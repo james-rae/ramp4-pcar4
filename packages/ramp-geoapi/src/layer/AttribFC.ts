@@ -8,6 +8,8 @@ import BaseFC from './BaseFC';
 import { AttributeLoaderBase, AttributeLoaderDetails, ArcServerAttributeLoader } from '../util/AttributeLoader';
 import { BaseRenderer } from '../util/Renderers';
 import QuickCache from './QuickCache';
+import Filter from './Filter';
+import { Extent } from '../api/api';
 
 export default class AttribFC extends BaseFC {
 
@@ -23,6 +25,7 @@ export default class AttribFC extends BaseFC {
     renderer: BaseRenderer;
     serviceUrl: string;
     protected quickCache: QuickCache;
+    protected filter: Filter;
 
     constructor (infoBundle: InfoBundle, parent: BaseLayer, layerIdx: number = 0) {
         super(infoBundle, parent, layerIdx);
@@ -31,6 +34,7 @@ export default class AttribFC extends BaseFC {
         this.oidField = '';
         this.nameField = '';
         this.serviceUrl = '';
+        this.filter = new Filter();
     }
 
     // serviceUrl: string,
@@ -420,15 +424,10 @@ export default class AttribFC extends BaseFC {
         });
     }
 
-    // TODO we are using the getgraphic type as it's an unbound loosely typed feature
-    //      may want to change name of the type to something more general
-    /**
-     * Requests a set of features for this layer that match the criteria of the options
-     *
-     * @param options {Object} options to provide filters and helpful information.
-     * @returns {Array} set of features that satisfy the criteria
-     */
-    queryFeatures(options: QueryFeaturesParams): Promise<Array<GetGraphicResult>> {
+    // TODO make override in geojson layer
+    // TODO this is more of a utility function. leaving it public as it might be useful, revist when
+    //      the app is mature.
+    queryOIDs(options: QueryFeaturesParams): Promise<Array<number>> {
         // NOTE this assumes a server based layer
         //      local based layers should override this function
 
@@ -445,7 +444,22 @@ export default class AttribFC extends BaseFC {
             ...options
         };
 
-        return this.gapi.utils.query.arcGisServerQueryIds(agsOpt).then(oids => {
+        return this.gapi.utils.query.arcGisServerQueryIds(agsOpt);
+    }
+
+    // TODO we are using the getgraphic type as it's an unbound loosely typed feature
+    //      may want to change name of the type to something more general
+    /**
+     * Requests a set of features for this layer that match the criteria of the options
+     *
+     * @param options {Object} options to provide filters and helpful information.
+     * @returns {Array} set of features that satisfy the criteria
+     */
+    queryFeatures(options: QueryFeaturesParams): Promise<Array<GetGraphicResult>> {
+        // NOTE this assumes a server based layer
+        //      local based layers should override this function
+
+        return this.queryOIDs(options).then(oids => {
             // run result ids through our quick cache pipeline
             const p: GetGraphicParams = {
                 getGeom: !!options.includeGeometry,
@@ -455,6 +469,48 @@ export default class AttribFC extends BaseFC {
             const cacheQueue: Array<Promise<GetGraphicResult>> = oids.map(oid => this.getGraphic(oid, p));
             return Promise.all(cacheQueue);
         });
-
     }
+
+    /**
+     * Gets array of object ids that currently pass any filters
+     *
+     * @function getFilterOIDs
+     *
+     * @param {Array} [exclusions] list of any filters keys to exclude from the result. omission includes all filters
+     * @param {Extent} [extent] if provided, the result list will only include features intersecting the extent
+     * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
+     */
+    getFilterOIDs(exclusions: Array<string> = [], extent: Extent = undefined): Promise<Array<number>> {
+        // NOTE this logic should perform for both server and file based layers, as long as .queryOIDs is properly overriden
+        const sql = this.filter.getCombinedSql(exclusions);
+        const bExt: boolean = !!extent; // keep typescript happy
+
+        if (!(sql || bExt)) {
+            // no filters active. return undefined so caller can not worry about applying filters
+            return Promise.resolve(undefined);
+        }
+
+        if (extent) {
+            // essentially this determines if our extent was already cached,
+            // bonks the cache if it is stale
+            this.filter.setExtent(extent);
+        }
+
+        // this must be done after the setExtent() call, as that call can potentially invalidate caches
+        const impactedFilters = this.filter.sqlActiveFilters(exclusions);
+        let cache = this.filter.getCache(impactedFilters, bExt);
+
+        // if not cached, execute a query and store the result as the cache
+        if (!cache) {
+            const qOpts: QueryFeaturesParams = {
+                filterGeometry: extent,
+                filterSql: sql,
+                includeGeometry: false
+            };
+            cache = this.queryOIDs(qOpts);
+            this.filter.setCache(cache, impactedFilters, bExt);
+        }
+        return cache;
+    }
+
 }

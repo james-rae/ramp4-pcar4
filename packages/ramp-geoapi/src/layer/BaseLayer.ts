@@ -2,13 +2,15 @@
 // TODO add proper comments
 
 import esri = __esri;
-import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet } from '../gapiTypes';
+import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet, FilterEventParam } from '../gapiTypes';
 import BaseBase from '../BaseBase';
 import { TypedEvent } from '../Event';
 import BaseFC from './BaseFC';
 import TreeNode from './TreeNode';
 import NaughtyPromise from '../util/NaughtyPromise';
 import ScaleSet from './ScaleSet';
+
+
 
 export default class BaseLayer extends BaseBase {
 
@@ -22,6 +24,7 @@ export default class BaseLayer extends BaseBase {
     visibilityChanged: TypedEvent<boolean>;
     opacityChanged: TypedEvent<number>;
     stateChanged: TypedEvent<string>;
+    filterChanged: TypedEvent<FilterEventParam>; // TODO test if this syntax does what I want. if not, make a class for return type
 
     // statuses
     state: LayerState;
@@ -58,6 +61,7 @@ export default class BaseLayer extends BaseBase {
         this.visibilityChanged = new TypedEvent<boolean>();
         this.opacityChanged = new TypedEvent<number>();
         this.stateChanged = new TypedEvent<string>();
+        this.filterChanged = new TypedEvent<FilterEventParam>();
 
         this.state = LayerState.LOADING;
         this.supportsIdentify = false; // default state.

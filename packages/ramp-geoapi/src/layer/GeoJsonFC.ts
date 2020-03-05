@@ -122,4 +122,18 @@ export default class GeoJsonFC extends AttribFC {
         return this.gapi.utils.query.geoJsonQuery(gjOpt);
     }
 
+    // TODO this is more of a utility function. leaving it public as it might be useful, revist when
+    //      the app is mature.
+    queryOIDs(options: QueryFeaturesParams): Promise<Array<number>> {
+
+        const gjOpt: QueryFeaturesGeoJsonParams = {
+            layer: (<GeoJsonLayer>this.parentLayer),
+            ...options
+        };
+
+        // run the query. since geojson is local, the util always returns everything.
+        // iterate through the results and strip out the OIDs
+        return this.gapi.utils.query.geoJsonQuery(gjOpt).then(gjFeats => gjFeats.map(feat => feat.attributes[this.oidField]));
+    }
+
 }

@@ -1,5 +1,9 @@
 // TODO add proper comments
 // TODO after all the stuff has been dumped in here, re-organize the order into logical sections
+// TODO revist the definitions. things that are exposed on the API might be better defined in the ApiTypes files.
+//      this file should have stuff that relatively GAPI agnostic and frequently used in outsider code.
+//      May need an overall re-hash of how definitions are exported in general; what way makes most sense
+//      and leads to cleanest imports for consumers of GAPI
 
 import esri = __esri; // magic command to get ESRI JS API type definitions.
 import BaseGeometry from './api/geometry/BaseGeometry'; // this is a bit wonky. could expose on RampAPI, but dont want clients using the baseclass
@@ -235,6 +239,11 @@ export interface IdentifyResultSet {
     done: Promise<void>;
     uid: string; // this would be the parent layer's uid. TODO again, might want more specific name. parentUid? layerUid?
 }
+
+export interface FilterEventParam {
+    filter: string,
+    uid: string
+};
 
 // ----------------------- CLIENT CONFIG INTERFACES -----------------------------------
 
