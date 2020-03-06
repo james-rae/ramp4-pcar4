@@ -459,6 +459,12 @@ export default class AttribFC extends BaseFC {
         // NOTE this assumes a server based layer
         //      local based layers should override this function
 
+        // TODO potential optimization.
+        //      if we have a big array of OIDs returned below, comparable to
+        //      layers record count, and this.attLoader.isLoaded is false,
+        //      we could trigger a getattributes call to bulk download them upfront.
+        //      would be more efficient (way less web calls).
+
         return this.queryOIDs(options).then(oids => {
             // run result ids through our quick cache pipeline
             const p: GetGraphicParams = {
@@ -511,6 +517,30 @@ export default class AttribFC extends BaseFC {
             this.filter.setCache(cache, impactedFilters, bExt);
         }
         return cache;
+    }
+
+    setSqlFilter(filterKey: string, whereClause: string): void {
+        // TODO maybe implement a check first? e.g. if we are setting to '' but that key is already '',
+        //      then just exit, no need to trigger updates?
+        this.filter.setSql(filterKey, whereClause);
+        this.parentLayer.filterChanged.fireEvent({
+            uid: this.uid,
+            filter: filterKey
+        });
+    }
+
+    getSqlFilter(filterKey: string): string {
+        return this.filter.getSql(filterKey);
+    }
+
+    /**
+     * Applies the current filter settings to the physical map layer.
+     *
+     * @function applySqlFilter
+     * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
+     */
+    applySqlFilter (exclusions: Array<string> = []): void {
+        throw new Error('attempted to apply sql filter to a layer not equipped for it. likely a new subclass of AttribFC did not override applySqlFilter');
     }
 
 }

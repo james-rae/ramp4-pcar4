@@ -136,4 +136,27 @@ export default class GeoJsonFC extends AttribFC {
         return this.gapi.utils.query.geoJsonQuery(gjOpt).then(gjFeats => gjFeats.map(feat => feat.attributes[this.oidField]));
     }
 
+    /**
+     * Applies the current filter settings to the physical map layer.
+     *
+     * @function applySqlFilter
+     * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
+     */
+    applySqlFilter (exclusions: Array<string> = []): void {
+
+        const sql = this.filter.getCombinedSql(exclusions);
+        console.log('TEEEST gj filter sql', sql);
+
+        // fetch all local graphics
+        // TODO test that empty query param will return all
+        // TODO if this fails, investigate using this.parentLayer.innerLayer.layerView.queryFeatures()
+        // would need to figure out how to find the view, as it's likely in the map, not the layer
+        (<esri.FeatureLayer>this.parentLayer.innerLayer).queryFeatures().then(fs => {
+            console.log('TEEEST gj query result thing', fs);
+            this.gapi.utils.query.sqlEsriGraphicsVisibility(fs.features, sql);
+        });
+
+    }
+
+
 }

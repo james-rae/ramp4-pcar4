@@ -15,6 +15,7 @@ import ScaleSet from './ScaleSet';
 export default class BaseLayer extends BaseBase {
 
     uid: string;
+    id: string;
 
     // TODO think about how to expose. protected makes sense, but might want to make it public to allow hacking and use by a dev module if we decide to
     //      could be the FCs need to access it so no choice
@@ -74,6 +75,7 @@ export default class BaseLayer extends BaseBase {
         this.fcs = [];
         this.origRampConfig = rampConfig;
         this.name = rampConfig.name || '';
+        this.id = rampConfig.id || '';
     }
 
     protected updateState(newState: LayerState): void {
