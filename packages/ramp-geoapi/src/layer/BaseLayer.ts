@@ -20,6 +20,7 @@ export default class BaseLayer extends BaseBase {
     // TODO think about how to expose. protected makes sense, but might want to make it public to allow hacking and use by a dev module if we decide to
     //      could be the FCs need to access it so no choice
     innerLayer: esri.Layer;
+    innerView: esri.LayerView;
 
     // events
     visibilityChanged: TypedEvent<boolean>;
@@ -46,6 +47,7 @@ export default class BaseLayer extends BaseBase {
     //      alternately implement something like function layerLoaded() from old geoApi
     protected loadProimse: NaughtyPromise; // a promise that resolves when layer is fully ready and safe to use. for convenience of caller
     protected esriPromise: NaughtyPromise; // a promise that resolves when esri layer object has been created
+    protected viewPromise: NaughtyPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     // FC management
     protected fcs: Array<BaseFC>;
@@ -71,6 +73,7 @@ export default class BaseLayer extends BaseBase {
         this.sawRefresh = false;
         this.loadProimse = new NaughtyPromise();
         this.esriPromise = new NaughtyPromise();
+        this.viewPromise = new NaughtyPromise();
 
         this.fcs = [];
         this.origRampConfig = rampConfig;
@@ -147,12 +150,15 @@ export default class BaseLayer extends BaseBase {
         });
 
         this.innerLayer.on('layerview-create', (e: esri.LayerLayerviewCreateEvent) => {
+            console.log('TEEEST i saw a layer view get created', this.id);
+            this.innerView = e.layerView;
             e.layerView.watch('updating', (newval: boolean) => {
                 this.updateState(newval ? LayerState.REFRESH : LayerState.LOADED );
                 if (newval) {
                     this.sawRefresh = true;
                 }
             });
+            this.viewPromise.resolveMe();
         });
 
         this.esriPromise.resolveMe();

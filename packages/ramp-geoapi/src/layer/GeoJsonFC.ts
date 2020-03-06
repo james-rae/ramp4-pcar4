@@ -151,7 +151,7 @@ export default class GeoJsonFC extends AttribFC {
         // TODO test that empty query param will return all
         // TODO if this fails, investigate using this.parentLayer.innerLayer.layerView.queryFeatures()
         // would need to figure out how to find the view, as it's likely in the map, not the layer
-        (<esri.FeatureLayer>this.parentLayer.innerLayer).queryFeatures().then(fs => {
+        (<esri.FeatureLayerView>this.parentLayer.innerView).queryFeatures().then(fs => {
             console.log('TEEEST gj query result thing', fs);
             this.gapi.utils.query.sqlEsriGraphicsVisibility(fs.features, sql);
         });

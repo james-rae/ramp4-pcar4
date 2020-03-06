@@ -192,6 +192,11 @@ export class GeoJsonLayer extends AttribLayer {
         }
         */
 
+        // TODO testing this out for now. our SQL support needs the view in place, so this delays our load promise until the view is ready.
+        //      if this becomes problematic (e.g. we want to create a layer and have it "load" without adding it to a map),
+        //      we can instead put the view promise dependency on the applySqlFilter of GeoJsonFC. this will require making the viewPromise public
+        loadPromises.push(this.viewPromise.getPromise());
+
         return loadPromises;
     }
 
