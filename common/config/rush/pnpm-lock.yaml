@@ -1,5 +1,5 @@
 dependencies:
-  '@arcgis/core': 4.18.0-next.20201211
+  '@arcgis/core': 4.18.0-next.20201213
   '@babel/cli': 7.10.5_@babel+core@7.11.0
   '@babel/core': 7.11.0
   '@babel/plugin-proposal-class-properties': 7.10.4_@babel+core@7.11.0
@@ -86,7 +86,7 @@ dependencies:
   wrapper-webpack-plugin: 2.1.0_webpack@4.41.3
 lockfileVersion: 5.1
 packages:
-  /@arcgis/core/4.18.0-next.20201211:
+  /@arcgis/core/4.18.0-next.20201213:
     dependencies:
       '@esri/arcgis-html-sanitizer': 2.5.0
       '@esri/calcite-colors': 5.0.0
@@ -96,7 +96,7 @@ packages:
       sortablejs: 1.10.2
     dev: false
     resolution:
-      integrity: sha512-jQoo7KOq796JaY4qQGHctvZicNxeCe0+wrxzo9oTUU8zHzAUW23CAtnyyJZby0sH4f+rNC1pMTFxYnyhBQFMiw==
+      integrity: sha512-uCAPtHEv0T0ibndwqQscVpxCbMj+Bc4mtSY/u+AsdvonwobGjFDl3i/Hl6Omp49X3+sE71vM5z4/dwuLmFc71Q==
   /@babel/cli/7.10.5_@babel+core@7.11.0:
     dependencies:
       '@babel/core': 7.11.0
@@ -13669,7 +13669,7 @@ packages:
       integrity: sha512-jcKpkthap6x63MB4TxwCyuIGkV0oYP/YRyuQU5UO0Yz/E/ZAu+653/uov+phdmO54n6BcvFRyyt0RRrWdN2mpw==
   'file:projects/ramp-core.tgz_777e958c1436af419002454c0780d0b4':
     dependencies:
-      '@arcgis/core': 4.18.0-next.20201211
+      '@arcgis/core': 4.18.0-next.20201213
       '@tailwindcss/custom-forms': 0.2.1_tailwindcss@1.6.2
       '@types/animejs': 3.1.1
       '@types/clone-deep': 4.0.1
@@ -13728,7 +13728,7 @@ packages:
       webpack: '*'
       webpack-cli: '*'
     resolution:
-      integrity: sha512-tYKjZnHjUnYaPtRt3+8YGUUcvxLZcywYCHQOwTdrW9UoAmhEB4SE/8Kqo5qiubL9GVPu6gooDJerejxHQhyMdQ==
+      integrity: sha512-NYX9xzHcLjTYEARtWM7rvBsY6FgBefTOt3rW0MXHd3wRGjo/7jP4x2PPZ+G2rOiBb7BfKOSrb5UOluInTo8C1g==
       tarball: 'file:projects/ramp-core.tgz'
     version: 0.0.0
   'file:projects/ramp-geoapi.tgz':
@@ -13804,7 +13804,7 @@ packages:
     version: 0.0.0
 registry: ''
 specifiers:
-  '@arcgis/core': 4.18.0-next.20201211
+  '@arcgis/core': 4.18.0-next.20201213
   '@babel/cli': ^7.2.3
   '@babel/core': ^7.4.0
   '@babel/plugin-proposal-class-properties': ^7.4.0
