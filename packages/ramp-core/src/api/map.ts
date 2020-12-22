@@ -1,6 +1,7 @@
 import { APIScope, GlobalEvents } from './internal';
-import { IdentifyResult, IdentifyResultSet, IdentifyParameters, MapClick, ApiBundle } from 'ramp-geoapi';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import { IdentifyResult, IdentifyResultSet, IdentifyParameters, MapClick, ApiBundle } from 'rampgeoapi';
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 import { LayerStore } from '@/store/modules/layer';
 
 export class MapAPI extends APIScope {
@@ -30,6 +31,8 @@ export class MapAPI extends APIScope {
      * @param {*} payload
      * @memberof DetailsFixture
      */
+    // BAAH
+    /*
     identify(payload: MapClick | ApiBundle.Point) {
         let layers: BaseLayer[] | undefined = this.$vApp.$store.get(LayerStore.layers);
 
@@ -68,6 +71,7 @@ export class MapAPI extends APIScope {
         // TODO make the event payload an interface? should there be a public area with all event payload interfaces?
         this.$iApi.event.emit(GlobalEvents.MAP_IDENTIFY, { results: identifyResults, click: mapClick });
     }
+    */
 
     // list of keys that are currently pressed
     private _activeKeys: string[] = [];
@@ -95,7 +99,8 @@ export class MapAPI extends APIScope {
             this._activeKeys.push(payload.key);
             this.zoom(payload);
         } else if (payload.key === 'Enter') {
-            this.identify(this.$iApi.map.getExtent().center());
+            // BAAH
+            // this.identify(this.$iApi.map.getExtent().center());
         }
     }
 

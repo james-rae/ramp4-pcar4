@@ -21,7 +21,8 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import { RampMap, ApiBundle, RampMapConfig } from 'ramp-geoapi'
+// BAAH
+// import { RampMap, ApiBundle, RampMapConfig } from 'rampgeoapi'
 import { ConfigStore } from '@/store/modules/config';
 import { GlobalEvents } from '../../api/internal';
 import { OverviewmapStore } from './store';
@@ -30,13 +31,15 @@ import { debounce } from 'debounce';
 
 @Component({})
 export default class OverviewmapV extends Vue {
-    @Get(OverviewmapStore.mapConfig) mapConfig!: RampMapConfig;
+    @Get(OverviewmapStore.mapConfig) mapConfig!: any; // RampMapConfig; // BAAH
     @Get(OverviewmapStore.startMinimized) startMinimized!: boolean;
 
-    overviewMap!: RampMap;
+    overviewMap!: any; // RampMap; // BAAH
     minimized: boolean = true;
 
     mounted() {
+        // BAAH
+        /*
         let config = this.mapConfig || defaultConfig;
         this.overviewMap = RAMP.geoapi.maps.createMap(config, this.$el.querySelector('.overviewmap') as HTMLDivElement);
         this.overviewMap._innerView.ui.components = [];
@@ -55,8 +58,11 @@ export default class OverviewmapV extends Vue {
             this.updateOverview(this.$iApi.map.getExtent());
         }
         this.$iApi.event.on(GlobalEvents.MAP_EXTENTCHANGE, debounce(this.updateOverview, 300));
+        */
     }
 
+    // BAAH
+    /*
     updateOverview(newExtent: ApiBundle.Extent) {
         const hRatio = this.$iApi.map.getPixelHeight() / 200;
         const wRatio = this.$iApi.map.getPixelWidth() / 200;
@@ -64,6 +70,7 @@ export default class OverviewmapV extends Vue {
         this.overviewMap.zoomMapTo(newExtent.center(), overviewScale);
         this.overviewMap._innerView.graphics.getItemAt(0).geometry = this.$iApi.map._innerView.extent;
     }
+    */
 
     get mapStyle() {
         return {

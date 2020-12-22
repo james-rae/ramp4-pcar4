@@ -13,12 +13,13 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { PanelInstance } from '@/api';
-import { IdentifyResult, IdentifyResultSet, IdentifyItem, IdentifyResultFormat } from 'ramp-geoapi';
+// BAAH
+// import { IdentifyResult, IdentifyResultSet, IdentifyItem, IdentifyResultFormat } from 'rampgeoapi';
 
 @Component({})
 export default class ESRIDefaultV extends Vue {
     // passed in by the details panel. Contains all of the identify data.
-    @Prop() identifyData!: IdentifyItem;
+    @Prop() identifyData!: any; // IdentifyItem; // BAAH
 
     // clone identifyData and remove unwanted data
     get itemData() {

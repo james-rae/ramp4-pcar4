@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import GapiLoader, { GeoApi, ApiBundle as GeoApiBundle } from 'ramp-geoapi';
+// BAAH
+// import GapiLoader, { GeoApi, ApiBundle as GeoApiBundle } from 'rampgeoapi';
 
 import { InstanceAPI, AppVersion } from './internal';
 import mixin from './mixin';
@@ -11,6 +12,8 @@ declare const __VERSION__: AppVersion;
 // install/register mixin plugin with Vue, so it's available on all Vue instances
 Vue.use(mixin);
 
+// BAAH
+/*
 export interface RampGeo {
     Extent: typeof GeoApiBundle.Extent;
     Graphic: typeof GeoApiBundle.Graphic;
@@ -27,11 +30,13 @@ export interface RampGeo {
     PolygonStyleOptions: typeof GeoApiBundle.PolygonStyleOptions;
     SpatialReference: typeof GeoApiBundle.SpatialReference;
 }
+*/
 
 export interface APIInterface {
     Instance: typeof InstanceAPI;
-    geoapi: GeoApi;
-    gapiPromise: Promise<GeoApi>;
+    // BAAH
+    // geoapi: GeoApi;
+    // gapiPromise: Promise<GeoApi>;
 
     /**
      * Version information of R4MP.
@@ -41,11 +46,14 @@ export interface APIInterface {
      */
     version: AppVersion;
 
-    GEO: RampGeo;
+    // BAAH
+    // GEO: RampGeo;
 }
 
 // Load geoapi
 // moved from `main-build` since it was being attached to the api object anyways
+// BAAH
+/*
 let geoapi: GeoApi;
 let rampgeo: RampGeo;
 
@@ -69,9 +77,13 @@ gapiPromise.then((gapi: GeoApi) => {
         SpatialReference: GeoApiBundle.SpatialReference
     };
 });
+*/
 
 const api: APIInterface = {
     Instance: InstanceAPI,
+
+    // BAAH
+    /*
     gapiPromise,
     get geoapi(): GeoApi {
         if (typeof geoapi === 'undefined') {
@@ -80,8 +92,11 @@ const api: APIInterface = {
 
         return geoapi;
     },
+    */
     version: __VERSION__, // this is populated by the build process; see `vue.config.js`
 
+    // BAAH
+    /*
     get GEO(): RampGeo {
         if (typeof rampgeo === 'undefined') {
             throw new Error("Attempting to access `GEO` before it's resolved. Use `initRamp` global function instead.");
@@ -89,6 +104,7 @@ const api: APIInterface = {
 
         return rampgeo;
     }
+    */
 };
 
 // export `InstanceApi` as `Instance` on global RAMP interface

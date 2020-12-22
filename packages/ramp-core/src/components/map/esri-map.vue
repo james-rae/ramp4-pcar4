@@ -5,31 +5,36 @@
 <script lang="ts">
 import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'ramp-geoapi';
+// BAAH
+// import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'rampgeoapi';
 import { GlobalEvents } from '../../api/internal';
-import { APIInterface, RampGeo } from '../../api';
+import { APIInterface /*, RampGeo // BAAH */ } from '../../api';
 // import { window } from '@/main';
 
 import { ConfigStore } from '@/store/modules/config';
 import { LayerStore, layer } from '@/store/modules/layer';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 @Component
 export default class EsriMap extends Vue {
-    @Get(ConfigStore.getMapConfig) mapConfig!: RampMapConfig;
+    @Get(ConfigStore.getMapConfig) mapConfig!: any; // RampMapConfig; // BAAH
 
-    @Get(LayerStore.layers) layers!: BaseLayer[];
+    @Get(LayerStore.layers) layers!: any[]; // BaseLayer[]; // BAAH
 
-    gapi!: GeoApi;
-    map!: RampMap;
+    // BAAH
+    gapi!: any; // GeoApi; // BAAH
+    map!: any; // RampMap; // BAAH
 
     created() {
         // temporarily print out loaded layers to console for grid testing purposes.
         console.log(this.layers);
     }
 
+    // BAAH
+    /*
     @Watch('layers')
-    onLayerArrayChange(newValue: BaseLayer[], oldValue: BaseLayer[]) {
+    onLayerArrayChange(newValue: any[], oldValue: any[]) { // (newValue: BaseLayer[], oldValue: BaseLayer[]) { // BAAH
         // TODO we are getting frequent errors at startup; something reacts to layer array
         //      change before map exists. kicking out for now to make demos work.
         //      possibly this is evil in vue state land. if so, then someone figure out
@@ -95,6 +100,7 @@ export default class EsriMap extends Vue {
 
         this.onLayerArrayChange(this.layers, []);
     }
+    */
 }
 </script>
 

@@ -31,7 +31,9 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+type BaseLayer = any;
 
 import { LegendStore } from '../store';
 import { LegendEntry, LegendTypes } from '../store/legend-defs';
@@ -54,6 +56,8 @@ export default class LegendPlaceholderV extends Vue {
 
     @Watch('layers')
     layerAdded(newValue: BaseLayer[], oldValue: BaseLayer[]) {
+        // BAAH
+        /*
         this.layer = newValue.find((layer: BaseLayer) => layer.id === this.legendItem.id);
 
         if (this.layer !== undefined) {
@@ -63,6 +67,7 @@ export default class LegendPlaceholderV extends Vue {
                 this.legendItem._uid = this.layer!.getLayerTree().findChildByIdx(this.legendItem._layerIndex!)?.uid || this.layer!.uid;
             });
         }
+        */
     }
 }
 </script>

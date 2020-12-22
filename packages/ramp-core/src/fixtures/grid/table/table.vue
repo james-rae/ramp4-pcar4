@@ -51,7 +51,7 @@
             :rowData="rowData"
             :frameworkComponents="frameworkComponents"
             @grid-ready="onGridReady"
-            @keydown.native="stopArrowKeyProp" 
+            @keydown.native="stopArrowKeyProp"
         >
         </ag-grid-vue>
     </div>
@@ -64,7 +64,9 @@ import { GlobalEvents } from '../../../api/internal';
 import deepmerge from 'deepmerge';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+type BaseLayer = any;
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
@@ -345,6 +347,8 @@ export default class TableComponent extends Vue {
     setUpSymbolsAndInteractive(col: any, colDef: any) {
         // Set up the interactive column that contains the zoom and details button.
         // TODO: add details functionality.
+        // BAAH
+        /*
         if (col.field === 'rvInteractive') {
             let detailsDef = {
                 sortable: false,
@@ -367,7 +371,7 @@ export default class TableComponent extends Vue {
                 onCellClicked: (cell: any) => {
                     const fakeIdentifyItem = deepmerge({}, {data: cell.data});
                     delete fakeIdentifyItem['data']['rvInteractive'];
-                    delete fakeIdentifyItem['data']['rvSymbol']; 
+                    delete fakeIdentifyItem['data']['rvSymbol'];
                     this.$iApi.event.emit(GlobalEvents.DETAILS_OPEN, {identifyItem: fakeIdentifyItem, uid: this.layerUid});
                 }
             };
@@ -436,6 +440,7 @@ export default class TableComponent extends Vue {
 
             colDef.push(iconDef);
         }
+        */
     }
 
     clearColumnFilters() {

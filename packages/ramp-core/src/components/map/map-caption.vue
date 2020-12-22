@@ -28,7 +28,8 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop, Inject } from 'vue-property-decorator';
 import { debounce } from 'debounce';
-import { ApiBundle, MapMove } from 'ramp-geoapi';
+// BAAH
+// import { ApiBundle, MapMove } from 'rampgeoapi';
 import { GlobalEvents } from '@/api';
 
 @Component
@@ -55,6 +56,8 @@ export default class MapCaptionV extends Vue {
         //      since it happens at map create, could be risky/tricky putting it in the "default" events
         //      as odds are if there is any delay, the handler will miss the MAP_CREATED event.
         //      But having a specific name means someone can remove it later at their lesiure.
+        // BAAH
+        /*
         this.$iApi.event.on(GlobalEvents.MAP_CREATED, () => {
             this.updateScale();
             // Listen for scale changes, debounce so that zoom animations don't rapidly call update
@@ -74,6 +77,7 @@ export default class MapCaptionV extends Vue {
                 'a_name_to_be_decided_later'
             );
         });
+        */
     }
 
     onScaleClick() {
@@ -85,6 +89,8 @@ export default class MapCaptionV extends Vue {
      * Calculates a scale bar for the current resolution.
      */
     updateScale(): void {
+        // BAAH
+        /*
         // the starting length of the scale line in pixels
         // reduce the length of the bar on extra small layouts
         const factor = window.innerWidth > 600 ? 70 : 35;
@@ -116,6 +122,7 @@ export default class MapCaptionV extends Vue {
             width: `${pixels}px`,
             label: `${distance}${unit}`
         };
+        */
     }
 
     /**
@@ -127,6 +134,8 @@ export default class MapCaptionV extends Vue {
      * @param screenY pixel position in y-axis
      */
     private updateCursorPoint(screenX: number, screenY: number): void {
+        // BAAH
+        /*
         // get map point from cursor location
         const mapCursorPoint = this.$iApi.map.screenPointToMapPoint(screenX, screenY);
 
@@ -137,6 +146,7 @@ export default class MapCaptionV extends Vue {
             this.latLongCursor.lat = castPoint.y;
             this.latLongCursor.long = castPoint.x;
         });
+        */
     }
 
     /**

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 
-import { RampLayerConfig, RampMapConfig } from 'ramp-geoapi';
+// BAAH
+// import { RampLayerConfig, RampMapConfig } from 'rampgeoapi';
 import { APIInterface, InstanceAPI } from './api';
 
 // extend `ComponentOptions` to accept `iApi` as one of the component options
@@ -65,8 +66,8 @@ declare global {
  * @interface RampConfig
  */
 export interface RampConfig {
-    map: RampMapConfig;
-    layers: RampLayerConfig[];
+    map: any; // RampMapConfig; // BAAH
+    layers: any; // RampLayerConfig[]; // BAAH
     fixtures: { [key: string]: any };
 }
 

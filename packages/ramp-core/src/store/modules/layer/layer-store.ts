@@ -3,8 +3,12 @@ import { make } from 'vuex-pathify';
 
 import { LayerState } from './layer-state';
 import { RootState } from '@/store';
-import { RampLayerConfig } from 'ramp-geoapi';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import { RampLayerConfig } from 'rampgeoapi';
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+type BaseLayer = any;
+type RampLayerConfig = any;
+
 import LayerBlueprint from './layer-blueprint.class';
 
 import api from '@/api';

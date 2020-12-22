@@ -1,5 +1,6 @@
 import Vue, { VueConstructor } from 'vue';
-import { RampMap } from 'ramp-geoapi';
+// BAAH
+// import { RampMap } from 'rampgeoapi';
 import { RampConfigs } from '@/types';
 import { Store } from 'vuex';
 import { i18n } from '@/lang';
@@ -25,7 +26,7 @@ export class InstanceAPI {
 
     // FIXME: temporarily store map in global, remove line below when map API is complete
     // set by the `map/esri-map.vue` file
-    map!: RampMap;
+    map!: any; // RampMap; // BAAH
 
     /**
      * The instance of Vue R4MP application controlled by this InstanceAPI.
@@ -171,7 +172,7 @@ export class InstanceAPI {
 
     /**
      * The current animation status.
-     * 
+     *
      * @readonly
      * @type string
      * @memberof InstanceAPI

@@ -1,9 +1,10 @@
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 export class LayerState {
-    layers: BaseLayer[];
+    layers: any[]; // BaseLayer[]; // BAAH
 
-    constructor(layers: BaseLayer[]) {
+    constructor(layers: any[]) { // BaseLayer[]) { // BAAH
         this.layers = layers;
     }
 }

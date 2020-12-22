@@ -1,5 +1,6 @@
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
-import TreeNode from 'ramp-geoapi/dist/layer/TreeNode';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+// import TreeNode from 'rampgeoapi/dist/layer/TreeNode';
 
 /**
  * Function definitions for legend item wrapper objects.
@@ -102,10 +103,10 @@ export class LegendItem {
  */
 export class LegendEntry extends LegendItem {
     _uid: string | undefined;
-    _layer: BaseLayer | undefined;
+    _layer: any; // BaseLayer | undefined; // BAAH
     _layerIndex: number | undefined;
-    _layerTree: TreeNode | undefined;
-    _isLoaded: boolean;
+    _layerTree: any; // TreeNode | undefined; // BAAH
+    _isLoaded: boolean = false; // BAAH (i added the = false)
     _symbologyStack: any;
 
     /**
@@ -117,6 +118,8 @@ export class LegendEntry extends LegendItem {
         this._type = legendEntry.type !== undefined ? legendEntry.type : LegendTypes.Entry;
         this._parent = parent;
 
+        // BAAH
+        /*
         // find matching BaseLayer in layer store to the layerId in config
         this._layer = legendEntry.layers.find((layer: BaseLayer) => layer.id === this._id);
         this._layerIndex = legendEntry.entryIndex;
@@ -129,6 +132,7 @@ export class LegendEntry extends LegendItem {
         this._isLoaded = this._layer !== undefined ? this._layer.isValidState() : true;
         // initialize more layer properties after layer loads
         this._waitLayerLoad();
+        */
     }
 
     /**
@@ -159,12 +163,12 @@ export class LegendEntry extends LegendItem {
     }
 
     /** Returns BaseLayer associated with legend entry. */
-    get layer(): BaseLayer | undefined {
+    get layer(): any { // BaseLayer | undefined { // BAAH
         return this._layer;
     }
 
     /** Returns layer tree associated with legend entry. */
-    get layerTree(): TreeNode | undefined {
+    get layerTree(): any { // TreeNode | undefined { // BAAH
         return this._layerTree;
     }
 

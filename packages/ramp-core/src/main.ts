@@ -15,8 +15,9 @@ window.RAMP = api;
 window.Vue = Vue;
 
 // execute `initRAMP` global function if it's defined as soon at the RAMP library is added to the global scope
-api.gapiPromise.then(() => {
-    if (typeof window.initRAMP === 'function') {
-        window.initRAMP();
-    }
-});
+// BAAH
+// api.gapiPromise.then(() => {
+if (typeof window.initRAMP === 'function') {
+    window.initRAMP();
+}
+//});

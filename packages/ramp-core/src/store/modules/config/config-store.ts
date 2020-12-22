@@ -1,7 +1,8 @@
 import { ActionContext, Action } from 'vuex';
 import { make } from 'vuex-pathify';
 import merge from 'deepmerge';
-import { RampMapConfig } from 'ramp-geoapi';
+// BAAH
+// import { RampMapConfig } from 'rampgeoapi';
 
 import { ConfigState } from './config-state';
 import { RootState } from '@/store';
@@ -20,8 +21,8 @@ const getters = {
         return state.registeredConfigs[lang];
     },
 
-    getMapConfig: (state: ConfigState): RampMapConfig => {
-        return state.config.map as RampMapConfig;
+    getMapConfig: (state: ConfigState): any => { // RampMapConfig => { // BAAH
+        return state.config.map; // as RampMapConfig; // BAAH
     },
 
     getFixtureConfig: (state: ConfigState) => (key: string): any => {
