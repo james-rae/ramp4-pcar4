@@ -3,7 +3,8 @@ import { LegendConfig } from '../store';
 import { LegendStore } from '../store';
 import { LegendItem, LegendEntry, LegendGroup, LegendSet } from '../store/legend-defs';
 import { LayerStore } from '@/store/modules/layer';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 export class LegendAPI extends FixtureInstance {
     /**
@@ -29,6 +30,8 @@ export class LegendAPI extends FixtureInstance {
             return;
         }
 
+        // BAAH
+        /*
         const layers: BaseLayer[] | undefined = this.$vApp.$store.get(LayerStore.layers);
         let legendEntries: Array<LegendItem> = [];
         let stack: Array<any> = [];
@@ -77,5 +80,6 @@ export class LegendAPI extends FixtureInstance {
         // console.log('all legend entries: ', legendEntries);
         this.$vApp.$store.set(LegendStore.children, legendEntries);
         // TODO: validate legend items?
+        */
     }
 }

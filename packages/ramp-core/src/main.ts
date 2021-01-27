@@ -5,6 +5,7 @@
 // so we need to expose RAMP API on the window manually
 import api from '@/api';
 import Vue from 'vue';
+import '@/styles/main.css';
 
 // assign RAMP api to global variable
 window.RAMP = api;
@@ -15,8 +16,9 @@ window.RAMP = api;
 window.Vue = Vue;
 
 // execute `initRAMP` global function if it's defined as soon at the RAMP library is added to the global scope
-api.gapiPromise.then(() => {
-    if (typeof window.initRAMP === 'function') {
-        window.initRAMP();
-    }
-});
+// BAAH
+// api.gapiPromise.then(() => {
+if (typeof window.initRAMP === 'function') {
+    window.initRAMP();
+}
+//});

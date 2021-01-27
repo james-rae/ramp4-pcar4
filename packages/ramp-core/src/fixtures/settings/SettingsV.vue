@@ -83,7 +83,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { PanelInstance } from '@/api';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 import SettingsComponent from './SettingsComponentV.vue';
 
@@ -94,7 +95,7 @@ import SettingsComponent from './SettingsComponentV.vue';
 })
 export default class SettingsV extends Vue {
     @Prop() panel!: PanelInstance;
-    @Prop() layer!: BaseLayer;
+    @Prop() layer!: any; // BaseLayer; // BAAH
 
     // Models.
     visibilityModel: boolean = this.layer.getVisibility();
@@ -103,10 +104,13 @@ export default class SettingsV extends Vue {
 
     mounted() {
         // Listen for a layer load event. Some of these values may change when the layer fully loads.
+        // BAAH
+        /*
         this.layer.stateChanged.listen(payload => {
             this.visibilityModel = this.layer.getVisibility();
             this.opacityModel = this.layer.getOpacity() * 100;
         });
+        */
     }
 
     // Update the layer visibility.

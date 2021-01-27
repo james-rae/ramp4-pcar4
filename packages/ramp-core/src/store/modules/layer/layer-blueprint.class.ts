@@ -2,7 +2,9 @@ import to from 'await-to-js';
 import deepmerge from 'deepmerge';
 import axios from 'axios';
 
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+type BaseLayer = any;
 
 import api from '@/api';
 
@@ -82,7 +84,8 @@ function mixins<T>(...Ctors: Constructor<T>[]): Constructor<T> {
 }
 
 // TODO modify type signature as required after other functions are created (csv and shapefile)
-type LayerRecordFactory = (config: any, geoJson?: any, systemOptions?: any) => BaseLayer;
+type LayerRecordFactory = (config: any, geoJson?: any, systemOptions?: any) => any; // BaseLayer; // BAAH
+const donkeyFactory = (x: any) => { return {}};
 
 type WFSResponse = {
     data: { numberMatched: number; features: any[] };
@@ -329,7 +332,9 @@ class FeatureServiceSource extends mixins(BlueprintBase, ServerSideData) {
     }
 
     get layerRecordFactory(): LayerRecordFactory {
-        return config => api.geoapi.layers.createFeatureLayer(config); // TODO: gapiService.gapi.layer.createFeatureRecord;
+        return donkeyFactory;
+        // BAAH
+        // return config => api.geoapi.layers.createFeatureLayer(config); // TODO: gapiService.gapi.layer.createFeatureRecord;
     }
 
     /**
@@ -359,7 +364,9 @@ class MapImageServiceSource extends mixins(BlueprintBase, ServerSideData) {
     }
 
     get layerRecordFactory(): LayerRecordFactory {
-        return config => api.geoapi.layers.createMapImageLayer(config); // TODO: gapiService.gapi.layer.createMapImageRecord;
+        return donkeyFactory;
+        // BAAH
+        // return config => api.geoapi.layers.createMapImageLayer(config); // TODO: gapiService.gapi.layer.createMapImageRecord;
     }
 
     get type() {
@@ -488,7 +495,9 @@ class WFSServiceSource extends mixins(BlueprintBase, ClientSideData) {
     }
 
     get layerRecordFactory(): LayerRecordFactory {
-        return (config, geoJson, systemOptions) => api.geoapi.layers.createGeoJSONLayer(config, geoJson, systemOptions);
+        return donkeyFactory;
+        // BAAH
+        // return (config, geoJson, systemOptions) => api.geoapi.layers.createGeoJSONLayer(config, geoJson, systemOptions);
     }
 
     get type() {
@@ -638,7 +647,9 @@ class GeoJSONSource extends mixins(BlueprintBase, ClientSideData) {
     }
 
     get layerRecordFactory(): LayerRecordFactory {
-        return (config, geoJson, systemOptions) => api.geoapi.layers.createGeoJSONLayer(config, geoJson, systemOptions);
+        return donkeyFactory;
+        // BAAH
+        // return (config, geoJson, systemOptions) => api.geoapi.layers.createGeoJSONLayer(config, geoJson, systemOptions);
     }
 
     get type() {

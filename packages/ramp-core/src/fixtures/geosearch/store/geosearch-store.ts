@@ -127,6 +127,8 @@ const actions = {
      * @param   {any}    mapExtent   current map extent info
      */
     setMapExtent: function(context: GeosearchContext, mapExtent: any): void {
+        // BAAH
+        /*
         // if results should be filtered by current map view
         if (mapExtent.visible !== undefined) {
             context.commit('SET_RESULTS_VISIBLE', mapExtent.visible);
@@ -137,6 +139,7 @@ const actions = {
             // run query after toggling map extent filters
             context.dispatch('runQuery');
         });
+        */
     }
 };
 

@@ -9,8 +9,9 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 import { NortharrowStore } from './store';
 import { GlobalEvents } from '../../api/internal';
-import { ApiBundle, HighlightLayer } from 'ramp-geoapi';
-import BaseLayer from 'ramp-geoapi/dist/layer/BaseLayer';
+// BAAH
+// import { ApiBundle, HighlightLayer } from 'rampgeoapi';
+// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 import flag from './flag.json';
 import { debounce } from 'debounce';
 
@@ -38,13 +39,18 @@ export default class NortharrowV extends Vue {
         if (this.arrowIcon) {
             this.arrow = `<img width='25' src='${this.arrowIcon}'>`;
         }
-        // don't think this condition should be needed but sometimes errors at startup without it 
+        // BAAH
+        /*
+        // don't think this condition should be needed but sometimes errors at startup without it
         if (this.$iApi.map._innerView.ready) {
             this.updateNortharrow(this.$iApi.map.getExtent())
         }
         this.$iApi.event.on(GlobalEvents.MAP_EXTENTCHANGE, debounce(this.updateNortharrow, 300));
+        */
     }
 
+    // BAAH
+    /*
     async updateNortharrow(newExtent: ApiBundle.Extent) {
         const innerShell = document.querySelector('.inner-shell')!;
         const arrowWidth = this.$el.querySelector('.northarrow')!.getBoundingClientRect().width;
@@ -52,13 +58,13 @@ export default class NortharrowV extends Vue {
         const sr = newExtent.sr;
         const mercator = [900913, 3587, 54004, 41001, 102113, 102100, 3785];
         if (mercator.includes(sr.wkid) || mercator.includes(sr.latestWkid)) {
-            // mercator projection, always in center of viewer with no rotation 
+            // mercator projection, always in center of viewer with no rotation
             this.displayArrow = true;
             this.angle = 0;
             this.arrowLeft = appbarWidth + (innerShell.clientWidth - appbarWidth - arrowWidth) / 2;
         } else {
             // north value (set longitude to be half of Canada extent (141° W, 52° W))
-            const pole: ApiBundle.Point = new ApiBundle.Point("pole", { x: -96, y: 90 });   
+            const pole: ApiBundle.Point = new ApiBundle.Point("pole", { x: -96, y: 90 });
             const projPole = await RAMP.geoapi.utils.proj.projectGeometry(sr, pole) as ApiBundle.Point;
             const poleScreenPos = this.$iApi.map.mapPointToScreenPoint(projPole);
             if (poleScreenPos.screenY < 0) {
@@ -86,7 +92,7 @@ export default class NortharrowV extends Vue {
                             type: "esriPMS",
                             contentType: contentType,
                             imageData: imageData
-                        } 
+                        }
                     }
                     // add pole marker to a highlight layer
                     const esriP = RAMP.geoapi.utils.geom.convPointToEsri(projPole);
@@ -97,12 +103,13 @@ export default class NortharrowV extends Vue {
             }
         }
     }
+    */
 
     get arrowStyle() {
-        return { 
+        return {
             'transform-origin': `top center`,
-            transform: `rotate(${this.angle}deg)`, 
-            left: `${this.arrowLeft}px`,  
+            transform: `rotate(${this.angle}deg)`,
+            left: `${this.arrowLeft}px`,
             visibility: this.displayArrow ? `visible` : `hidden`
         }
     }

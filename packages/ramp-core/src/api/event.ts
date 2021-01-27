@@ -3,7 +3,9 @@ import { APIScope, InstanceAPI } from './internal';
 import { DetailsAPI } from '@/fixtures/details/api/details';
 import { SettingsAPI} from '@/fixtures/settings/api/settings'
 import { HelpAPI } from '@/fixtures/help/api/help'
-import { IdentifyResult, IdentifyResultSet, MapClick } from 'ramp-geoapi';
+
+// BAAH
+// import { IdentifyResult, IdentifyResultSet, MapClick } from 'rampgeoapi';
 
 export enum GlobalEvents {
     /**
@@ -19,7 +21,7 @@ export enum GlobalEvents {
      * Fires when the map is created
      * Payload: (map)
      */
-    MAP_CREATED = 'map/created',
+    MAP_CREATED = 'map/created', // TODO since map is now part of the api (i.e. rampapi.geo.map), is the payload redundant?
 
     // TODO docs, determine the payloads
     MAP_CLICK = 'map/click', // payload is interface MapClick from geoapi
@@ -31,6 +33,12 @@ export enum GlobalEvents {
     MAP_KEYDOWN = 'map/keydown',
     MAP_KEYUP = 'map/keyup',
     MAP_BLUR = 'map/blur',
+
+    /**
+     * Fires when the map scale changes.
+     * Payload: the scale denominator integer.
+     */
+    MAP_SCALECHANGE = 'map/scalechanged',
     SETTINGS_OPEN = 'settings/open',
     DETAILS_OPEN = 'details/open',
     HELP_TOGGLE = 'help/toggle'
@@ -303,13 +311,16 @@ export class EventAPI extends APIScope {
 
         switch (handlerName) {
             case DefEH.MAP_IDENTIFY:
+                // BAAH
                 // when map clicks, run the identify action
+                /*
                 zeHandler = (clickParam: MapClick) => {
                     if (clickParam.button === 0) {
                         this.$iApi.mapActions.identify(clickParam);
                     }
                 };
                 this.on(GlobalEvents.MAP_CLICK, zeHandler, handlerName);
+                */
                 break;
             case DefEH.IDENTIFY_DETAILS:
                 // when identify runs, open details fixture and show the results
@@ -351,19 +362,19 @@ export class EventAPI extends APIScope {
                 break;
             case DefEH.MAP_KEYDOWN:
                 zeHandler = (payload: KeyboardEvent) => {
-                    this.$iApi.mapActions.mapKeyDown(payload);
+                    this.$iApi.geo.map.mapKeyDown(payload);
                 };
                 this.$iApi.event.on(GlobalEvents.MAP_KEYDOWN, zeHandler, handlerName);
                 break;
             case DefEH.MAP_KEYUP:
                 zeHandler = (payload: KeyboardEvent) => {
-                    this.$iApi.mapActions.mapKeyUp(payload);
+                    this.$iApi.geo.map.mapKeyUp(payload);
                 };
                 this.$iApi.event.on(GlobalEvents.MAP_KEYUP, zeHandler, handlerName);
                 break;
             case DefEH.MAP_BLUR:
                 zeHandler = (payload: FocusEvent) => {
-                    this.$iApi.mapActions.stopPan();
+                    this.$iApi.geo.map.stopPan();
                 };
                 this.$iApi.event.on(GlobalEvents.MAP_BLUR, zeHandler, handlerName);
                 break;
