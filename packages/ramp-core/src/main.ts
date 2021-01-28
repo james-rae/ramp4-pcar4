@@ -7,6 +7,8 @@ import api from '@/api';
 import Vue from 'vue';
 import '@/styles/main.css';
 
+console.log('BAAH serve main is running');
+
 // assign RAMP api to global variable
 window.RAMP = api;
 
@@ -15,10 +17,18 @@ window.RAMP = api;
 // TODO: there are issues with how Vue is loading when using Cypress
 window.Vue = Vue;
 
+console.log('BAAH window Vue assigned');
+
 // execute `initRAMP` global function if it's defined as soon at the RAMP library is added to the global scope
 // BAAH
 // api.gapiPromise.then(() => {
-if (typeof window.initRAMP === 'function') {
-    window.initRAMP();
-}
+console.log('BAAH the window', typeof window.initRAMP);
+// TODO with the removal of the promise, it appears .initRAMP is not present when this code runs.
+// TODO a timeout delay for now, but should be fixed to be proper / most efficient solution
+setTimeout(() => {
+    if (typeof window.initRAMP === 'function') {
+        console.log('BAAH gonna call init ramp');
+        window.initRAMP();
+    }
+}, 500);
 //});

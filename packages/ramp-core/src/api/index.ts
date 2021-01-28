@@ -3,6 +3,7 @@ import Vue from 'vue';
 // import GapiLoader, { GeoApi, ApiBundle as GeoApiBundle } from 'rampgeoapi';
 
 import { InstanceAPI, AppVersion } from './internal';
+import { GeoCommonAPI } from '../geo/internal';
 import mixin from './mixin';
 
 export * from './internal';
@@ -32,6 +33,11 @@ export interface RampGeo {
 }
 */
 
+// TODO some of the stateless geoapi stuff needs to be still available.
+//      e.g. we need default LODs to be there before an instance is created.
+//      might as well make the geometry stuff available too? We can always expose later.
+//      The files that expose this will need to be in classes that do not require a an instance on the constructor
+
 export interface APIInterface {
     Instance: typeof InstanceAPI;
     // BAAH
@@ -47,16 +53,16 @@ export interface APIInterface {
     version: AppVersion;
 
     // BAAH
-    // GEO: RampGeo;
+    GEO: GeoCommonAPI;
 }
 
 // Load geoapi
 // moved from `main-build` since it was being attached to the api object anyways
 // BAAH
-/*
-let geoapi: GeoApi;
-let rampgeo: RampGeo;
+// let geoapi: GeoApi;
+let geocommon: GeoCommonAPI = new GeoCommonAPI();
 
+/*
 const gapiPromise = GapiLoader(window);
 gapiPromise.then((gapi: GeoApi) => {
     geoapi = gapi;
@@ -96,15 +102,15 @@ const api: APIInterface = {
     version: __VERSION__, // this is populated by the build process; see `vue.config.js`
 
     // BAAH
-    /*
-    get GEO(): RampGeo {
-        if (typeof rampgeo === 'undefined') {
+    get GEO(): GeoCommonAPI {
+        // TODO we might not need this check anymore, since there is no longer a geoapi promise
+        if (typeof geocommon === 'undefined') {
             throw new Error("Attempting to access `GEO` before it's resolved. Use `initRamp` global function instead.");
         }
 
-        return rampgeo;
+        return geocommon;
     }
-    */
+
 };
 
 // export `InstanceApi` as `Instance` on global RAMP interface

@@ -1,19 +1,20 @@
 // the structure of the geo element of the RAMP API
 
 import { APIScope, InstanceAPI } from '../api/internal';
-import { MapAPI } from './internal';
+import { MapAPI, UtilsAPI } from './internal';
 
 export class GeoAPI extends APIScope {
 
     map: MapAPI;
     layer: any;
-    utils: any;
+    utils: UtilsAPI;
 
     // TODO how to best expose the geometery/graphic stuff.
     //      .graphic would be proper, but thats a long word.
     //      put stuff right on the root?  e.g. api.geo.Point, api.geo.Graphic
     //      split things out? geo.geom for geometry, geo.graphic for others?
     //      everything under .geom?
+    //      we might need this stuff in an independent outside class with no ties to the instance.
 
     /**
      * @constructor
@@ -23,6 +24,7 @@ export class GeoAPI extends APIScope {
         super(iApi);
 
         this.map = new MapAPI(iApi);
+        this.utils = new UtilsAPI();
     }
 
 }
