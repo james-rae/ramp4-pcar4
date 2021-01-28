@@ -1,26 +1,24 @@
 // TODO I don't love this class / file name. Rename if better suggestion
 
-import { SpatialReference } from '../internal';
+import { Extent, LinearRing, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon,  RampLodConfig, SpatialReference } from '../internal';
 
 export class GeoCommonAPI  {
 
     // exposing the open classes for quick reference on the RAMP API
 
-    /*
-    Extent: GeoApiBundle.Extent,
-    Graphic: GeoApiBundle.Graphic,
-    Hover: GeoApiBundle.Hover,
-    LineString: GeoApiBundle.LineString,
-    LineStyleOptions: GeoApiBundle.LineStyleOptions,
-    LinearRing: GeoApiBundle.LinearRing,
-    MultiLineString: GeoApiBundle.MultiLineString,
-    MultiPoint: GeoApiBundle.MultiPoint,
-    MultiPolygon: GeoApiBundle.MultiPolygon,
-    Point: GeoApiBundle.Point,
-    PointStyleOptions: GeoApiBundle.PointStyleOptions,
-    Polygon: GeoApiBundle.Polygon,
-    PolygonStyleOptions: GeoApiBundle.PolygonStyleOptions,
-    */
+    Extent = Extent;
+    // Graphic = Graphic;
+    // Hover = Hover;
+    LineString = LineString;
+    // LineStyleOptions = LineStyleOptions;
+    LinearRing = LinearRing;
+    MultiLineString = MultiLineString;
+    MultiPoint = MultiPoint;
+    MultiPolygon = MultiPolygon;
+    Point = Point;
+    // PointStyleOptions = PointStyleOptions;
+    Polygon = Polygon;
+    // PolygonStyleOptions = PolygonStyleOptions;
     SpatialReference = SpatialReference; // SpatialReference: typeof SpatialReference = SpatialReference // this is great code
 
     // useful functions
@@ -32,17 +30,7 @@ export class GeoCommonAPI  {
         return [this.DEFAULT_LAMBERT, this.DEFAULT_MERCATOR];
     }
 
-    // TODO the return type here was originally Array<RampLodConfig>
-    //      to preserve that, we would need to pull the definition out from geo-defs
-    //      and put it here in the commons.
-    //      Maybe the answer is put all definitions not tied to the instance in the commons.
-    //      For now, just using any to make the builds work.
-    //      Alternative is we just provide another type/interface here, as it is mostly
-    //      outside callers running these functions, not the ramp core. Outside caller
-    //      is likely not going to be importing the interface, so all this really impacts
-    //      is nice documentation of the return type.
-
-    defaultLODs(keycode: string): Array<any> {
+    defaultLODs(keycode: string): Array<RampLodConfig> {
         const lodGrinder = ((a: Array<Array<number>>) => {
             return a.map(lod => {
                 return {

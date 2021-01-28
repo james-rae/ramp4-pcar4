@@ -5,6 +5,14 @@
 export * from './api/geo-common';
 export * from './api/graphic/geometry/spatial-reference';
 export * from './api/graphic/geometry/base-geometry';
+export * from './api/graphic/geometry/point';
+export * from './api/graphic/geometry/multi-point';
+export * from './api/graphic/geometry/line-string';
+export * from './api/graphic/geometry/multi-line-string';
+export * from './api/graphic/geometry/linear-ring';
+export * from './api/graphic/geometry/polygon';
+export * from './api/graphic/geometry/multi-polygon';
+export * from './api/graphic/geometry/extent';
 
 export * from './geo';
 export * from './geo-defs';

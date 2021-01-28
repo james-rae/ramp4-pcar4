@@ -1,6 +1,5 @@
 // these are for actual basemap objects in the map
 
-// import esri = __esri;
 import { LayerType, RampBasemapConfig } from '../internal';
 import { EsriBasemap, EsriMapImageLayer, EsriTileLayer } from '../esri';
 

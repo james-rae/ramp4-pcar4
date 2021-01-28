@@ -7,10 +7,12 @@ dependencies:
   '@types/animejs': 3.1.2
   '@types/clone-deep': 4.0.1
   '@types/debounce': 1.2.0
+  '@types/geojson': 1.0.6
   '@types/jest': 24.9.1
   '@types/lodash': 4.14.168
   '@types/marked': 1.2.1
   '@types/node': 13.11.1
+  '@types/proj4': 2.5.0
   '@vue/cli-plugin-babel': 4.5.11_7fd1c33fe171018602ad64aa8e04225c
   '@vue/cli-plugin-e2e-cypress': 4.5.11_95f89060f4409da3d7f6e63ae4252efc
   '@vue/cli-plugin-eslint': 4.5.11_95f89060f4409da3d7f6e63ae4252efc
@@ -40,11 +42,15 @@ dependencies:
   marked: 1.2.8
   postcss-nested: 4.2.3
   prettier: 1.19.1
+  proj4: 2.6.0
   raw-loader: 4.0.2_webpack@4.41.3
   sass: 1.32.5
   sass-loader: 8.0.2_sass@1.32.5+webpack@4.41.3
   screenfull: 5.0.2
+  svg.js: 2.7.1
   tailwindcss: 1.9.6
+  terraformer: 1.0.9
+  terraformer-arcgis-parser: 1.1.0
   ts-jest: 23.10.5_jest@23.6.0
   ts-loader: 7.0.5_typescript@3.8.3
   tslib: 1.10.0
@@ -1409,6 +1415,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-no+R6rW60JEc59977wIxreQVsIEOAYwgCqldrA/vkpCnbD7MqTefO97lmoBe4WE0F156bC4uLSP1XHDOySnChg==
+  /@types/geojson/1.0.6:
+    dev: false
+    resolution:
+      integrity: sha512-Xqg/lIZMrUd0VRmSRbCAewtwGZiAk3mEUDvV4op1tGl+LvyPcb/MIOSxTl9z+9+J+R4/vpjiCAT4xeKzH9ji1w==
   /@types/glob/7.1.3:
     dependencies:
       '@types/minimatch': 3.0.3
@@ -1489,6 +1499,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
+  /@types/proj4/2.5.0:
+    dev: false
+    resolution:
+      integrity: sha512-9bR9qvg4wZE6UiIlmhodCOZ2r38SeN8T35SsmMDuIMfACxxaMvIwiwoTJnEA9f/KEhL+BQSuD+arbZucUzYu7w==
   /@types/q/1.5.4:
     dev: false
     resolution:
@@ -8785,6 +8799,10 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha1-VSmk1nZUE07cxSZmVoNbD4Ua/O4=
+  /mgrs/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha1-+5FYjnjJACVnI5XLQLJffNatGCk=
   /microevent.ts/0.1.1:
     dev: false
     resolution:
@@ -10494,6 +10512,13 @@ packages:
       node: '>=0.4.0'
     resolution:
       integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
+  /proj4/2.6.0:
+    dependencies:
+      mgrs: 1.0.0
+      wkt-parser: 1.2.4
+    dev: false
+    resolution:
+      integrity: sha512-ll2WyehUFOyzEZtN8hAiOTmZpuDCN5V+4A/HjhPbhlwVwlsFKnIHSZ3l3uhzgDndHjoL2MyERFGe9VmXN4rYUg==
   /promise-inflight/1.0.1:
     dev: false
     resolution:
@@ -12050,6 +12075,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WPcc7jvVGbWdSyqEO2x95krAR2Q=
+  /svg.js/2.7.1:
+    dev: false
+    resolution:
+      integrity: sha512-ycbxpizEQktk3FYvn/8BH+6/EuWXg7ZpQREJvgacqn46gIddG24tNNe4Son6omdXCnSOaApnpZw6MPCBA1dODA==
   /svgo/1.3.2:
     dependencies:
       chalk: 2.4.2
@@ -12132,6 +12161,21 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==
+  /terraformer-arcgis-parser/1.1.0:
+    dependencies:
+      '@types/geojson': 1.0.6
+      terraformer: 1.0.9
+    dev: false
+    resolution:
+      integrity: sha512-bvxEtpiS22Lz1ciaXP/MMLTlJkrHWLBV/y7VBeTLHtZnz/Ngq4wF3RqrpjzP6ojJjxvcdDlvs+UFs3wicoT1Vg==
+  /terraformer/1.0.9:
+    dev: false
+    engines:
+      node: '>=4.2.6'
+    optionalDependencies:
+      '@types/geojson': 1.0.6
+    resolution:
+      integrity: sha512-YlmQ1fsMWTkKGDGibCRWgmLzrpDRUr63Q025LJ/taYQ6j1Yb8q9McKF7NBi6ACAyUXO6F/bl9w6v4MY307y5Ag==
   /terser-webpack-plugin/1.4.5_webpack@4.41.3:
     dependencies:
       cacache: 12.0.4
@@ -13336,6 +13380,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
+  /wkt-parser/1.2.4:
+    dev: false
+    resolution:
+      integrity: sha512-ZzKnc7ml/91fOPh5bANBL4vUlWPIYYv11waCtWTkl2TRN+LEmBg60Q1MA8gqV4hEp4MGfSj9JiHz91zw/gTDXg==
   /word-wrap/1.2.3:
     dev: false
     engines:
@@ -13619,10 +13667,12 @@ packages:
       '@types/animejs': 3.1.2
       '@types/clone-deep': 4.0.1
       '@types/debounce': 1.2.0
+      '@types/geojson': 1.0.6
       '@types/jest': 24.9.1
       '@types/lodash': 4.14.168
       '@types/marked': 1.2.1
       '@types/node': 13.11.1
+      '@types/proj4': 2.5.0
       '@vue/cli-plugin-babel': 4.5.11_7fd1c33fe171018602ad64aa8e04225c
       '@vue/cli-plugin-e2e-cypress': 4.5.11_95f89060f4409da3d7f6e63ae4252efc
       '@vue/cli-plugin-eslint': 4.5.11_95f89060f4409da3d7f6e63ae4252efc
@@ -13648,11 +13698,15 @@ packages:
       marked: 1.2.8
       postcss-nested: 4.2.3
       prettier: 1.19.1
+      proj4: 2.6.0
       raw-loader: 4.0.2_webpack@4.41.3
       sass: 1.32.5
       sass-loader: 8.0.2_sass@1.32.5+webpack@4.41.3
       screenfull: 5.0.2
+      svg.js: 2.7.1
       tailwindcss: 1.9.6
+      terraformer: 1.0.9
+      terraformer-arcgis-parser: 1.1.0
       tslib: 1.10.0
       typescript: 3.8.3
       vue: 2.6.12
@@ -13671,7 +13725,7 @@ packages:
     peerDependencies:
       webpack: '*'
     resolution:
-      integrity: sha512-1HfMOdgbcEJZSyG1RuVdBpZLrAFOmvE/hbHfl+jdNy/kBZuUkHY0P4yQCIp4299HxDEBmFZTLXByKjqKi3DueA==
+      integrity: sha512-Hyg6QdMHeXCKtY/xf8URsDaIFwFZ8uYW7qkEbDV/DVu5hCpXgOw6PKpkbHOCrzzRpUPYpGtuEIU1rLHWu3taRw==
       tarball: 'file:projects/ramp-core.tgz'
     version: 0.0.0
   'file:projects/ramp-locale-loader.tgz':
@@ -13713,6 +13767,7 @@ packages:
       integrity: sha512-OguwqMo1M+GWZfRLFMArIJ5GpRgZgpZlCyFD0Tonv6Wi+ttEB0KFoCCeVgweGn8Tnil0lIfjgfKgtap2oMr8nw==
       tarball: 'file:projects/ramp-sample-fixtures.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@arcgis/core': 4.18.1
   '@rush-temp/ramp-core': 'file:./projects/ramp-core.tgz'
@@ -13722,10 +13777,12 @@ specifiers:
   '@types/animejs': ~3.1.0
   '@types/clone-deep': ~4.0.1
   '@types/debounce': ^1.2.0
+  '@types/geojson': ^1.0.0
   '@types/jest': ^24.0.19
   '@types/lodash': ^4.14.149
   '@types/marked': ^1.1.0
   '@types/node': ~13.11.0
+  '@types/proj4': 2.5.0
   '@vue/cli-plugin-babel': ^4.1.0
   '@vue/cli-plugin-e2e-cypress': ^4.1.0
   '@vue/cli-plugin-eslint': ^4.1.0
@@ -13755,11 +13812,15 @@ specifiers:
   marked: ^1.2.2
   postcss-nested: ~4.2.1
   prettier: ^1.19.1
+  proj4: 2.6.0
   raw-loader: ^4.0.1
   sass: ^1.23.7
   sass-loader: ^8.0.0
   screenfull: ~5.0.2
+  svg.js: 2.7.1
   tailwindcss: ^1.1.4
+  terraformer: 1.0.9
+  terraformer-arcgis-parser: 1.1.0
   ts-jest: ^23.10.3
   ts-loader: ^7.0.1
   tslib: ~1.10.0
