@@ -172,7 +172,7 @@ export interface Attributes { [key: string]: any; }
 
 export type SrDef = SpatialReference | string | number;
 
-export type IdDef = string | number;
+export type IdDef = string | number | undefined;
 
 export interface EpsgLookup {
     (code: string | number): Promise<string>;

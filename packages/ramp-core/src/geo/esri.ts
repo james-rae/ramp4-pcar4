@@ -6,6 +6,11 @@
 
 // sorted by library path
 import EsriBasemap from '@arcgis/core/Basemap';
+import EsriExtent from '@arcgis/core/geometry/Extent';
+import EsriMultipoint from '@arcgis/core/geometry/Multipoint';
+import EsriPoint from '@arcgis/core/geometry/Point';
+import EsriPolygon from '@arcgis/core/geometry/Polygon';
+import EsriPolyline from '@arcgis/core/geometry/Polyline';
 import EsriSpatialReference from '@arcgis/core/geometry/SpatialReference';
 //import EsriGeometryJsonUtils from '@arcgis/core/geometry/support/jsonUtils';
 import EsriGraphic from '@arcgis/core/Graphic';
@@ -55,7 +60,7 @@ export {
     EsriBasemapGallery,
     EsriClassBreakInfo,
     EsriClassBreaksRenderer,
-    EsriRequest,
+    EsriExtent,
     EsriFeatureFilter,
     EsriFeatureLayer,
     EsriField,
@@ -71,15 +76,20 @@ export {
     EsriMap,
     EsriMapImageLayer,
     EsriMapView,
+    EsriMultipoint,
     EsriPictureMarkerSymbol,
     EsriPrintParameters,
     EsriPrintTask,
     EsriPrintTemplate,
     EsriProjectParameters,
+    EsriPoint,
+    EsriPolygon,
+    EsriPolyline,
     EsriQuery,
     EsriQueryTask,
     EsriRenderer,
     // EsriRendererUtils,
+    EsriRequest,
     EsriScaleBar,
     EsriSimpleFillSymbol,
     EsriSimpleLineSymbol,

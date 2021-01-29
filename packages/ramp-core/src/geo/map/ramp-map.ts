@@ -46,93 +46,93 @@ export class MapAPI extends CommonMapAPI {
      * @param {RampMapConfig} config configuration data for the map
      * @param {string | HTMLDivElement} targetDiv the page div or the div id that the map should be created in
      */
-     createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
-         super.createMap(config, targetDiv);
+    createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
+        super.createMap(config, targetDiv);
 
         // TODO if ._innerMap or ._innerView exists, do we want to do any cleanup on it? E.g. remove event handlers?
 
-         this._rampSR = SpatialReference.fromConfig(config.extent.spatialReference);
+        this._rampSR = SpatialReference.fromConfig(config.extent.spatialReference);
 
-         const esriViewConfig: esri.MapViewProperties = {
-             map: this._innerMap,
-             container: targetDiv,
-             constraints: {
-                 lods: <Array<EsriLOD>>config.lods,
-                 rotationEnabled: false // TODO make rotation a config option?
-             },
-             spatialReference: this.$iApi.geo.utils.geom.convSrToEsri(this._rampSR),
-             extent: config.extent
-         };
+        const esriViewConfig: esri.MapViewProperties = {
+            map: this._innerMap,
+            container: targetDiv,
+            constraints: {
+                lods: <Array<EsriLOD>>config.lods,
+                rotationEnabled: false // TODO make rotation a config option?
+            },
+            spatialReference: this.$iApi.geo.utils.geom.convSrToEsri(this._rampSR),
+            extent: config.extent
+        };
 
-         // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
-         this._innerView = new EsriMapView(esriViewConfig);
+        // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
+        this._innerView = new EsriMapView(esriViewConfig);
 
-         this._innerView.watch('extent', (newval: esri.Extent) => {
-             // NOTE: yes, double events. rationale is a block of code dealing with filters will not
-             //       want to have two event handlers (one on filter, one on extent change) and synch
-             //       between them. They can subscribe to the filter event and get all the info they need.
+        this._innerView.watch('extent', (newval: esri.Extent) => {
+            // NOTE: yes, double events. rationale is a block of code dealing with filters will not
+            //       want to have two event handlers (one on filter, one on extent change) and synch
+            //       between them. They can subscribe to the filter event and get all the info they need.
 
-             // BAAH
-             const newExtent = {}; // <Extent>this.gapi.utils.geom.geomEsriToRamp(newval, 'map_extent_event');
-             this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, newExtent);
-             this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
-                 extent: newExtent,
-                 filterKey: CoreFilterKey.EXTENT
-             });
-         });
+            // BAAH
+            const newExtent = {}; // <Extent>this.gapi.utils.geom.geomEsriToRamp(newval, 'map_extent_event');
+            this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, newExtent);
+            this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
+                extent: newExtent,
+                filterKey: CoreFilterKey.EXTENT
+            });
+        });
 
-         this._innerView.watch('scale', (newval: number) => {
-             this.$iApi.event.emit(GlobalEvents.MAP_SCALECHANGE, newval);
-         });
+        this._innerView.watch('scale', (newval: number) => {
+            this.$iApi.event.emit(GlobalEvents.MAP_SCALECHANGE, newval);
+        });
 
-         this._innerView.on('click', esriClick => {
-             // BAAH
-             // this.mapClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_click_point'));
-         });
+        this._innerView.on('click', esriClick => {
+            // BAAH
+            // this.mapClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_click_point'));
+        });
 
-         this._innerView.on('double-click', esriClick => {
-             // BAAH
-             // this.mapDoubleClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_doubleclick_point'));
-         });
+        this._innerView.on('double-click', esriClick => {
+            // BAAH
+            // this.mapDoubleClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_doubleclick_point'));
+        });
 
-         this._innerView.on('pointer-move', esriMouseMove => {
-             // TODO this even fires on just about every change in pixel the pointer makes.
-             //      should we debounce here? or on the client?
-             // BAAH
-             // this.mapMouseMoved.fireEvent(this.gapi.utils.geom.esriMapMouseToRamp(esriMouseMove));
-         });
+        this._innerView.on('pointer-move', esriMouseMove => {
+            // TODO this even fires on just about every change in pixel the pointer makes.
+            //      should we debounce here? or on the client?
+            // BAAH
+            // this.mapMouseMoved.fireEvent(this.gapi.utils.geom.esriMapMouseToRamp(esriMouseMove));
+        });
 
-         this._innerView.on('pointer-down', esriMouseDown => {
-             // BAAH
-             // this.mapMouseDown.fireEvent(esriMouseDown.native);
-         });
+        this._innerView.on('pointer-down', esriMouseDown => {
+            // BAAH
+            // this.mapMouseDown.fireEvent(esriMouseDown.native);
+        });
 
-         this._innerView.on('key-down', esriKeyDown => {
-             // BAAH
-             /*
-             this.mapKeyDown.fireEvent(esriKeyDown.native);
-             esriKeyDown.stopPropagation();
-             */
-         });
+        this._innerView.on('key-down', esriKeyDown => {
+            // BAAH
+            /*
+            this.mapKeyDown.fireEvent(esriKeyDown.native);
+            esriKeyDown.stopPropagation();
+            */
+        });
 
-         this._innerView.on('key-up', esriKeyUp => {
-             // BAAH
-             /*
-             this.mapKeyUp.fireEvent(esriKeyUp.native);
-             esriKeyUp.stopPropagation();
-             */
-         });
+        this._innerView.on('key-up', esriKeyUp => {
+            // BAAH
+            /*
+            this.mapKeyUp.fireEvent(esriKeyUp.native);
+            esriKeyUp.stopPropagation();
+            */
+        });
 
-         this._innerView.on('blur', esriBlur => {
-             // BAAH
-             // this.mapBlur.fireEvent(esriBlur.native);
-         });
+        this._innerView.on('blur', esriBlur => {
+            // BAAH
+            // this.mapBlur.fireEvent(esriBlur.native);
+        });
 
-         this._innerView.container.addEventListener('touchmove', e => {
-             // need this for panning and zooming to work on mobile devices / touchscreens
-             // touchmove stops the drag event (what the MapView reacts to) from firing properly
-             e.preventDefault();
-         });
+        this._innerView.container.addEventListener('touchmove', e => {
+            // need this for panning and zooming to work on mobile devices / touchscreens
+            // touchmove stops the drag event (what the MapView reacts to) from firing properly
+            e.preventDefault();
+        });
 
      }
 
