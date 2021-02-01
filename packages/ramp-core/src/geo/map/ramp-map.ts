@@ -60,7 +60,7 @@ export class MapAPI extends CommonMapAPI {
                 lods: <Array<EsriLOD>>config.lods,
                 rotationEnabled: false // TODO make rotation a config option?
             },
-            spatialReference: this.$iApi.geo.utils.geom.convSrToEsri(this._rampSR),
+            spatialReference: this.$iApi.geo.utils.geom._convSrToEsri(this._rampSR), // internal, so we will sneak an internal call
             extent: config.extent
         };
 

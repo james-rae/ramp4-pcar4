@@ -2,8 +2,8 @@
 
 import esri = __esri;
 import GeoJson from 'geojson';
-import { BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint, MultiPolygon, Point,
-    Polygon, SpatialReference } from '../internal';
+import { Graphic, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
+    MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
 import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriSpatialReference } from '../esri';
 
 // import * as RampAPI from '../api/api';
@@ -40,7 +40,7 @@ export class GeometryAPI {
      */
     esriMapClickToRamp(esriMapClick: esri.MapViewClickEvent | esri.MapViewDoubleClickEvent, id?: number | string): MapClick {
         return {
-            mapPoint: this.convEsriPointToRamp(esriMapClick.mapPoint, id),
+            mapPoint: this._convEsriPointToRamp(esriMapClick.mapPoint, id),
             screenX: esriMapClick.x,
             screenY: esriMapClick.y,
             button: esriMapClick.button,
@@ -73,21 +73,21 @@ export class GeometryAPI {
 
         switch (rampApiGeom.type) {
             case GeometryType.POINT:
-                return this.convPointToEsri(<Point>rampApiGeom);
+                return this._convPointToEsri(<Point>rampApiGeom);
             case GeometryType.LINESTRING:
-                return this.convLineToEsri(<LineString>rampApiGeom);
+                return this._convLineToEsri(<LineString>rampApiGeom);
             case GeometryType.POLYGON:
-                return this.convPolygonToEsri(<Polygon>rampApiGeom);
+                return this._convPolygonToEsri(<Polygon>rampApiGeom);
             case GeometryType.EXTENT:
-                return this.convExtentToEsri(<Extent>rampApiGeom);
+                return this._convExtentToEsri(<Extent>rampApiGeom);
             case GeometryType.MULTIPOINT:
-                return this.convMultiPointToEsri(<MultiPoint>rampApiGeom);
+                return this._convMultiPointToEsri(<MultiPoint>rampApiGeom);
             case GeometryType.MULTILINESTRING:
-                return this.convMultiLineToEsri(<MultiLineString>rampApiGeom);
+                return this._convMultiLineToEsri(<MultiLineString>rampApiGeom);
             case GeometryType.MULTIPOLYGON:
-                return this.convMultiPolygonToEsri(<MultiPolygon>rampApiGeom);
+                return this._convMultiPolygonToEsri(<MultiPolygon>rampApiGeom);
             case GeometryType.LINEARRING:
-                return this.convLinearRingToEsri(<LinearRing>rampApiGeom);
+                return this._convLinearRingToEsri(<LinearRing>rampApiGeom);
             default:
                 throw new Error(`Encountered unhandled geometry type ${rampApiGeom.type}`);
         }
@@ -104,15 +104,15 @@ export class GeometryAPI {
 
         switch (esriGeometry.type) {
             case 'point':
-                return this.convEsriPointToRamp(<esri.Point>esriGeometry, id);
+                return this._convEsriPointToRamp(<esri.Point>esriGeometry, id);
             case 'polyline':
-                return this.convEsriLineToRamp(<esri.Polyline>esriGeometry, id);
+                return this._convEsriLineToRamp(<esri.Polyline>esriGeometry, id);
             case 'polygon':
-                return this.convEsriPolygonToRamp(<esri.Polygon>esriGeometry, id);
+                return this._convEsriPolygonToRamp(<esri.Polygon>esriGeometry, id);
             case 'extent':
-                return this.convEsriExtentToRamp(<esri.Extent>esriGeometry, id);
+                return this._convEsriExtentToRamp(<esri.Extent>esriGeometry, id);
             case 'multipoint':
-                return this.convEsriMultiPointToRamp(<esri.Multipoint>esriGeometry, id);
+                return this._convEsriMultiPointToRamp(<esri.Multipoint>esriGeometry, id);
             default:
                 throw new Error(`Encountered unhandled geometry type ${esriGeometry.type}`);
         }
@@ -129,17 +129,17 @@ export class GeometryAPI {
 
         switch (geoJsonGeometry.type) {
             case gjType.POINT:
-                return this.convGeoJsonPointToRamp(<GeoJson.Point>geoJsonGeometry, id);
+                return this._convGeoJsonPointToRamp(<GeoJson.Point>geoJsonGeometry, id);
             case gjType.LINESTRING:
-                return this.convGeoJsonLineToRamp(<GeoJson.LineString>geoJsonGeometry, id);
+                return this._convGeoJsonLineToRamp(<GeoJson.LineString>geoJsonGeometry, id);
             case gjType.POLYGON:
-                return this.convGeoJsonPolygonToRamp(<GeoJson.Polygon>geoJsonGeometry, id);
+                return this._convGeoJsonPolygonToRamp(<GeoJson.Polygon>geoJsonGeometry, id);
             case gjType.MULTIPOINT:
-                return this.convGeoJsonMultiPointToRamp(<GeoJson.MultiPoint>geoJsonGeometry, id);
+                return this._convGeoJsonMultiPointToRamp(<GeoJson.MultiPoint>geoJsonGeometry, id);
             case gjType.MULTILINESTRING:
-                return this.convGeoJsonMultiLineToRamp(<GeoJson.MultiLineString>geoJsonGeometry, id);
+                return this._convGeoJsonMultiLineToRamp(<GeoJson.MultiLineString>geoJsonGeometry, id);
             case gjType.MULTIPOLYGON:
-                return this.convGeoJsonMultiPolygonToRamp(<GeoJson.MultiPolygon>geoJsonGeometry, id);
+                return this._convGeoJsonMultiPolygonToRamp(<GeoJson.MultiPolygon>geoJsonGeometry, id);
             default:
                 throw new Error(`Encountered unhandled geometry type ${geoJsonGeometry.type}`);
         }
@@ -155,21 +155,21 @@ export class GeometryAPI {
 
         switch (rampApiGeom.type) {
             case GeometryType.POINT:
-                return this.convPointToGeoJson(<Point>rampApiGeom);
+                return this._convPointToGeoJson(<Point>rampApiGeom);
             case GeometryType.LINESTRING:
-                return this.convLineToGeoJson(<LineString>rampApiGeom);
+                return this._convLineToGeoJson(<LineString>rampApiGeom);
             case GeometryType.POLYGON:
-                return this.convPolygonToGeoJson(<Polygon>rampApiGeom);
+                return this._convPolygonToGeoJson(<Polygon>rampApiGeom);
             case GeometryType.EXTENT:
-                return this.convExtentToGeoJson(<Extent>rampApiGeom);
+                return this._convExtentToGeoJson(<Extent>rampApiGeom);
             case GeometryType.MULTIPOINT:
-                return this.convMultiPointToGeoJson(<MultiPoint>rampApiGeom);
+                return this._convMultiPointToGeoJson(<MultiPoint>rampApiGeom);
             case GeometryType.MULTILINESTRING:
-                return this.convMultiLineToGeoJson(<MultiLineString>rampApiGeom);
+                return this._convMultiLineToGeoJson(<MultiLineString>rampApiGeom);
             case GeometryType.MULTIPOLYGON:
-                return this.convMultiPolygonToGeoJson(<MultiPolygon>rampApiGeom);
+                return this._convMultiPolygonToGeoJson(<MultiPolygon>rampApiGeom);
             case GeometryType.LINEARRING:
-                return this.convLinearRingToGeoJson(<LinearRing>rampApiGeom);
+                return this._convLinearRingToGeoJson(<LinearRing>rampApiGeom);
             default:
                 throw new Error(`Encountered unhandled geometry type ${rampApiGeom.type}`);
         }
@@ -202,7 +202,7 @@ export class GeometryAPI {
     // everything below is worker functions for the main hawggies above.
     // they can be used by outside callers, but in most cases, use the standard things ^
 
-    parseGeoJsonCrs(crs: GeoJson.CoordinateReferenceSystem | undefined): string {
+    _parseGeoJsonCrs(crs: GeoJson.CoordinateReferenceSystem | undefined): string {
         if (!crs) {
             return 'EPSG:4326';
         } else if (crs.type === 'name') {
@@ -224,56 +224,56 @@ export class GeometryAPI {
         return 'EPSG:4326';
     }
 
-    convSrToEsri(rampSR: SpatialReference): EsriSpatialReference {
+    _convSrToEsri(rampSR: SpatialReference): EsriSpatialReference {
         return new EsriSpatialReference(rampSR.lean());
     }
 
-    convPointToEsri(rampPoint: Point): EsriPoint {
+    _convPointToEsri(rampPoint: Point): EsriPoint {
         return new EsriPoint({
             x: rampPoint.x,
             y: rampPoint.y,
-            spatialReference: this.convSrToEsri(rampPoint.sr)
+            spatialReference: this._convSrToEsri(rampPoint.sr)
         });
     }
 
-    convMultiPointToEsri(rampMultiPoint: MultiPoint): EsriMultipoint {
+    _convMultiPointToEsri(rampMultiPoint: MultiPoint): EsriMultipoint {
         return new EsriMultipoint({
             points: rampMultiPoint.toArray(),
-            spatialReference: this.convSrToEsri(rampMultiPoint.sr)
+            spatialReference: this._convSrToEsri(rampMultiPoint.sr)
         });
     }
 
     private polylineFactory(coords: Array<Array<Array<number>>>, sr: SpatialReference): EsriPolyline {
         return new EsriPolyline({
             paths: coords,
-            spatialReference: this.convSrToEsri(sr)
+            spatialReference: this._convSrToEsri(sr)
         });
     }
 
-    convLineToEsri(rampLine: LineString): EsriPolyline {
+    _convLineToEsri(rampLine: LineString): EsriPolyline {
         return this.polylineFactory([rampLine.toArray()], rampLine.sr);
     }
 
-    convMultiLineToEsri(rampMultiLine: MultiLineString): EsriPolyline {
+    _convMultiLineToEsri(rampMultiLine: MultiLineString): EsriPolyline {
         return this.polylineFactory(rampMultiLine.toArray(), rampMultiLine.sr);
     }
 
     private polygonFactory(coords: Array<Array<Array<number>>>, sr: SpatialReference): EsriPolygon {
         return new EsriPolygon({
             rings: coords,
-            spatialReference: this.convSrToEsri(sr)
+            spatialReference: this._convSrToEsri(sr)
         });
     }
 
-    convLinearRingToEsri(rampRing: LinearRing): EsriPolygon {
+    _convLinearRingToEsri(rampRing: LinearRing): EsriPolygon {
         return this.polygonFactory([rampRing.toArray()], rampRing.sr);
     }
 
-    convPolygonToEsri(rampPolygon: Polygon): EsriPolygon {
+    _convPolygonToEsri(rampPolygon: Polygon): EsriPolygon {
         return this.polygonFactory(rampPolygon.toArray(), rampPolygon.sr);
     }
 
-    convMultiPolygonToEsri(rampMultiPolygon: MultiPolygon): EsriPolygon {
+    _convMultiPolygonToEsri(rampMultiPolygon: MultiPolygon): EsriPolygon {
         // esri doesn't support multipolygons. instead all polygons become one polygon that has all the rings in it
         const ringMerger: Array<Array<Array<number>>> = [];
 
@@ -285,17 +285,17 @@ export class GeometryAPI {
         return this.polygonFactory(ringMerger, rampMultiPolygon.sr);
     }
 
-    convExtentToEsri(rampExtent: Extent): EsriExtent {
+    _convExtentToEsri(rampExtent: Extent): EsriExtent {
         return new EsriExtent({
             xmin: rampExtent.xmin,
             ymin: rampExtent.ymin,
             xmax: rampExtent.xmax,
             ymax: rampExtent.ymax,
-            spatialReference: this.convSrToEsri(rampExtent.sr)
+            spatialReference: this._convSrToEsri(rampExtent.sr)
         });
     }
 
-    convEsriSrToSr(esriSR: EsriSpatialReference): SpatialReference {
+    _convEsriSrToSr(esriSR: EsriSpatialReference): SpatialReference {
         if (esriSR.wkt) {
             return new SpatialReference(esriSR.wkt);
         } else {
@@ -308,13 +308,13 @@ export class GeometryAPI {
         }
     }
 
-    convEsriPointToRamp(esriPoint: EsriPoint, id?: number | string): Point {
-        return new Point(id, [esriPoint.x, esriPoint.y], this.convEsriSrToSr(esriPoint.spatialReference), true);
+    _convEsriPointToRamp(esriPoint: EsriPoint, id?: number | string): Point {
+        return new Point(id, [esriPoint.x, esriPoint.y], this._convEsriSrToSr(esriPoint.spatialReference), true);
     }
 
     // this will shoot back a LineString or MultiLineString, depending on the guts
-    convEsriLineToRamp(esriLine: EsriPolyline, id?: number | string): BaseGeometry {
-        const sr: SpatialReference = this.convEsriSrToSr(esriLine.spatialReference);
+    _convEsriLineToRamp(esriLine: EsriPolyline, id?: number | string): BaseGeometry {
+        const sr: SpatialReference = this._convEsriSrToSr(esriLine.spatialReference);
         if (esriLine.paths.length === 1) {
             return new LineString(id, esriLine.paths[0], sr, true);
         } else {
@@ -322,17 +322,17 @@ export class GeometryAPI {
         }
     }
 
-    convEsriPolygonToRamp(esriPoly: EsriPolygon, id?: number | string): Polygon {
-        return new Polygon(id, esriPoly.rings, this.convEsriSrToSr(esriPoly.spatialReference), true);
+    _convEsriPolygonToRamp(esriPoly: EsriPolygon, id?: number | string): Polygon {
+        return new Polygon(id, esriPoly.rings, this._convEsriSrToSr(esriPoly.spatialReference), true);
     }
 
-    convEsriExtentToRamp(esriExtent: EsriExtent, id?: number | string): Extent {
+    _convEsriExtentToRamp(esriExtent: EsriExtent, id?: number | string): Extent {
         return Extent.fromParams(id, esriExtent.xmin, esriExtent.ymin,
-            esriExtent.xmax, esriExtent.ymax, this.convEsriSrToSr(esriExtent.spatialReference));
+            esriExtent.xmax, esriExtent.ymax, this._convEsriSrToSr(esriExtent.spatialReference));
     }
 
-    convEsriMultiPointToRamp(esriMultiPoint: EsriMultipoint, id?: number | string): MultiPoint {
-        return new MultiPoint(id, esriMultiPoint.points, this.convEsriSrToSr(esriMultiPoint.spatialReference), true);
+    _convEsriMultiPointToRamp(esriMultiPoint: EsriMultipoint, id?: number | string): MultiPoint {
+        return new MultiPoint(id, esriMultiPoint.points, this._convEsriSrToSr(esriMultiPoint.spatialReference), true);
     }
 
     // we could abstract all these functions to a generalized, slightly riskier, function.
@@ -346,7 +346,7 @@ export class GeometryAPI {
             coordinates: coords
         };
         if (sr) {
-            gj.crs = this.convSrToGeoJson(sr);
+            gj.crs = this._convSrToGeoJson(sr);
         }
         return gj;
     }
@@ -356,7 +356,7 @@ export class GeometryAPI {
     //      also might want to consider various magics for feature sets to remove all the crs
     //      from the geoms and just define once on the feature set.
 
-    convSrToGeoJson(rampSR: SpatialReference): GeoJson.NamedCoordinateReferenceSystem {
+    _convSrToGeoJson(rampSR: SpatialReference): GeoJson.NamedCoordinateReferenceSystem {
         const crs = {
             type: 'name',
             properties: {
@@ -371,42 +371,42 @@ export class GeometryAPI {
         return crs;
     }
 
-    convPointToGeoJson(rampPoint: Point): GeoJson.Point {
+    _convPointToGeoJson(rampPoint: Point): GeoJson.Point {
         return <GeoJson.Point>this.gjFactory(gjType.POINT, rampPoint.toArray(), rampPoint.sr);
     }
 
-    convMultiPointToGeoJson(rampMultiPoint: MultiPoint): GeoJson.MultiPoint {
+    _convMultiPointToGeoJson(rampMultiPoint: MultiPoint): GeoJson.MultiPoint {
         return <GeoJson.MultiPoint>this.gjFactory(gjType.MULTIPOINT, rampMultiPoint.toArray(), rampMultiPoint.sr);
     }
 
-    convLineToGeoJson(rampLine: LineString): GeoJson.LineString {
+    _convLineToGeoJson(rampLine: LineString): GeoJson.LineString {
         return <GeoJson.LineString>this.gjFactory(gjType.LINESTRING, rampLine.toArray(), rampLine.sr);
     }
 
-    convMultiLineToGeoJson(rampMultiLine: MultiLineString): GeoJson.MultiLineString {
+    _convMultiLineToGeoJson(rampMultiLine: MultiLineString): GeoJson.MultiLineString {
         return <GeoJson.MultiLineString>this.gjFactory(gjType.MULTILINESTRING, rampMultiLine.toArray(), rampMultiLine.sr);
     }
 
-    convLinearRingToGeoJson(rampLR: LinearRing): GeoJson.Polygon {
+    _convLinearRingToGeoJson(rampLR: LinearRing): GeoJson.Polygon {
         // convert to polygon
         return <GeoJson.Polygon>this.gjFactory(gjType.POLYGON, [rampLR.toArray()], rampLR.sr);
     }
 
-    convPolygonToGeoJson(rampPolygon: Polygon): GeoJson.Polygon {
+    _convPolygonToGeoJson(rampPolygon: Polygon): GeoJson.Polygon {
         return <GeoJson.Polygon>this.gjFactory(gjType.POLYGON, rampPolygon.toArray(), rampPolygon.sr);
     }
 
-    convMultiPolygonToGeoJson(rampMultiPolygon: MultiPolygon): GeoJson.MultiPolygon {
+    _convMultiPolygonToGeoJson(rampMultiPolygon: MultiPolygon): GeoJson.MultiPolygon {
         return <GeoJson.MultiPolygon>this.gjFactory(gjType.MULTIPOLYGON, rampMultiPolygon.toArray(), rampMultiPolygon.sr);
     }
 
     // TODO figure out if we want a Polygon or a bbox string
-    convExtentToGeoJson(rampExtent: Extent): GeoJson.Polygon {
+    _convExtentToGeoJson(rampExtent: Extent): GeoJson.Polygon {
         return <GeoJson.Polygon>this.gjFactory(gjType.POLYGON, rampExtent.toPolygonArray(), rampExtent.sr);
     }
 
-    convGeoJsonSrToSr(crs: GeoJson.CoordinateReferenceSystem | undefined): SpatialReference {
-        const p: string = this.parseGeoJsonCrs(crs);
+    _convGeoJsonSrToSr(crs: GeoJson.CoordinateReferenceSystem | undefined): SpatialReference {
+        const p: string = this._parseGeoJsonCrs(crs);
         if (p.substr(0, 5) === 'EPSG:') {
             return new SpatialReference(parseInt(p.substr(5)));
         } else {
@@ -415,29 +415,29 @@ export class GeometryAPI {
         }
     }
 
-    convGeoJsonPointToRamp(geoJsonPoint: GeoJson.Point, id?: number | string): Point {
-        return new Point(id, geoJsonPoint.coordinates, this.convGeoJsonSrToSr(geoJsonPoint.crs), true);
+    _convGeoJsonPointToRamp(geoJsonPoint: GeoJson.Point, id?: number | string): Point {
+        return new Point(id, geoJsonPoint.coordinates, this._convGeoJsonSrToSr(geoJsonPoint.crs), true);
     }
 
-    convGeoJsonLineToRamp(geoJsonLine: GeoJson.LineString, id?: number | string): LineString {
-        return new LineString(id, geoJsonLine.coordinates, this.convGeoJsonSrToSr(geoJsonLine.crs), true);
+    _convGeoJsonLineToRamp(geoJsonLine: GeoJson.LineString, id?: number | string): LineString {
+        return new LineString(id, geoJsonLine.coordinates, this._convGeoJsonSrToSr(geoJsonLine.crs), true);
 
     }
 
-    convGeoJsonPolygonToRamp(geoJsonPoly: GeoJson.Polygon, id?: number | string): Polygon {
-        return new Polygon(id, geoJsonPoly.coordinates, this.convGeoJsonSrToSr(geoJsonPoly.crs), true);
+    _convGeoJsonPolygonToRamp(geoJsonPoly: GeoJson.Polygon, id?: number | string): Polygon {
+        return new Polygon(id, geoJsonPoly.coordinates, this._convGeoJsonSrToSr(geoJsonPoly.crs), true);
     }
 
-    convGeoJsonMultiPolygonToRamp(geoJsonMultiPoly: GeoJson.MultiPolygon, id?: number | string): MultiPolygon {
-        return new MultiPolygon(id, geoJsonMultiPoly.coordinates, this.convGeoJsonSrToSr(geoJsonMultiPoly.crs), true);
+    _convGeoJsonMultiPolygonToRamp(geoJsonMultiPoly: GeoJson.MultiPolygon, id?: number | string): MultiPolygon {
+        return new MultiPolygon(id, geoJsonMultiPoly.coordinates, this._convGeoJsonSrToSr(geoJsonMultiPoly.crs), true);
     }
 
-    convGeoJsonMultiLineToRamp(geoJsonMultiLine: GeoJson.MultiLineString, id?: number | string): MultiLineString {
-        return new MultiLineString(id, geoJsonMultiLine.coordinates, this.convGeoJsonSrToSr(geoJsonMultiLine.crs), true);
+    _convGeoJsonMultiLineToRamp(geoJsonMultiLine: GeoJson.MultiLineString, id?: number | string): MultiLineString {
+        return new MultiLineString(id, geoJsonMultiLine.coordinates, this._convGeoJsonSrToSr(geoJsonMultiLine.crs), true);
     }
 
-    convGeoJsonMultiPointToRamp(geoJsonMultiPoint: GeoJson.MultiPoint, id?: number | string): MultiPoint {
-        return new MultiPoint(id, geoJsonMultiPoint.coordinates, this.convGeoJsonSrToSr(geoJsonMultiPoint.crs), true);
+    _convGeoJsonMultiPointToRamp(geoJsonMultiPoint: GeoJson.MultiPoint, id?: number | string): MultiPoint {
+        return new MultiPoint(id, geoJsonMultiPoint.coordinates, this._convGeoJsonSrToSr(geoJsonMultiPoint.crs), true);
     }
 
 }
