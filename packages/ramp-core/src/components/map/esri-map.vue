@@ -64,43 +64,6 @@ export default class EsriMap extends Vue {
         this.$iApi.geo.map.createMap(this.mapConfig, this.$el as HTMLDivElement);
         this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
 
-        // TODO wire up more events from map to main bus. or migrate into "map API" if that happens
-        // BAAH these events likely go, as the emit calls will be done inside the MapAPI. verify the emits are there before deleting
-        /*
-        this.$iApi.geo.map.mapClicked.listen((payload: MapClick) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_CLICK, payload);
-        });
-        this.$iApi.map.mapDoubleClicked.listen((payload: MapClick) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_DOUBLECLICK, payload);
-        });
-        this.$iApi.map.extentChanged.listen((payload: GeoApiBundle.Extent) => {
-            // NOTE: yes, double events. rationale is a block of code dealing with filters will not
-            //       want to have two event handlers (one on filter, one on extent change) and synch
-            //       between them. They can subscribe to the filter event and get all the info they need.
-            this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, payload);
-            this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
-                extent: payload,
-                filterKey: CoreFilterKey.EXTENT
-            });
-        });
-        this.$iApi.map.mapMouseMoved.listen((payload: MapMove) => {
-            // TODO debounce here? the map event fires pretty much every change in pixel value.
-            this.$iApi.event.emit(GlobalEvents.MAP_MOUSEMOVE, payload);
-        });
-        this.$iApi.map.mapMouseDown.listen((payload: PointerEvent) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_MOUSEDOWN, payload);
-        });
-        this.$iApi.map.mapKeyDown.listen((payload: KeyboardEvent) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_KEYDOWN, payload);
-        });
-        this.$iApi.map.mapKeyUp.listen((payload: KeyboardEvent) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_KEYUP, payload);
-        });
-        this.$iApi.map.mapBlur.listen((payload: FocusEvent) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_BLUR, payload);
-        });
-        */
-
         // BAAH
         // this.onLayerArrayChange(this.layers, []);
     }

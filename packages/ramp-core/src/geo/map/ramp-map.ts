@@ -4,7 +4,8 @@
 import esri = __esri;
 
 import { GlobalEvents, InstanceAPI } from '../../api/internal';
-import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, RampMapConfig, MapClick, MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
+import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, RampMapConfig, MapClick,
+    MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
 import { EsriLOD, EsriMapView } from '../esri';
 import { LayerStore } from '@/store/modules/layer';
 
@@ -72,8 +73,7 @@ export class MapAPI extends CommonMapAPI {
             //       want to have two event handlers (one on filter, one on extent change) and synch
             //       between them. They can subscribe to the filter event and get all the info they need.
 
-            // BAAH
-            const newExtent = {}; // <Extent>this.gapi.utils.geom.geomEsriToRamp(newval, 'map_extent_event');
+            const newExtent = <Extent>this.$iApi.geo.utils.geom.geomEsriToRamp(newval, 'map_extent_event');
             this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, newExtent);
             this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
                 extent: newExtent,
@@ -86,46 +86,38 @@ export class MapAPI extends CommonMapAPI {
         });
 
         this._innerView.on('click', esriClick => {
-            // BAAH
-            // this.mapClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_click_point'));
+            this.$iApi.event.emit(GlobalEvents.MAP_CLICK, this.$iApi.geo.utils.geom.esriMapClickToRamp(esriClick, 'map_click_point'));
         });
 
         this._innerView.on('double-click', esriClick => {
-            // BAAH
-            // this.mapDoubleClicked.fireEvent(this.gapi.utils.geom.esriMapClickToRamp(esriClick, 'map_doubleclick_point'));
+            this.$iApi.event.emit(GlobalEvents.MAP_DOUBLECLICK, this.$iApi.geo.utils.geom.esriMapClickToRamp(esriClick, 'map_doubleclick_point'));
         });
 
         this._innerView.on('pointer-move', esriMouseMove => {
-            // TODO this even fires on just about every change in pixel the pointer makes.
-            //      should we debounce here? or on the client?
-            // BAAH
-            // this.mapMouseMoved.fireEvent(this.gapi.utils.geom.esriMapMouseToRamp(esriMouseMove));
+            // TODO debounce here? the map event fires pretty much every change in pixel value.
+            this.$iApi.event.emit(GlobalEvents.MAP_MOUSEMOVE, this.$iApi.geo.utils.geom.esriMapMouseToRamp(esriMouseMove));
         });
 
         this._innerView.on('pointer-down', esriMouseDown => {
-            // BAAH
-            // this.mapMouseDown.fireEvent(esriMouseDown.native);
+            // .native is a DOM pointer event
+            this.$iApi.event.emit(GlobalEvents.MAP_MOUSEDOWN, esriMouseDown.native);
         });
 
         this._innerView.on('key-down', esriKeyDown => {
-            // BAAH
-            /*
-            this.mapKeyDown.fireEvent(esriKeyDown.native);
+            // .native is a DOM keyboard event
+            this.$iApi.event.emit(GlobalEvents.MAP_KEYDOWN, esriKeyDown.native);
             esriKeyDown.stopPropagation();
-            */
         });
 
         this._innerView.on('key-up', esriKeyUp => {
-            // BAAH
-            /*
-            this.mapKeyUp.fireEvent(esriKeyUp.native);
+            // .native is a DOM keyboard event
+            this.$iApi.event.emit(GlobalEvents.MAP_KEYUP, esriKeyUp.native);
             esriKeyUp.stopPropagation();
-            */
         });
 
         this._innerView.on('blur', esriBlur => {
-            // BAAH
-            // this.mapBlur.fireEvent(esriBlur.native);
+            // .native is a DOM keyboard event
+            this.$iApi.event.emit(GlobalEvents.MAP_BLUR, esriBlur.native);
         });
 
         this._innerView.container.addEventListener('touchmove', e => {
