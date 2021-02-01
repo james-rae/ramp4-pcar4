@@ -374,7 +374,7 @@ export class EventAPI extends APIScope {
                 break;
             case DefEH.MAP_BLUR:
                 zeHandler = (payload: FocusEvent) => {
-                    this.$iApi.geo.map.stopPan();
+                    this.$iApi.geo.map.stopKeyPan();
                 };
                 this.$iApi.event.on(GlobalEvents.MAP_BLUR, zeHandler, handlerName);
                 break;

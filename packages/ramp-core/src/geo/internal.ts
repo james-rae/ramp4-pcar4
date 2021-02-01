@@ -27,6 +27,8 @@ export * from './map/basemap';
 export * from './map/common-map';
 export * from './map/ramp-map';
 
+export * from './layer/scale-set';
+
 export * from './utils/geometry';
 export * from './utils/renderer';
 export * from './utils/utils';

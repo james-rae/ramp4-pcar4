@@ -4,7 +4,7 @@
 import esri = __esri;
 
 import { GlobalEvents, InstanceAPI } from '../../api/internal';
-import { CommonMapAPI, CoreFilterKey, IdentifyMode, RampMapConfig, MapClick, MapMove, ScreenPoint, SpatialReference } from '../internal';
+import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, RampMapConfig, MapClick, MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
 import { EsriLOD, EsriMapView } from '../esri';
 import { LayerStore } from '@/store/modules/layer';
 
@@ -143,16 +143,18 @@ export class MapAPI extends CommonMapAPI {
      * @param {BaseGeometry} geom the RAMP API geometry to project
      * @returns {Promise<BaseGeometry>} the geometry projected to the map's projection, in RAMP API Geometry format
      */
-    // BAAH
-    /*
     private geomToMapSR(geom: BaseGeometry): Promise<BaseGeometry> {
-        if (this.rampSR.isEqual(geom.sr)) {
+        if (!this._rampSR) {
+            throw new Error('call to map.geomToMapSR before the map spatial ref was created');
+        }
+        if (this._rampSR.isEqual(geom.sr)) {
             return Promise.resolve(geom);
         } else {
-            return this.gapi.utils.proj.projectGeometry(this.rampSR, geom);
+            return Promise.resolve(geom); // fake to shut up compiler
+            // BAAH
+            // return this.$iApi.geo.utils.proj.projectGeometry(this._rampSR, geom);
         }
     }
-    */
 
     /**
      * Adds a layer to the map
@@ -191,24 +193,27 @@ export class MapAPI extends CommonMapAPI {
      * @param {boolean} [animate] An optional animation setting. On by default
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
-    // BAAH
-    /*
-    zoomMapTo(geom: BaseGeometry, scale?: number, animate: boolean = true): Promise<void> {
+    async zoomMapTo(geom: BaseGeometry, scale?: number, animate: boolean = true): Promise<void> {
         // TODO technically this can accept any geometry. should we open up the suggested signatures to allow various things?
-        return this.geomToMapSR(geom).then(g => {
+        if (this._innerView) {
+            const g = await this.geomToMapSR(geom);
             // TODO investigate the `snapTo` parameter if we have an extent / poly coming in
             //      see how it compares to the old "fit to view" parameter of ESRI3
             const zoomP: any = {
-                target: this.gapi.utils.geom.geomRampToEsri(g)
+                target: this.$iApi.geo.utils.geom.geomRampToEsri(g)
             };
             if (g.type === GeometryType.POINT) {
                 zoomP.scale = scale || 50000;
             }
             const opts: any = { animate: animate };
-            return this._innerView.goTo(zoomP, opts);
-        });
+            if (this._innerView) {
+                return this._innerView.goTo(zoomP, opts);
+            }
+
+        } else {
+            this.noMapErr();
+        }
     }
-    */
 
     /**
      * Zooms the map to a given zoom level. The center point will not change.
@@ -217,12 +222,13 @@ export class MapAPI extends CommonMapAPI {
      * @param {number} zoomLevel An integer matching the level of detail / zoom level the map should adjust to
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
-    // BAAH
-    /*
-    zoomToLevel(zoomLevel: number): Promise<void> {
-        return this._innerView.goTo({ zoom: zoomLevel });
+    async zoomToLevel(zoomLevel: number): Promise<void> {
+        if (this._innerView) {
+            return this._innerView.goTo({ zoom: zoomLevel });
+        } else {
+            this.noMapErr();
+        }
     }
-    */
 
     /**
      * Zooms the map to the next zoom level in towards the earth. The center point will not change.
@@ -230,13 +236,14 @@ export class MapAPI extends CommonMapAPI {
      *
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
-    // BAAH
-    /*
-    zoomIn(): Promise<void> {
+    async zoomIn(): Promise<void> {
         // TODO fancy it up and add some bounds checking
-        return this.zoomToLevel(this._innerView.zoom + 1);
+        if (this._innerView) {
+            return this.zoomToLevel(this._innerView.zoom + 1);
+        } else {
+            this.noMapErr();
+        }
     }
-    */
 
     /**
      * Zooms the map to the next zoom level out away from the earth. The center point will not change.
@@ -244,13 +251,14 @@ export class MapAPI extends CommonMapAPI {
      *
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
-    // BAAH
-    /*
-    zoomOut(): Promise<void> {
+    async zoomOut(): Promise<void> {
         // TODO fancy it up and add some bounds checking
-        return this.zoomToLevel(this._innerView.zoom - 1);
+        if (this._innerView) {
+            return this.zoomToLevel(this._innerView.zoom - 1);
+        } else {
+            this.noMapErr();
+        }
     }
-    */
 
     /**
      * Zooms the map to the closest zoom level that will be visible for a given scale set.
@@ -258,12 +266,15 @@ export class MapAPI extends CommonMapAPI {
      *
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
-    // BAAH
-    /*
-    zoomToVisibleScale(scaleSet: ScaleSet): Promise<void> {
+    async zoomToVisibleScale(scaleSet: ScaleSet): Promise<void> {
+        if (!this._innerView) {
+            this.noMapErr();
+            return;
+        }
+
         const offStatus = scaleSet.isOffScale(this.getScale());
 
-        if (!offStatus.offScale) { return Promise.resolve(); }
+        if (!offStatus.offScale) { return; }
 
         const lods = this._innerView.constraints.lods;
 
@@ -283,7 +294,6 @@ export class MapAPI extends CommonMapAPI {
         return this.zoomToLevel(scaleLod.level);
 
     }
-    */
 
     /**
      * Provides the scale of the map (the scale denominator as integer)
@@ -318,12 +328,14 @@ export class MapAPI extends CommonMapAPI {
      *
      * @returns {Extent} the map extent in RAMP API Extent format
      */
-    // BAAH
-    /*
     getExtent(): Extent {
-        return this.gapi.utils.geom.convEsriExtentToRamp(this._innerView.extent);
+        if (this._innerView) {
+            return this.$iApi.geo.utils.geom._convEsriExtentToRamp(this._innerView.extent);
+        } else {
+            this.noMapErr();
+            return Extent.fromParams('i_am_error', 0, 1, 0, 1); // default fake value. avoids us having undefined checks everywhere.
+        }
     }
-    */
 
     /**
      * Provides the spatial reference of the map
@@ -374,12 +386,14 @@ export class MapAPI extends CommonMapAPI {
      * @param {Number} screenY pixel co-ord of the point on the map, y-axis.
      * @returns {Point} the map point analagous to the screen point
      */
-    // BAAH
-    /*
     screenPointToMapPoint(screenX: number, screenY: number): Point {
-        return this.gapi.utils.geom.convEsriPointToRamp(this._innerView.toMap({x: screenX, y: screenY}), 'mappoint');
+        if (this._innerView) {
+            return this.$iApi.geo.utils.geom._convEsriPointToRamp(this._innerView.toMap({x: screenX, y: screenY}), 'mappoint');
+        } else {
+            this.noMapErr();
+            return new Point('i_am_error', [0, 0], undefined, true); //  default fake value. avoids us having undefined checks everywhere.
+        }
     }
-    */
 
     /**
      * Get a pixel in screen co-ordinates corresponding to a point in map co-ordinates.
@@ -387,13 +401,16 @@ export class MapAPI extends CommonMapAPI {
      * @param {Point} mapPoint point on the map
      * @returns {ScreenPoint} the screen point analagous to the map point
      */
-    // BAAH
-    /*
     mapPointToScreenPoint(mapPoint: Point): ScreenPoint {
-        const esriPoint = this._innerView.toScreen(this.gapi.utils.geom.convPointToEsri(mapPoint))
-        return { screenX: esriPoint.x, screenY: esriPoint.y };
+
+        if (this._innerView) {
+            const esriPoint = this._innerView.toScreen(this.$iApi.geo.utils.geom._convPointToEsri(mapPoint))
+            return { screenX: esriPoint.x, screenY: esriPoint.y };
+        } else {
+            this.noMapErr();
+            return { screenX: 1, screenY: 1}; //  default fake value. avoids us having undefined checks everywhere.
+        }
     }
-    */
 
     // TODO function to allow a second Map to be shot out, that shares this map but has a different scene
 
@@ -425,9 +442,10 @@ export class MapAPI extends CommonMapAPI {
      * @param {*} payload
      * @memberof DetailsFixture
      */
-    // BAAH
-    /*
-    identify(payload: MapClick | ApiBundle.Point) {
+
+    identify(payload: MapClick | Point) {
+        // BAAH
+        /*
         let layers: BaseLayer[] | undefined = this.$vApp.$store.get(LayerStore.layers);
 
         // Don't perform an identify request if the layers array hasn't been established yet.
@@ -450,7 +468,7 @@ export class MapAPI extends CommonMapAPI {
         let mapClick: MapClick;
         if (payload instanceof ApiBundle.Point) {
             // construct MapClick if only point is given
-            const screenPoint = this.$iApi.map.mapPointToScreenPoint(payload);
+            const screenPoint = this.mapPointToScreenPoint(payload);
             mapClick = {
                 mapPoint: payload,
                 screenX: screenPoint.screenX,
@@ -464,8 +482,9 @@ export class MapAPI extends CommonMapAPI {
 
         // TODO make the event payload an interface? should there be a public area with all event payload interfaces?
         this.$iApi.event.emit(GlobalEvents.MAP_IDENTIFY, { results: identifyResults, click: mapClick });
+        */
     }
-    */
+
 
     // list of keys that are currently pressed
     private _activeKeys: string[] = [];
@@ -487,14 +506,13 @@ export class MapAPI extends CommonMapAPI {
             this._activeKeys.push(payload.key);
             // don't pan in middle of zoom animation
             if (!this._activeKeys.some(k => zoomKeys.includes(k))) {
-                this.pan();
+                this.keyPan();
             }
         } else if (zoomKeys.includes(payload.key) && !this._activeKeys.includes(payload.key)) {
             this._activeKeys.push(payload.key);
-            this.zoom(payload);
+            this.keyZoom(payload);
         } else if (payload.key === 'Enter') {
-            // BAAH
-            // this.identify(this.$iApi.map.getExtent().center());
+            this.identify(this.getExtent().center());
         }
     }
 
@@ -512,7 +530,7 @@ export class MapAPI extends CommonMapAPI {
             this._activeKeys.splice(this._activeKeys.indexOf(payload.key), 1);
             // don't pan in middle of zoom animation
             if (!this._activeKeys.some(k => zoomKeys.includes(k))) {
-                this.pan();
+                this.keyPan();
             }
         }
     }
@@ -522,7 +540,7 @@ export class MapAPI extends CommonMapAPI {
      *
      * @memberof MapAPI
      */
-    stopPan() {
+    stopKeyPan() {
         this._activeKeys = [];
         clearInterval(this._panInterval);
     }
@@ -544,20 +562,15 @@ export class MapAPI extends CommonMapAPI {
      * @memberof MapAPI
      * @private
      */
-    private async zoom(payload: KeyboardEvent) {
-        // TODO consider renaming to something more specific
-
-        // BAAH
-        /*
+    private async keyZoom(payload: KeyboardEvent) {
         clearInterval(this._panInterval);
         if (payload.key === '=') {
-            await this.$iApi.map.zoomIn();
+            await this.zoomIn();
         } else if (payload.key === '-') {
-            await this.$iApi.map.zoomOut();
+            await this.zoomOut();
         }
         this._activeKeys.splice(this._activeKeys.indexOf(payload.key), 1);
-        this.pan();
-        */
+        this.keyPan();
     }
 
     /**
@@ -566,21 +579,17 @@ export class MapAPI extends CommonMapAPI {
      * @memberof MapAPI
      * @private
      */
-    private pan() {
-        // TODO consider renaming to something more specific
-
-        // BAAH
-        /*
+    private keyPan() {
         clearInterval(this._panInterval);
         if (this._activeKeys.length === 0) {
             return;
         }
 
-        const center = this.$iApi.geo.map.getExtent().center();
+        const center = this.getExtent().center();
 
         // calculate pan velocity based on constant pixel value that won't change based on zoom
-        const screenCenter = this.$iApi.map.mapPointToScreenPoint(center);
-        const p = this.$iApi.geo.map.screenPointToMapPoint(screenCenter.screenX + 5, screenCenter.screenY + 5);
+        const screenCenter = this.mapPointToScreenPoint(center);
+        const p = this.screenPointToMapPoint(screenCenter.screenX + 5, screenCenter.screenY + 5);
         const xDiff = Math.abs(p.x - center.x);
         const yDiff = Math.abs(p.y - center.y);
 
@@ -608,13 +617,12 @@ export class MapAPI extends CommonMapAPI {
             };
         }
 
-        const scale = this.$iApi.map.getScale();
+        const scale = this.getScale();
 
         this._panInterval = setInterval(() => {
             center.x += multiplier * dx;
             center.y += multiplier * dy;
-            this.$iApi.map.zoomMapTo(center, scale, false);
-        }, 25)
-        */
+            this.zoomMapTo(center, scale, false);
+        }, 25);
     }
 }
