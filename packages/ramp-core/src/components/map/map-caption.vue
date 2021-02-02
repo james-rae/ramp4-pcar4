@@ -29,7 +29,7 @@
 import { Vue, Component, Watch, Prop, Inject } from 'vue-property-decorator';
 import { debounce } from 'debounce';
 // BAAH
-// import { ApiBundle, MapMove } from 'rampgeoapi';
+import { MapMove } from '../../geo/internal';
 import { GlobalEvents } from '@/api';
 
 @Component
@@ -52,20 +52,27 @@ export default class MapCaptionV extends Vue {
 
     mounted() {
         // When map is created update scale
+
         // TODO consider giving this handler a specific name and put in the document.
         //      since it happens at map create, could be risky/tricky putting it in the "default" events
         //      as odds are if there is any delay, the handler will miss the MAP_CREATED event.
         //      But having a specific name means someone can remove it later at their lesiure.
-        // BAAH
-        /*
+
+        // TODO consider what happens when a map is re-created. We might need to check if common handlers pre-exist.
+        //      or do some type of "one time only" boolean so we don't have double-handlers each time a projection changes.
+        //      we also need to be careful of the scenario where someone removes these default handlers after the map loads;
+        //      we would not want to re-add them back during a projection change -- want to respect the new custom handlers.
+
         this.$iApi.event.on(GlobalEvents.MAP_CREATED, () => {
             this.updateScale();
             // Listen for scale changes, debounce so that zoom animations don't rapidly call update
-            // TODO change this to use events api
-            this.$iApi.map.scaleChanged.listen(
-                debounce(() => {
-                    this.updateScale();
-                }, 300)
+            this.$iApi.event.on(GlobalEvents.MAP_SCALECHANGE,
+                () => {
+                    debounce(() => {
+                        this.updateScale();
+                    }, 300)
+                },
+                'update_scale_display' // TODO document event handler name, possibly rename to align to standards
             );
 
             // for demonstration. will decide the best way to wire this up. i.e. where.
@@ -78,7 +85,7 @@ export default class MapCaptionV extends Vue {
                 'a_name_to_be_decided_later'
             );
         });
-        */
+
     }
 
     onScaleClick() {
@@ -90,17 +97,16 @@ export default class MapCaptionV extends Vue {
      * Calculates a scale bar for the current resolution.
      */
     updateScale(): void {
-        // BAAH
-        /*
+
         // the starting length of the scale line in pixels
         // reduce the length of the bar on extra small layouts
         const factor = window.innerWidth > 600 ? 70 : 35;
-        const mapResolution = this.$iApi.map.getResolution();
+        const mapResolution = this.$iApi.geo.map.getResolution();
 
         // distance in meters
         const meters = mapResolution * factor;
         console.log(mapResolution, 'resolution');
-        console.log(this.$iApi.map.getScale(), 'scale');
+        console.log(this.$iApi.geo.map.getScale(), 'scale');
         const metersInAMile = 1609.34;
 
         // get the distance in units, either miles or kilometers
@@ -123,7 +129,6 @@ export default class MapCaptionV extends Vue {
             width: `${pixels}px`,
             label: `${distance}${unit}`
         };
-        */
     }
 
     /**

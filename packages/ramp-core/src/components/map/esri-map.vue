@@ -7,7 +7,7 @@ import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 // BAAH
 // import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'rampgeoapi';
-import { RampMapConfig } from '../../geo/internal';
+import { MapAPI, RampMapConfig } from '../../geo/internal';
 import { GlobalEvents } from '../../api/internal';
 import { APIInterface /*, RampGeo // BAAH */ } from '../../api';
 // import { window } from '@/main';
@@ -23,9 +23,7 @@ export default class EsriMap extends Vue {
 
     @Get(LayerStore.layers) layers!: any[]; // BaseLayer[]; // BAAH
 
-    // BAAH
-    gapi!: any; // GeoApi; // BAAH
-    map!: any; // RampMap; // BAAH
+    map!: MapAPI; // TODO assuming we need this as a local property for vue binding. if we don't, remove it and just use $iApi.geo.map
 
     created() {
         // temporarily print out loaded layers to console for grid testing purposes.
@@ -56,12 +54,12 @@ export default class EsriMap extends Vue {
 
     @Watch('mapConfig')
     onMapConfigChange(newValue: RampMapConfig, oldValue: RampMapConfig) {
-        console.log('BAAH map config change start');
         if (newValue === oldValue) {
             return;
         }
 
         this.$iApi.geo.map.createMap(this.mapConfig, this.$el as HTMLDivElement);
+        this.map = this.$iApi.geo.map;
         this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
 
         // BAAH

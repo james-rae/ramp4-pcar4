@@ -56,8 +56,6 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { PanelInstance } from '@/api';
 
 import { GeosearchStore } from './store';
-// BAAH
-// import { RampMap } from 'rampgeoapi';
 
 import GeosearchBar from './geosearch-bar.vue';
 import GeosearchTopFilters from './geosearch-top-filters.vue';
@@ -85,11 +83,8 @@ export default class GeosearchComponent extends Vue {
 
     // zoom in to a clicked result
     zoomIn(result: any): void {
-        // BAAH
-        /*
         let zoomPoint = new RAMP.GEO.Point('zoomies', result.position);
-        this.$iApi.map.zoomMapTo(zoomPoint, 50000);
-        */
+        this.$iApi.geo.map.zoomMapTo(zoomPoint, 50000);
     }
 
     // highlight the search term in each listed geosearch result

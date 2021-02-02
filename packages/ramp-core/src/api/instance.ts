@@ -41,9 +41,7 @@ export class InstanceAPI {
 
         this.fixture = new FixtureAPI(this); // pass the iApi reference to the FixtureAPI
         this.panel = new PanelAPI(this);
-        console.log('BAAH pre new GeoApi');
         this.geo = new GeoAPI(this);
-        console.log('BAAH post new GeoApi');
 
         // TODO: decide whether to move to src/main.ts:createApp
         // TODO: store a reference to the even bus in the global store [?]

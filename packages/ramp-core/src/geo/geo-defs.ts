@@ -3,7 +3,7 @@
 // NOTE attempt to avoid importing any classes that depend on the Instance.
 //      we want types here to be available before the instance is generated,
 //      so don't want some weird dependency loop.
-import { SpatialReference } from './internal';
+import { BaseGeometry, BaseRenderer, Extent, Point, SpatialReference } from './internal';
 
 // NOTE: some values have changed since RAMP2.
 //       this is due to esri api 4 using different constants, and working exclusively in the
@@ -210,7 +210,7 @@ export enum IdentifyResultFormat {
 //      same question probably applies to a number of other interfaces here.
 
 export interface MapClick {
-    mapPoint: any; // BAAH // Point;
+    mapPoint: Point;
     screenX: number;
     screenY: number;
     button: number;
@@ -251,7 +251,7 @@ export interface TabularAttributeSet {
     fields: Array<FieldDefinition>;
     oidField: string;
     oidIndex: number; // TODO determine if we need this anymore
-    renderer: any; // BAAH // BaseRenderer; // TODO determine if we need this anymore
+    renderer: BaseRenderer; // TODO determine if we need this anymore
 }
 
 export interface LegendSymbology {
@@ -285,11 +285,11 @@ export interface GetGraphicServiceDetails {
 export interface GetGraphicResult {
     // TODO replace all this with a RAMPAPI.Graphic?
     attributes?: Attributes;
-    geometry?: any; // BAAH // BaseGeometry;
+    geometry?: BaseGeometry;
 }
 
 export interface QueryFeaturesParams {
-    filterGeometry?: any; // BAAH // BaseGeometry; // filter by geometry
+    filterGeometry?: BaseGeometry; // filter by geometry
     filterSql?: string; // filter by sql query
     includeGeometry?: boolean; // if geometry should be included in the result
     outFields?: string; // comma separated list of attributes to restrict what is downloaded
@@ -306,7 +306,7 @@ export interface QueryFeaturesGeoJsonParams extends QueryFeaturesParams {
 }
 
 export interface IdentifyParameters {
-    geometry: any; // BAAH // BaseGeometry; // esri.Geometry; // TODO figure out how to manage this. typescript gets angry about supertypes.
+    geometry: BaseGeometry;
     unboundMap?: any; // BAAH // TODO do we still need this? if map is part of api, we can just direct reference it from anywhere? // RampMap; // this allows a reference map to be provided. useful for identifying on a layer that is not on a map. not required if layer has been added to the map
     tolerance?: number;
     returnGeometry?: boolean; // TODO revisit this. might make more sense to offload geom to a followup request. if we keep, we may need to add property to IdentifyItem for the geom to live in
@@ -341,7 +341,7 @@ export interface IdentifyResultSet {
 export interface FilterEventParam {
     filterKey: string;
     uid?: string;
-    extent?: any; // BAAH // Extent;
+    extent?: Extent;
     extraData?: any;
 }
 
