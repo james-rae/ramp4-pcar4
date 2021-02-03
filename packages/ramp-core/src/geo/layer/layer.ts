@@ -13,12 +13,48 @@ type ILayerBase = new () => LayerBase;
  */
 type ILayerInstance = new (id: string, iApi: InstanceAPI) => LayerInstance;
 
-// this class represents the functions that exist on rampApi.geo.layer
+// this probably becomes the vuex store object if we convert?
+// metadata to store and track our layer definitions
+class LayerDef {
+    layerConstructor: ILayerBase | undefined;
+    rawBase: boolean = false; // true if constructor is from outside the core and requires updateBaseToInstance
+    loadPromise: Promise<any> | undefined; // resolves when layer definition has loaded
+    id: string;
+    private api: InstanceAPI;
 
+    constructor (id: string, api: InstanceAPI) {
+        this.id = id;
+        this.api = api;
+        this.loadPromise = Promise.resolve();
+    }
+
+    // TODO figure out the config. if we have the config present for instantiation of the layer object, or we
+    //      push it off to a "load layer" function which could be used for reloads as well.
+    async generateLayer(config: any): Promise<LayerBase> {
+        await this.loadPromise;
+
+        if (!this.layerConstructor) {
+            throw new Error(`Layer Definition bug. A definition promise resolved but no definition exists. Definition id ${this.id}`);
+        }
+        if (this.rawBase) {
+            return LayerInstance.updateBaseToInstance(new this.layerConstructor(), this.id, this.api);
+        } else {
+            return new this.layerConstructor(); // TODO prob needs instance api passed in
+        }
+    }
+}
+
+// this class represents the functions that exist on rampApi.geo.layer
 export class LayerAPI extends APIScope {
 
     // stores any layer definitions that have been added. this would migrate to a vuex store if we apply that here
-    _layerDefStore: {[key: string]: LayerBase} = {};
+    // NOTE probably want to change this from LayerBase to ILayerBase.
+    //      we want to store constructors, not instances of layers.
+    _layerDefStore: {[key: string]: LayerDef} = {};
+
+    // NOTE also might want to store the Promises that get generated when creating these definitions.
+    //      when we request a new layer, would be good to be able to see if a definition request
+    //      is pending, instead of just failing on a "no definition found" case.
 
     /**
      * Loads a (built-in) fixture or adds supplied fixture into the R4MP Vue instance.
@@ -28,42 +64,65 @@ export class LayerAPI extends APIScope {
      * @returns {Promise<FixtureBase>}
      * @memberof FixtureAPI
      */
-    async addLayerDef(id: string, constructor?: ILayerBase): Promise<LayerBase> {
+    async addLayerDef(id: string, constructor?: ILayerBase): Promise<string> {
         // TODO revisit if the return value should be LayerBase. This is registering a layer definition
         //      (i.e. a blueprint), so the layer id might be more appropriate, or void. Person would
         //      use the create layer on LayerAPI to make an actual layer.
-        let fixture: LayerBase;
+        //      Also might consider changing the type to ILayerBase, as returning the constructor makes a bit more sense.
 
         // if the layer def already exist, do nothing and just return it
         // TODO in vuex world, would be a store check
         // if (id in this.$vApp.$store.get<FixtureBaseSet>(`fixture/items`)!) {
         if (this._layerDefStore[id]) {
-            // TODO could indicate a double registration. console.warn?
-            return this._layerDefStore[id];
+            console.warn(`Encountered duplicate layer registration for ${id}`);
+            return id;
         }
+
+        const layerDef = new LayerDef(id, this.$iApi);
 
         // only need to provide fixture constructors for external fixtures since internal ones are loaded automatically
         if (constructor) {
             if (typeof constructor !== 'function') {
-                throw new Error('malformed fixture constructor');
+                throw new Error('malformed layer definition constructor');
             }
 
-            // run the provided constructor and update the resulting object with FixtureInstance functions/properties
-            fixture = FixtureInstance.updateBaseToInstance(new constructor(), id, this.$iApi);
-        } else {
-            // perform a dynamic webpack import of a internal fixture (allows for code splitting)
-            const instanceConstructor: IFixtureInstance = (await import(/* webpackChunkName: "[request]" */ `@/fixtures/${id}/index.ts`))
-                .default;
+            layerDef.layerConstructor = constructor;
+            layerDef.rawBase = true;
+            layerDef.loadPromise = Promise.resolve();
+            this._layerDefStore[id] = layerDef;
 
-            fixture = new instanceConstructor(id, this.$iApi);
+            // NOTE we no longer do this here. this would take place on the new layer function.
+            //      We might need to also store a flag indicating this def requires the .baseToInstance wrapper
+
+            // run the provided constructor and update the resulting object with FixtureInstance functions/properties
+            // layerDef = FixtureInstance.updateBaseToInstance(new constructor(), id, this.$iApi);
+        } else {
+
+            // trickery. when the promise resolves, we know layerDef.layerConstructor will have a value.
+            layerDef.loadPromise = this.magicLoader(layerDef);
+
+            // store the def in the registry before blocking
+            this._layerDefStore[id] = layerDef;
+            await layerDef.loadPromise;
+
+            // TODO this would happen on the new layer function
+            // layerDef = new layerDef(id, this.$iApi);
         }
 
         // TODO: calling `ADD_FIXTURE` mutation directly here; might want to switch to calling the action `addFixture`
         // TODO: using this horrible concatenated mixture `fixture/${FixtureMutation.ADD_FIXTURE}!` all the time doesn't seem like a good idea;
         // fixtures are always stored as objects implementing `FixtureBase` interfaces;
-        this.$vApp.$store.set(`fixture/${FixtureMutation.ADD_FIXTURE}!`, { value: fixture });
+        // this.$vApp.$store.set(`fixture/${FixtureMutation.ADD_FIXTURE}!`, { value: fixture });
+        // this._layerDefStore[id] = layerDef;
 
-        return fixture;
+        return id;
+    }
+
+    private async magicLoader(layerDef: LayerDef): Promise<void> {
+        // TODO might need some magic in the webpack to copy stuff over.
+        //      we might also need to structure our layers folder to be by-id
+        // perform a dynamic webpack import of a internal fixture (allows for code splitting)
+        layerDef.layerConstructor = (await import(/* webpackChunkName: "[request]" */ `@/geo/layer/${layerDef.id}/index.ts`)).default;
     }
 
     /**
