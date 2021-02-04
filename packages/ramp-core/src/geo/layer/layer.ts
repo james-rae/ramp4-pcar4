@@ -3,20 +3,23 @@
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { LayerBase } from '../internal';
 
+// TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
  * A constructor returning an object implementing LayerBase interface.
  */
-type ILayerBase = new () => LayerBase;
+type ILayerBase = new (config: any, iApi: InstanceAPI) => LayerBase;
 
+// TODO revist how useful this is. LayerInstance implements LayerBase so its very similar to ILayerBase
 /**
- * A constructor returning an instance of FixtureInstance class.
+ * A constructor returning an instance of LayerInstance class.
  */
-type ILayerInstance = new (id: string, iApi: InstanceAPI) => LayerInstance;
+type ILayerInstance = new (config: any, iApi: InstanceAPI) => LayerInstance;
 
 // this probably becomes the vuex store object if we convert?
 // metadata to store and track our layer definitions
 class LayerDef {
     layerConstructor: ILayerBase | undefined;
+    // strongLayerConstructor: ILayerInstance | undefined; // would be a layer def from inside RAMP
     rawBase: boolean = false; // true if constructor is from outside the core and requires updateBaseToInstance
     loadPromise: Promise<any> | undefined; // resolves when layer definition has loaded
     id: string;
@@ -37,9 +40,9 @@ class LayerDef {
             throw new Error(`Layer Definition bug. A definition promise resolved but no definition exists. Definition id ${this.id}`);
         }
         if (this.rawBase) {
-            return LayerInstance.updateBaseToInstance(new this.layerConstructor(), this.id, this.api);
+            return LayerInstance.updateBaseToInstance(new this.layerConstructor(config, this.api), this.id, this.api);
         } else {
-            return new this.layerConstructor(); // TODO prob needs instance api passed in
+            return new this.layerConstructor(config, this.api); // TODO prob needs instance api passed in
         }
     }
 }
@@ -133,6 +136,9 @@ export class LayerAPI extends APIScope {
      * @returns {T}
      * @memberof FixtureAPI
      */
+    // TODO consider if we need the ability to remove a definition. Possible use case:
+    //      someone wants to override a core layer class with a custom (like, hotswapping anything that is feature layer)
+    /*
     remove<T extends FixtureBase = FixtureBase>(fixtureOrId: FixtureBase | string): T {
         const fixture = this.get<T>(fixtureOrId);
 
@@ -140,7 +146,9 @@ export class LayerAPI extends APIScope {
 
         return fixture;
     }
+    */
 
+    // TODO consider if we need a "get". The common use case would be to do a create layer
     /**
      * Finds and returns a `FixtureBase` object with the id specified.
      *
@@ -149,7 +157,7 @@ export class LayerAPI extends APIScope {
      * @returns {T}
      * @memberof FixtureAPI
      */
-    get<T extends FixtureBase = FixtureBase>(item: string | FixtureBase): T;
+    // get<T extends FixtureBase = FixtureBase>(item: string | FixtureBase): T;
     /**
      * Finds and returns a collection of `FixtureBase` objects given a list of ids.
      * This can be useful when retrieving several fixtures at one time as follows:
@@ -162,6 +170,7 @@ export class LayerAPI extends APIScope {
      * @returns {T[]}
      * @memberof FixtureAPI
      */
+    /*
     get<T extends FixtureBase = FixtureBase>(item: string[]): T[];
     get<T extends FixtureBase = FixtureBase>(item: string | FixtureBase | string[]): T | T[] {
         const ids: string[] = [];
@@ -186,7 +195,11 @@ export class LayerAPI extends APIScope {
 
         return fixtures.length === 1 ? fixtures[0] : fixtures;
     }
+    */
 
+    // TODO consider if we need a defaulting scenario. This might tie in with
+    //      people wanting to override core layer types; they would omit then provide
+    //      the custom layer definition class.
     /**
      * Loads the set of standard, built-in fixtures to the R4MP Vue instance.
      * This will quickly set up the vanilla version of RAMP.
@@ -199,6 +212,7 @@ export class LayerAPI extends APIScope {
      * @returns {Promise<Array<FixtureBase>>} resolves with array of default fixtures
      * @memberof FixtureAPI
      */
+    /*
     addDefaultFixtures(fixtureNames?: Array<string>): Promise<Array<FixtureBase>> {
         if (!Array.isArray(fixtureNames) || fixtureNames.length === 0) {
             fixtureNames = ['appbar', 'basemap', 'crosshairs', 'details', 'geosearch', 'grid', 'help', 'legend', 'mapnav', 'metadata', 'northarrow', 'overviewmap', 'settings'];
@@ -209,6 +223,7 @@ export class LayerAPI extends APIScope {
         // TODO alterately, don't do a promise.all, and just return the array of promises. not sure which is more useful.
         return Promise.all(fixtureNames.map(fn => this.add(fn)));
     }
+    */
 }
 
 // TODO put in a separate file?
@@ -226,6 +241,7 @@ export class LayerAPI extends APIScope {
 export class LayerInstance extends APIScope implements LayerBase {
 
     layerType: string = '';
+    config: any = {};
 
     /**
      * Adds missing functions and properties to the object implementing FixtureBase interface.
@@ -240,24 +256,26 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @returns {LayerInstance}
      * @memberof LayerInstance
      */
-    static updateBaseToInstance(value: LayerBase, id: string, $iApi: InstanceAPI): LayerInstance {
-        const instance = new LayerInstance(id, $iApi);
+    static updateBaseToInstance(value: LayerBase, config: any, $iApi: InstanceAPI): LayerInstance {
+        const instance = new LayerInstance(config, $iApi);
 
         Object.defineProperties(value, {
-            id: { value: id },
+            config: { value: config },
             $iApi: { value: $iApi },
             $vApp: {
                 get(): Vue {
                     return instance.$vApp;
                 }
             },
-            remove: { value: instance.remove },
-            extend: { value: instance.extend },
+            // remove: { value: instance.remove },
+            // extend: { value: instance.extend },
+            /*
             config: {
                 get(): any {
                     return instance.config;
                 }
             }
+            */
         });
 
         return value as LayerInstance;
@@ -269,19 +287,19 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @type {string}
      * @memberof FixtureInstance
      */
-    readonly id: string;
+    // readonly id: string;
 
     /**
-     * Creates an instance of FixtureInstance.
+     * Creates an instance of LayerInstance.
      *
      * @param {string} id
      * @param {InstanceAPI} iApi
      * @memberof FixtureInstance
      */
-    constructor(id: string, iApi: InstanceAPI) {
+    constructor(config: any, iApi: InstanceAPI) {
         super(iApi);
 
-        this.id = id;
+        this.config = config;
     }
 
     /**
@@ -291,10 +309,13 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @returns {this}
      * @memberof FixtureInstance
      */
+    // TODO re-add this if we support removal
+    /*
     remove(): this {
         this.$iApi.fixture.remove(this);
         return this;
     }
+    */
 
     /**
      * A helper function to create a "subclass" of the base Vue constructor
@@ -305,6 +326,9 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @returns {Vue}
      * @memberof FixtureInstance
      */
+    // TODO i have no idea what this does, but since layers are not vue componets like fixtures are,
+    //      will assume we don't need this
+    /*
     extend(vueConstructor: VueConstructor<Vue>, options: ComponentOptions<Vue> = {}, mount: boolean = true): Vue {
         const component = new (Vue.extend(vueConstructor))({
             iApi: this.$iApi,
@@ -319,6 +343,7 @@ export class LayerInstance extends APIScope implements LayerBase {
 
         return component;
     }
+    */
 
     added?(): void;
     removed?(): void;
@@ -332,7 +357,10 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @type {*}
      * @memberof FixtureInstance
      */
+    // this might return if we vuex thing. for now, config is normal local property
+    /*
     get config(): any {
         return this.$vApp.$store.get('config/getFixtureConfig', this.id);
     }
+    */
 }
