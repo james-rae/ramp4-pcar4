@@ -12,7 +12,7 @@ import { CommonLayer, DataFormat, LayerBase, LegendSymbology, ScaleSet } from '.
 export class CommonFC {
 
     protected parentLayer: CommonLayer;
-    dataFormat: DataFormat | undefined; // TODO maybe have an 'unknown' type to get rid of the undefined; is unknown until layer loads
+    dataFormat: DataFormat;
     layerIdx: number; // final name TBD
     name: string;
     uid: string;
@@ -33,6 +33,7 @@ export class CommonFC {
         this.scaleSet = new ScaleSet();
         this.supportsFeatures = false; // default state. featurish layers should set to true when the load
         this.legend = [];
+        this.dataFormat = DataFormat.UNKNOWN;
     }
 
     protected noLayerErr(): void {

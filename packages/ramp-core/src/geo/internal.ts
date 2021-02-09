@@ -29,10 +29,12 @@ export * from './map/ramp-map';
 
 export * from './layer/layer-base';
 export * from './layer/scale-set';
+export * from './layer/tree-node';
 export * from './layer/layer';
 export * from './layer/common-fc';
 export * from './layer/common-layer';
 
 export * from './utils/geometry';
 export * from './utils/renderer';
+export * from './utils/shared-utils';
 export * from './utils/utils';

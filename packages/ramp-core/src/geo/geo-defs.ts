@@ -29,7 +29,8 @@ export enum DataFormat {
     ESRI_FEATURE = 'esriFeature',
     ESRI_RASTER = 'esriRaster',
     ESRI_TILE = 'esriTile',
-    OGC_RASTER = 'ogcRaster'
+    OGC_RASTER = 'ogcRaster',
+    UNKNOWN = 'unknown'
 }
 
 export enum GeometryType {
@@ -264,7 +265,7 @@ export interface LegendSymbology {
 
 export interface ArcGisServerUrl {
     rootUrl: string;
-    index: number;
+    index: number | undefined;
 }
 
 export interface GetGraphicParams {

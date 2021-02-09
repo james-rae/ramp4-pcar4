@@ -5,16 +5,15 @@
 import esri = __esri;
 import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
     FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
-import BaseBase from '../BaseBase';
+
 import { TypedEvent } from '../Event';
-import BaseFC from './BaseFC';
-import TreeNode from './TreeNode';
+
 import NaughtyPromise from '../util/NaughtyPromise';
-import { LayerType, DataFormat } from '../api/apiDefs';
+import { LayerType } from '../api/apiDefs';
 // import RampMap from '../map/RampMap';
 
-import { APIScope, InstanceAPI } from '../../api/internal';
-import { CommonFC, Extent, LayerInstance, ScaleSet } from '../internal';
+import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
+import { CommonFC, DataFormat, Extent, LayerInstance, ScaleSet, TreeNode } from '../internal';
 import { } from '../esri';
 
 export class CommonLayer extends LayerInstance {
@@ -34,7 +33,6 @@ export class CommonLayer extends LayerInstance {
     _lastFilterUpdate: string = '';
 
     // events
-    visibilityChanged: TypedEvent<boolean>;
     opacityChanged: TypedEvent<number>;
     stateChanged: TypedEvent<string>;
     filterChanged: TypedEvent<FilterEventParam>;
@@ -62,9 +60,9 @@ export class CommonLayer extends LayerInstance {
     protected viewPromise: NaughtyPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     // FC management
-    protected fcs: Array<BaseFC>;
-    protected layerTree: TreeNode;
-    protected reloadTree: TreeNode;
+    protected fcs: Array<CommonFC>;
+    protected layerTree: TreeNode | undefined;
+    protected reloadTree: TreeNode | undefined;
 
     // ----------- LAYER CONSTRUCTION AND INITIALIZAION -----------
 
@@ -76,7 +74,6 @@ export class CommonLayer extends LayerInstance {
         this.reloadTree = reloadTree; // this needs to be set before doing uid calculations
         this.uid = this.bestUid(-1);
 
-        this.visibilityChanged = new TypedEvent<boolean>();
         this.opacityChanged = new TypedEvent<number>();
         this.stateChanged = new TypedEvent<string>();
         this.filterChanged = new TypedEvent<FilterEventParam>();
@@ -97,11 +94,15 @@ export class CommonLayer extends LayerInstance {
 
     }
 
+    protected noLayerErr(): void {
+        console.error('Attempted to manipulate the layer before it was generated');
+    }
+
     // will give a new uid to use. if appropriate, will recycle same uid from a previous
     // incarnation of a layer to preserve continuity during a reload
     bestUid(idx?: number): string {
 
-        if (!this.isUndefined(idx) && !this.isUndefined(this.reloadTree)) {
+        if (typeof idx !== 'undefined' && typeof this.reloadTree !== 'undefined') {
             // we have the ingredients for a reload scenario.
             // if we find an old uid from the last incarnation, use it.
             const t = this.reloadTree.findChildByIdx(idx);
@@ -111,7 +112,7 @@ export class CommonLayer extends LayerInstance {
         }
 
         // could find no previous uid, or situation does not apply. new uid.
-        return this.gapi.utils.shared.generateUUID();
+        return this.$iApi.geo.utils.shared.generateUUID();
     }
 
     protected updateState(newState: LayerState): void {
@@ -152,8 +153,20 @@ export class CommonLayer extends LayerInstance {
         // TODO consider putting lots of info on the events.  e.g. instead of just state changed, have .state, .layerid
         //      visibility might need an optional FC index (whatever we're calling that)
 
+        if (!this._innerLayer) {
+            this.noLayerErr();
+            return
+        }
+
         this._innerLayer.watch('visible', (newval: boolean) => {
-            this.visibilityChanged.fireEvent(newval);
+            // TODO re-evaluate the event parameter. This is common routine. Need to think about how sublayer would factor in to this.
+            //      might need a secondary sublayer event, triggered on the FC? Sublayer visibility can change without affecting
+            //      overall layer. TRICKY.
+            //      also might want some redundant params, like layer id.
+            this.$iApi.event.emit(GlobalEvents.LAYER_VISIBILITYCHANGE, {
+                visibility: newval,
+                uid: this.uid
+            });
         });
 
         this._innerLayer.watch('opacity', (newval: number) => {
@@ -164,7 +177,7 @@ export class CommonLayer extends LayerInstance {
         //      if so probably want a protected worker changeMyState function that sets prop and fires event.
 
         this._innerLayer.watch('loadStatus', (newval: string) => {
-            const statemap = {
+            const statemap: any = {
                 'not-loaded': LayerState.LOADING,
                 loading: LayerState.LOADING,
                 loaded: LayerState.LOADED,
@@ -241,7 +254,7 @@ export class CommonLayer extends LayerInstance {
     protected onLoadActions(): Array<Promise<void>> {
         if (!this.name) {
             // no name from config. attempt layer name
-            this.name = this._innerLayer.title || '';
+            this.name = this._innerLayer?.title || '';
         }
 
         // make the root of the tree
@@ -361,17 +374,17 @@ export class CommonLayer extends LayerInstance {
      * @param {boolean} [validRoot=false] indicates if asking for the layer root is a valid request
      * @returns {BaseFC} the matching feature class object, or undefined if the root was requested
      */
-    protected getFC(layerIdx: number | string, validRoot: boolean = false): BaseFC {
+    protected getFC(layerIdx: number | string | undefined, validRoot: boolean = false): CommonFC | undefined {
         // highscool cs IF party
 
         // default request
-        if (this.isUndefined(layerIdx)) {
+        if (typeof layerIdx === 'undefined') {
             if (validRoot) {
                 // requesting the root layer, return nothing
                 return undefined;
             } else {
                 // find first fc (there could be indexes of nothing, thus the find)
-                return this.fcs.find((fc: BaseFC) => fc);
+                return this.fcs.find((fc: CommonFC) => fc);
             }
         }
 
@@ -394,11 +407,11 @@ export class CommonLayer extends LayerInstance {
                 // TODO would it be kinder/friendlier to return the first child fc?
                 // throw new Error(`Attempt to access a function on layer root that only applies to an index of the layer [layerid ${this._innerLayer.id}]`);
                 // TODO going with return first for the time being, revisit later
-                return this.fcs.find((fc: BaseFC) => fc);
+                return this.fcs.find((fc: CommonFC) => fc);
             }
-        } else if (this.isUndefined(this.fcs[workingIdx])) {
+        } else if (typeof this.fcs[workingIdx] === 'undefined') {
             // passed a non-existing index/uid
-            throw new Error(`Attempt to access non-existing layer index [layerid ${this._innerLayer.id}, lookup value ${layerIdx}]`);
+            throw new Error(`Attempt to access non-existing layer index [layerid ${this.id}, lookup value ${layerIdx}]`);
         } else {
             return this.fcs[workingIdx];
         }
@@ -411,6 +424,7 @@ export class CommonLayer extends LayerInstance {
     protected mapCheck() {
         // Map Check Hah ha-ha-Hah
         // I be the anti-map rhythm rock shocker
+        // TODO maybe make this a boolean that gets flipped to true once layer is added to the map.
         if (this.isUndefined(this.hostMap)) {
             throw new Error('Attempting to use map-dependent logic before the layer has been added to the map');
         }
@@ -423,8 +437,8 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name for. Uses first/only if omitted.
      * @returns {String} name of the layer/sublayer
      */
-    getName(layerIdx: number | string = undefined): string {
-        return this.getFC(layerIdx).name;
+    getName(layerIdx: number | string | undefined = undefined): string {
+        return this.getFC(layerIdx)?.name || '';
     }
 
     /**
@@ -434,8 +448,10 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a sublayer index or uid to get the data format for. Uses first/only if omitted.
      * @returns {String} format type of the sublayer
      */
-    dataFormat(layerIdx: number | string = undefined): DataFormat {
-        return this.getFC(layerIdx).dataFormat;
+    dataFormat(layerIdx: number | string | undefined = undefined): DataFormat {
+        // TODO return value might need to be common string to allow for outside layers to have custom formats.
+        //      see if the interface on LayerInstance can be string and we can still compile an enum here or not.
+        return this.getFC(layerIdx)?.dataFormat || DataFormat.UNKNOWN;
     }
 
     /**
@@ -445,7 +461,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      * @returns {Boolean} visibility of the layer/sublayer
      */
-    getVisibility (layerIdx: number | string = undefined): boolean {
+    getVisibility (layerIdx: number | string | undefined = undefined): boolean {
         return this.getFC(layerIdx).getVisibility();
     }
 
@@ -456,7 +472,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Boolean} value the new visibility setting
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      */
-    setVisibility (value: boolean, layerIdx: number | string = undefined): void {
+    setVisibility (value: boolean, layerIdx: number | string | undefined = undefined): void {
         this.getFC(layerIdx).setVisibility(value);
     }
 
@@ -467,7 +483,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
      * @returns {Boolean} opacity of the layer/sublayer
      */
-    getOpacity (layerIdx: number | string = undefined): number {
+    getOpacity (layerIdx: number | string | undefined = undefined): number {
         return this.getFC(layerIdx).getOpacity();
     }
 
@@ -478,7 +494,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
      */
-    setOpacity (value: number, layerIdx: number | string = undefined): void {
+    setOpacity (value: number, layerIdx: number | string | undefined = undefined): void {
         this.getFC(layerIdx).setOpacity(value);
     }
 
@@ -489,7 +505,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the scale set for. Uses first/only if omitted.
      * @returns {ScaleSet} scale set of the layer/sublayer
      */
-    getScaleSet (layerIdx: number | string = undefined): ScaleSet {
+    getScaleSet (layerIdx: number | string | undefined = undefined): ScaleSet {
         return this.getFC(layerIdx).scaleSet;
     }
 
@@ -501,7 +517,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer} [testScale] optional scale to test against. if not provided, current map scale is used.
      * @returns {Boolean} true if the layer/sublayer is outside of a visible scale range
      */
-    isOffscale (layerIdx: number | string = undefined, testScale: number = undefined): boolean {
+    isOffscale (layerIdx: number | string | undefined = undefined, testScale: number | undefined = undefined): boolean {
         let mahScale: number;
         if (this.isUndefined(testScale)) {
             this.mapCheck();
@@ -519,7 +535,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to check offscale status for. Uses first/only if omitted.
      * @returns {Promise} resolves when map has finished zooming
      */
-    zoomToVisibleScale (layerIdx: number | string = undefined): Promise<void> {
+    zoomToVisibleScale (layerIdx: number | string | undefined = undefined): Promise<void> {
         this.mapCheck();
 
         // TODO consider enhancing to bring in the old "pan to data" step from RAMP2.
@@ -538,11 +554,11 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      * @returns {Boolean} if the layer/sublayer supports features
      */
-    supportsFeatures (layerIdx: number | string = undefined): boolean {
+    supportsFeatures (layerIdx: number | string | undefined = undefined): boolean {
         return this.getFC(layerIdx).supportsFeatures;
     }
 
-    getLegend (layerIdx: number | string = undefined): Array<LegendSymbology> {
+    getLegend (layerIdx: number | string | undefined = undefined): Array<LegendSymbology> {
         return this.getFC(layerIdx).legend;
     }
 
@@ -583,7 +599,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of attribute values
      */
-    getAttributes (layerIdx: number | string = undefined): Promise<AttributeSet> {
+    getAttributes (layerIdx: number | string | undefined = undefined): Promise<AttributeSet> {
         this.stubError();
         return Promise.resolve(undefined);
     }
@@ -594,7 +610,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get fields for. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getFields (layerIdx: number | string = undefined): Array<FieldDefinition> {
+    getFields (layerIdx: number | string | undefined = undefined): Array<FieldDefinition> {
         this.stubError();
         return [];
     }
@@ -605,7 +621,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the geometry type of. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getGeomType (layerIdx: number | string = undefined): string {
+    getGeomType (layerIdx: number | string | undefined = undefined): string {
         this.stubError();
         return '';
     }
@@ -616,7 +632,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name field of. Uses first/only if omitted.
      * @returns {string} name field
      */
-    getNameField (layerIdx: number | string = undefined): string {
+    getNameField (layerIdx: number | string | undefined = undefined): string {
         this.stubError();
         return '';
     }
@@ -627,7 +643,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the OID field of. Uses first/only if omitted.
      * @returns {string} OID field
      */
-    getOidField (layerIdx: number | string = undefined): string {
+    getOidField (layerIdx: number | string | undefined = undefined): string {
         this.stubError();
         return '';
     }
@@ -637,7 +653,7 @@ export class CommonLayer extends LayerInstance {
      *
      * @param {Integer | String} [layerIdx] targets a layer index or uid to stop loading attributes for. Uses first/only if omitted.
      */
-    abortAttributeLoad (layerIdx: number | string = undefined): void {
+    abortAttributeLoad (layerIdx: number | string | undefined = undefined): void {
         this.stubError();
     }
 
@@ -646,7 +662,7 @@ export class CommonLayer extends LayerInstance {
      *
      * @param {Integer | String} [layerIdx] targets a layer index or uid to detroy attributes for. Uses first/only if omitted.
      */
-    destroyAttributes (layerIdx: number | string = undefined): void {
+    destroyAttributes (layerIdx: number | string | undefined = undefined): void {
         this.stubError();
     }
 
@@ -659,7 +675,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get tabular attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of tabular attribute values
      */
-    getTabularAttributes (layerIdx: number | string = undefined): Promise<TabularAttributeSet> {
+    getTabularAttributes (layerIdx: number | string | undefined = undefined): Promise<TabularAttributeSet> {
         this.stubError();
         return Promise.resolve(undefined);
     }
@@ -670,7 +686,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the feature count for. Uses first/only if omitted.
      * @returns {Integer} number of features in the sublayer
      */
-    getFeatureCount (layerIdx: number | string = undefined): number {
+    getFeatureCount (layerIdx: number | string | undefined = undefined): number {
         this.stubError();
         return 0;
     }
@@ -687,7 +703,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to find the graphic in. Uses first/only if omitted.
      * @returns {Promise} resolves with a fake graphic containing the requested information
      */
-    getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string = undefined): Promise<GetGraphicResult> {
+    getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string | undefined = undefined): Promise<GetGraphicResult> {
         this.stubError();
         return Promise.resolve(undefined);
     }
@@ -699,7 +715,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to find the icon in. Uses first/only if omitted.
      * @returns {Promise} resolves with an svg string encoding of the icon
      */
-    getIcon (objectId: number, layerIdx: number | string = undefined): Promise<string> {
+    getIcon (objectId: number, layerIdx: number | string | undefined = undefined): Promise<string> {
         this.stubError();
         return Promise.resolve(undefined);
     }
@@ -712,7 +728,7 @@ export class CommonLayer extends LayerInstance {
      * @param {String} whereClause the WHERE clause of the filter
      * @param {Integer | String} [layerIdx] targets a layer index or uid to apply the filter to. Uses first/only if omitted.
      */
-    setSqlFilter(filterKey: string, whereClause: string, layerIdx: number | string = undefined): void {
+    setSqlFilter(filterKey: string, whereClause: string, layerIdx: number | string | undefined = undefined): void {
         this.stubError();
     }
 
@@ -723,7 +739,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid that has the filter. Uses first/only if omitted.
      * @returns {String} the value of the where clause for the filter. Empty string if not defined.
      */
-    getSqlFilter(filterKey: string, layerIdx: number | string = undefined): string {
+    getSqlFilter(filterKey: string, layerIdx: number | string | undefined = undefined): string {
         this.stubError();
         return '';
     }
@@ -739,7 +755,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to inspect. Uses first/only if omitted.
      * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
      */
-    getFilterOIDs(exclusions: Array<string> = [], extent: Extent = undefined, layerIdx: number | string = undefined): Promise<Array<number>> {
+    getFilterOIDs(exclusions: Array<string> = [], extent: Extent | undefined = undefined, layerIdx: number | string | undefined = undefined): Promise<Array<number>> {
         this.stubError();
         return Promise.resolve(undefined);
     }
@@ -751,7 +767,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
      * @param {Integer | String} [layerIdx] targets a layer index or uid to update. Uses first/only if omitted.
      */
-    applySqlFilter (exclusions: Array<string> = [], layerIdx: number | string = undefined): void {
+    applySqlFilter (exclusions: Array<string> = [], layerIdx: number | string | undefined = undefined): void {
         this.stubError();
     }
 

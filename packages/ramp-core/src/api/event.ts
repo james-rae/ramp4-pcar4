@@ -17,6 +17,8 @@ export enum GlobalEvents {
     // TODO document payload
     FILTER_CHANGE = 'filter/change',
 
+    LAYER_VISIBILITYCHANGE = 'layer/visibilitychange',
+
     /**
      * Fires when the map is created
      * Payload: (map)
