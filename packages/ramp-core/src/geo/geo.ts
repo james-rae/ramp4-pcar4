@@ -1,12 +1,12 @@
 // the structure of the geo element of the RAMP API
 
 import { APIScope, InstanceAPI } from '../api/internal';
-import { MapAPI, UtilsAPI } from './internal';
+import { LayerAPI, MapAPI, UtilsAPI } from './internal';
 
 export class GeoAPI extends APIScope {
 
     map: MapAPI;
-    layer: any;
+    layer: LayerAPI;
     utils: UtilsAPI;
 
     // TODO how to best expose the geometery/graphic stuff.
@@ -24,7 +24,8 @@ export class GeoAPI extends APIScope {
         super(iApi);
 
         this.map = new MapAPI(iApi);
-        this.utils = new UtilsAPI();
+        this.utils = new UtilsAPI(iApi); // TODO add the EPSG function parameter here. probably needs to get passed to GeoAPI constructor
+        this.layer = new LayerAPI(iApi);
     }
 
 }

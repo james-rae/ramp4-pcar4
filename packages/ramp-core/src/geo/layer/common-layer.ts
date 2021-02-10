@@ -6,14 +6,8 @@ import esri = __esri;
 import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
     FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
 
-import { TypedEvent } from '../Event';
-
-import NaughtyPromise from '../util/NaughtyPromise';
-import { LayerType } from '../api/apiDefs';
-// import RampMap from '../map/RampMap';
-
 import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
-import { CommonFC, DataFormat, Extent, LayerInstance, ScaleSet, TreeNode } from '../internal';
+import { CommonFC, DataFormat, Extent, LayerInstance, LayerType, NaughtyPromise, ScaleSet, TreeNode } from '../internal';
 import { } from '../esri';
 
 export class CommonLayer extends LayerInstance {
@@ -272,7 +266,7 @@ export class CommonLayer extends LayerInstance {
 
        // layer base class doesnt have spatial ref, but we will assume all our layers do.
        // consider adding fancy checks if its missing, and if so just promise.resolve
-       const lookupPromise = this.gapi.utils.proj.checkProj((<any>this._innerLayer).spatialReference).then((goodSR: boolean) => {
+       const lookupPromise = this.$iApi.geo.utils.proj.checkProj((<any>this._innerLayer).spatialReference).then((goodSR: boolean) => {
             if (goodSR) {
                 return Promise.resolve();
             } else {
@@ -333,10 +327,12 @@ export class CommonLayer extends LayerInstance {
      * @returns {TreeNode} the root of the layer tree
      */
     getLayerTree(): TreeNode {
-
-        // TODO throw error if called too early? may want to standardize that error for other properties
-        // TODO make basic tree code here (one child at root)
-        return this.layerTree;
+        if (this.layerTree) {
+            return this.layerTree;
+        } else {
+            this.noLayerErr();
+            return new TreeNode(0, 'YOU DID AN ERROR', 'Error, check your console pls');
+        }
     }
 
     /**
@@ -354,7 +350,7 @@ export class CommonLayer extends LayerInstance {
             const fcIdx: number = this.fcs.findIndex(fc => fc?.uid === uid);
             if (fcIdx === -1) {
                 // no match
-                throw new Error(`Attempt to access non-existing unique id [layerid ${this._innerLayer.id}, uid ${uid}]`);
+                throw new Error(`Attempt to access non-existing unique id [layerid ${this.id}, uid ${uid}]`);
             } else {
                 return fcIdx;
             }
@@ -425,9 +421,11 @@ export class CommonLayer extends LayerInstance {
         // Map Check Hah ha-ha-Hah
         // I be the anti-map rhythm rock shocker
         // TODO maybe make this a boolean that gets flipped to true once layer is added to the map.
+        /*
         if (this.isUndefined(this.hostMap)) {
             throw new Error('Attempting to use map-dependent logic before the layer has been added to the map');
         }
+        */
     }
 
     /**
@@ -462,7 +460,13 @@ export class CommonLayer extends LayerInstance {
      * @returns {Boolean} visibility of the layer/sublayer
      */
     getVisibility (layerIdx: number | string | undefined = undefined): boolean {
-        return this.getFC(layerIdx).getVisibility();
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getVisibility();
+        } else {
+            this.noLayerErr();
+            return false;
+        }
     }
 
     /**
@@ -473,7 +477,12 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      */
     setVisibility (value: boolean, layerIdx: number | string | undefined = undefined): void {
-        this.getFC(layerIdx).setVisibility(value);
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            fc.setVisibility(value);
+        } else {
+            this.noLayerErr();
+        }
     }
 
     /**
@@ -484,7 +493,13 @@ export class CommonLayer extends LayerInstance {
      * @returns {Boolean} opacity of the layer/sublayer
      */
     getOpacity (layerIdx: number | string | undefined = undefined): number {
-        return this.getFC(layerIdx).getOpacity();
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getOpacity();
+        } else {
+            this.noLayerErr();
+            return 0;
+        }
     }
 
     /**
@@ -495,7 +510,12 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
      */
     setOpacity (value: number, layerIdx: number | string | undefined = undefined): void {
-        this.getFC(layerIdx).setOpacity(value);
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            fc.setOpacity(value);
+        } else {
+            this.noLayerErr();
+        }
     }
 
     /**
@@ -506,7 +526,13 @@ export class CommonLayer extends LayerInstance {
      * @returns {ScaleSet} scale set of the layer/sublayer
      */
     getScaleSet (layerIdx: number | string | undefined = undefined): ScaleSet {
-        return this.getFC(layerIdx).scaleSet;
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.scaleSet;
+        } else {
+            this.noLayerErr();
+            return new ScaleSet();
+        }
     }
 
     /**
@@ -519,9 +545,9 @@ export class CommonLayer extends LayerInstance {
      */
     isOffscale (layerIdx: number | string | undefined = undefined, testScale: number | undefined = undefined): boolean {
         let mahScale: number;
-        if (this.isUndefined(testScale)) {
+        if (typeof testScale === 'undefined') {
             this.mapCheck();
-            mahScale = this.hostMap.getScale();
+            mahScale = this.$iApi.geo.map.getScale();
         } else {
             mahScale = testScale;
         }
@@ -544,7 +570,7 @@ export class CommonLayer extends LayerInstance {
         //      inside the layer extent. if not, pan the map to layer extent center.
         //      would need to add an extra boolean flag parameter to indicate if we do the pan or not.
         //      alternate idea is make a separate pan-to-extent function and let caller make two calls. hmmm. nice.
-        return this.hostMap.zoomToVisibleScale(this.getScaleSet(layerIdx));
+        return this.$iApi.geo.map.zoomToVisibleScale(this.getScaleSet(layerIdx));
     }
 
     /**
@@ -555,11 +581,23 @@ export class CommonLayer extends LayerInstance {
      * @returns {Boolean} if the layer/sublayer supports features
      */
     supportsFeatures (layerIdx: number | string | undefined = undefined): boolean {
-        return this.getFC(layerIdx).supportsFeatures;
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.supportsFeatures;
+        } else {
+            this.noLayerErr();
+            return false;
+        }
     }
 
     getLegend (layerIdx: number | string | undefined = undefined): Array<LegendSymbology> {
-        return this.getFC(layerIdx).legend;
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.legend;
+        } else {
+            this.noLayerErr();
+            return [];
+        }
     }
 
     // ----------- LAYER ACTIONS -----------
@@ -717,7 +755,7 @@ export class CommonLayer extends LayerInstance {
      */
     getIcon (objectId: number, layerIdx: number | string | undefined = undefined): Promise<string> {
         this.stubError();
-        return Promise.resolve(undefined);
+        return Promise.resolve('');
     }
 
     /**
@@ -755,7 +793,7 @@ export class CommonLayer extends LayerInstance {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to inspect. Uses first/only if omitted.
      * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
      */
-    getFilterOIDs(exclusions: Array<string> = [], extent: Extent | undefined = undefined, layerIdx: number | string | undefined = undefined): Promise<Array<number>> {
+    getFilterOIDs(exclusions: Array<string> = [], extent: Extent | undefined = undefined, layerIdx: number | string | undefined = undefined): Promise<Array<number> | undefined> {
         this.stubError();
         return Promise.resolve(undefined);
     }

@@ -4,7 +4,8 @@
 // TODO add proper comments
 
 import esri = __esri;
-import { EpsgLookup, GeometryAPI, SharedUtilsAPI } from '../internal';
+import { APIScope, InstanceAPI } from '../../api/internal';
+import { EpsgLookup, GeometryAPI, ProjectionAPI, SharedUtilsAPI } from '../internal';
 
 /*
 import AttributeService from './AttributeService';
@@ -18,10 +19,11 @@ import OgcService from './OgcService';
 */
 
 // TODO extend the InstanceAPI?
-export class UtilsAPI {
+export class UtilsAPI extends APIScope {
 
     geom: GeometryAPI;
     shared: SharedUtilsAPI;
+    proj: ProjectionAPI;
 
     /*
     attributes: AttributeService; // TODO do we want shorter name "attribs" or "attributes"
@@ -33,10 +35,12 @@ export class UtilsAPI {
     ogc: OgcService;
     */
 
-    constructor (epsgFunction: EpsgLookup | undefined = undefined) {
+    constructor (iApi: InstanceAPI, epsgFunction: EpsgLookup | undefined = undefined) {
+        super(iApi);
 
         this.geom = new GeometryAPI();
         this.shared = new SharedUtilsAPI();
+        this.proj = new ProjectionAPI(iApi, epsgFunction);
 
         /*
         this.attributes = new AttributeService(infoBundle);

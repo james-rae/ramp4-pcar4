@@ -240,7 +240,7 @@ export class LayerAPI extends APIScope {
  */
 export class LayerInstance extends APIScope implements LayerBase {
 
-    layerType: string = '';
+    get layerType(): string { return ''};
     config: any = {};
 
     /**

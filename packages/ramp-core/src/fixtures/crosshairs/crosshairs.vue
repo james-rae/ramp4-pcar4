@@ -26,6 +26,7 @@ export default class CrosshairsV extends Vue {
 
     mounted() {
         // TODO change this to avoid private variable access. since the map is now created on the fly, need a way to check it's existence first
+        //      possibly have a .viewPromise on the map like we have on layers.
         // BAAH
         /*
         this.$iApi.geo.map._innerView.when(() => {
