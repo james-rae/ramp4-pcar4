@@ -21,6 +21,8 @@ export enum LayerType {
     // OGS
     WMS = 'ogcWms',
     WFS = 'ogcWfs', // TODO proposing this should not be a part of this enum. WFS = Feature
+
+    UNKNOWN = 'unknown'
 }
 
 // Format indicates what form the spatial data is encoded in.
@@ -252,7 +254,7 @@ export interface TabularAttributeSet {
     fields: Array<FieldDefinition>;
     oidField: string;
     oidIndex: number; // TODO determine if we need this anymore
-    renderer: BaseRenderer; // TODO determine if we need this anymore
+    // renderer: BaseRenderer; // TODO determine if we need this anymore
 }
 
 export interface LegendSymbology {

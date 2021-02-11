@@ -17,6 +17,8 @@ export enum GlobalEvents {
     // TODO document payload
     FILTER_CHANGE = 'filter/change',
 
+    LAYER_OPACITYCHANGE = 'layer/opacitychange',
+    LAYER_STATECHANGE = 'layer/statechange',
     LAYER_VISIBILITYCHANGE = 'layer/visibilitychange',
 
     /**

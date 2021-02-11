@@ -15,7 +15,7 @@
 //
 // yes, yes, very bad and all -- show me a better solution and I'll consider it.
 
-export class NaughtyPromise {
+export class DefPromise {
 
     protected realPromise: Promise<void>;
 

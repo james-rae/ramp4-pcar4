@@ -3,11 +3,14 @@
 // TODO add proper comments
 
 import esri = __esri;
-import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
-    FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
+
+// import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
+//    FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
 
 import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
-import { CommonFC, DataFormat, Extent, LayerInstance, LayerType, NaughtyPromise, ScaleSet, TreeNode } from '../internal';
+import { AttributeSet, CommonFC, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
+    IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
+    ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 import { } from '../esri';
 
 export class CommonLayer extends LayerInstance {
@@ -26,11 +29,6 @@ export class CommonLayer extends LayerInstance {
     // used to manage debouncing when applying filter updates against a layer. Private! but needs to be seen by FCs.
     _lastFilterUpdate: string = '';
 
-    // events
-    opacityChanged: TypedEvent<number>;
-    stateChanged: TypedEvent<string>;
-    filterChanged: TypedEvent<FilterEventParam>;
-
     // statuses
     state: LayerState;
     supportsIdentify: boolean;
@@ -45,13 +43,13 @@ export class CommonLayer extends LayerInstance {
     protected sawRefresh: boolean;
     protected name: string; // TODO re-evaluate this. using protected property here to store name until FCs get created. might be smarter way
     protected origRampConfig: RampLayerConfig;
-    protected _layerType: LayerType;
+    protected _layerType: LayerType = LayerType.UNKNOWN;
 
     // TODO consider also having a loaded boolean property, allowing a synch check if layer has loaded or not. state can flip around to update, etc.
     //      alternately implement something like function layerLoaded() from old geoApi
-    protected loadPromise: NaughtyPromise; // a promise that resolves when layer is fully ready and safe to use. for convenience of caller
-    protected esriPromise: NaughtyPromise; // a promise that resolves when esri layer object has been created
-    protected viewPromise: NaughtyPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
+    protected loadPromise: DefPromise; // a promise that resolves when layer is fully ready and safe to use. for convenience of caller
+    protected esriPromise: DefPromise; // a promise that resolves when esri layer object has been created
+    protected viewPromise: DefPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     // FC management
     protected fcs: Array<CommonFC>;
@@ -68,18 +66,14 @@ export class CommonLayer extends LayerInstance {
         this.reloadTree = reloadTree; // this needs to be set before doing uid calculations
         this.uid = this.bestUid(-1);
 
-        this.opacityChanged = new TypedEvent<number>();
-        this.stateChanged = new TypedEvent<string>();
-        this.filterChanged = new TypedEvent<FilterEventParam>();
-
         this.state = LayerState.LOADING;
         this.supportsIdentify = false; // default state.
         this.isFile = false; // default state.
         this.sawLoad = false;
         this.sawRefresh = false;
-        this.loadPromise = new NaughtyPromise();
-        this.esriPromise = new NaughtyPromise();
-        this.viewPromise = new NaughtyPromise();
+        this.loadPromise = new DefPromise();
+        this.esriPromise = new DefPromise();
+        this.viewPromise = new DefPromise();
 
         this.fcs = [];
         this.origRampConfig = rampConfig;
@@ -111,7 +105,10 @@ export class CommonLayer extends LayerInstance {
 
     protected updateState(newState: LayerState): void {
         this.state = newState;
-        this.stateChanged.fireEvent(newState);
+        this.$iApi.event.emit(GlobalEvents.LAYER_STATECHANGE, {
+            state: newState,
+            uid: this.uid
+        });
     }
 
     // generic init stuff, like adding listeners/propogaters to events
@@ -164,7 +161,14 @@ export class CommonLayer extends LayerInstance {
         });
 
         this._innerLayer.watch('opacity', (newval: number) => {
-            this.opacityChanged.fireEvent(newval);
+            // TODO re-evaluate the event parameter. This is common routine. Need to think about how sublayer would factor in to this.
+            //      might need a secondary sublayer event, triggered on the FC? Sublayer opacity can change without affecting
+            //      overall layer opacity. TRICKY.
+            //      also might want some redundant params, like layer id.
+            this.$iApi.event.emit(GlobalEvents.LAYER_OPACITYCHANGE, {
+                opacity: newval,
+                uid: this.uid
+            });
         });
 
         // TODO for state stuff, do we need to also synch this.state?
@@ -220,8 +224,8 @@ export class CommonLayer extends LayerInstance {
         const esriConfig: any = {
             id: rampLayerConfig.id,
             url: rampLayerConfig.url,
-            opacity: rampLayerConfig.state.opacity,
-            visible: rampLayerConfig.state.visibility
+            opacity: rampLayerConfig?.state?.opacity,
+            visible: rampLayerConfig?.state?.visibility
         };
 
         // TODO careful now. seems setting this willy nilly, even if undefined value, causes layer to keep pinging the server
@@ -252,6 +256,8 @@ export class CommonLayer extends LayerInstance {
         }
 
         // make the root of the tree
+        // TODO consider initializing the layer tree object in the constructor, then editing it here.
+        //      would mean we can get rid of the undefined type on the property
         this.layerTree = new TreeNode(-1, this.uid, this.name, false);
 
         // TODO implement extent defaulting. Need to add property, get appropriate format from incoming ramp config, maybe need an interface
@@ -639,7 +645,10 @@ export class CommonLayer extends LayerInstance {
      */
     getAttributes (layerIdx: number | string | undefined = undefined): Promise<AttributeSet> {
         this.stubError();
-        return Promise.resolve(undefined);
+        return Promise.resolve({
+            features: [],
+            oidIndex: {}
+        });
     }
 
     /**
@@ -715,7 +724,15 @@ export class CommonLayer extends LayerInstance {
      */
     getTabularAttributes (layerIdx: number | string | undefined = undefined): Promise<TabularAttributeSet> {
         this.stubError();
-        return Promise.resolve(undefined);
+
+        // nonsense to shut up typescript
+        return Promise.resolve({
+            columns: [],
+            rows: [],
+            fields: [],
+            oidField: 'error',
+            oidIndex: 0 // TODO determine if we need this anymore
+        });
     }
 
     /**
@@ -743,7 +760,7 @@ export class CommonLayer extends LayerInstance {
      */
     getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string | undefined = undefined): Promise<GetGraphicResult> {
         this.stubError();
-        return Promise.resolve(undefined);
+        return Promise.resolve({});
     }
 
     /**

@@ -38,5 +38,5 @@ export * from './utils/geometry';
 export * from './utils/renderer';
 export * from './utils/shared-utils';
 export * from './utils/projection';
-export * from './utils/naughty-promise';
+export * from './utils/promise';
 export * from './utils/utils';
