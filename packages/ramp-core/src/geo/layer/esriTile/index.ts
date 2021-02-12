@@ -10,7 +10,7 @@ import { EsriTileLayer } from '../../esri';
 
 class TileLayer extends CommonLayer {
 
-    _innerLayer: esri.TileLayer;
+    esriLayer: esri.TileLayer;
 
     constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);
@@ -18,7 +18,7 @@ class TileLayer extends CommonLayer {
         this._layerType = LayerType.TILE;
 
         // TODO this will all get restructured to allow reloading to use the same methods
-        this._innerLayer = new EsriTileLayer(this.makeEsriLayerConfig(rampConfig));
+        this.esriLayer = new EsriTileLayer(this.makeEsriLayerConfig(rampConfig));
         this.initLayer();
     }
 

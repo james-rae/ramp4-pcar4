@@ -7,21 +7,19 @@ import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 // BAAH
 // import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'rampgeoapi';
-import { MapAPI, RampMapConfig } from '../../geo/internal';
+import { LayerInstance, MapAPI, RampMapConfig } from '../../geo/internal';
 import { GlobalEvents } from '../../api/internal';
 import { APIInterface /*, RampGeo // BAAH */ } from '../../api';
 // import { window } from '@/main';
 
 import { ConfigStore } from '@/store/modules/config';
 import { LayerStore, layer } from '@/store/modules/layer';
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 @Component
 export default class EsriMap extends Vue {
     @Get(ConfigStore.getMapConfig) mapConfig!: RampMapConfig;
 
-    @Get(LayerStore.layers) layers!: any[]; // BaseLayer[]; // BAAH
+    @Get(LayerStore.layers) layers!: LayerInstance[];
 
     map!: MapAPI; // TODO assuming we need this as a local property for vue binding. if we don't, remove it and just use $iApi.geo.map
 
@@ -31,9 +29,8 @@ export default class EsriMap extends Vue {
     }
 
     // BAAH
-    /*
     @Watch('layers')
-    onLayerArrayChange(newValue: any[], oldValue: any[]) { // (newValue: BaseLayer[], oldValue: BaseLayer[]) { // BAAH
+    onLayerArrayChange(newValue: LayerInstance[], oldValue: LayerInstance[]) { // BAAH
         // TODO we are getting frequent errors at startup; something reacts to layer array
         //      change before map exists. kicking out for now to make demos work.
         //      possibly this is evil in vue state land. if so, then someone figure out
@@ -45,12 +42,15 @@ export default class EsriMap extends Vue {
 
             // a bit dangerous but ideally https://github.com/ramp4-pcar4/ramp4-pcar4/issues/126 and https://github.com/ramp4-pcar4/ramp4-pcar4/issues/173
             // will make this more seamless and not need to worry about having multiple listeners.
+
+            // BAAH
+            /*
             layer.filterChanged.listen((payload: FilterEventParam) => {
                 this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, payload);
             });
+            */
         });
     }
-    */
 
     @Watch('mapConfig')
     onMapConfigChange(newValue: RampMapConfig, oldValue: RampMapConfig) {
@@ -62,8 +62,7 @@ export default class EsriMap extends Vue {
         this.map = this.$iApi.geo.map;
         this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
 
-        // BAAH
-        // this.onLayerArrayChange(this.layers, []);
+        this.onLayerArrayChange(this.layers, []);
     }
 
 }

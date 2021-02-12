@@ -42,7 +42,7 @@ export default class OverviewmapV extends Vue {
         /*
         let config = this.mapConfig || defaultConfig;
         this.overviewMap = RAMP.geoapi.maps.createMap(config, this.$el.querySelector('.overviewmap') as HTMLDivElement);
-        this.overviewMap._innerView.ui.components = [];
+        this.overviewMap.esriView.ui.components = [];
         this.minimized = this.startMinimized;
 
         // TODO update extent highlighting code to use ramp graphics once GraphicsLayer is implemented
@@ -52,9 +52,9 @@ export default class OverviewmapV extends Vue {
             outline: null
         };
         let g = new RAMP.geoapi.esriBundle.Graphic({ symbol: symbol, visible: true })
-        this.overviewMap._innerView.graphics.add(g)
+        this.overviewMap.esriView.graphics.add(g)
 
-        if (this.$iApi.map._innerView.ready) {
+        if (this.$iApi.map.esriView.ready) {
             this.updateOverview(this.$iApi.map.getExtent());
         }
         this.$iApi.event.on(GlobalEvents.MAP_EXTENTCHANGE, debounce(this.updateOverview, 300));
@@ -68,7 +68,7 @@ export default class OverviewmapV extends Vue {
         const wRatio = this.$iApi.map.getPixelWidth() / 200;
         const overviewScale = this.$iApi.map.getScale() * 1.5 * Math.max(hRatio, wRatio);
         this.overviewMap.zoomMapTo(newExtent.center(), overviewScale);
-        this.overviewMap._innerView.graphics.getItemAt(0).geometry = this.$iApi.map._innerView.extent;
+        this.overviewMap.esriView.graphics.getItemAt(0).geometry = this.$iApi.map.esriView.extent;
     }
     */
 

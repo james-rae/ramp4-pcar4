@@ -14,20 +14,20 @@ import { Basemap, RampMapConfig } from '../internal';
 // We also use "Base" for our vuex state classes so want to avoid naming overlaps.
 export class CommonMapAPI extends APIScope {
 
-    _innerMap: EsriMap | undefined;
+    esriMap: EsriMap | undefined;
 
     _basemapStore: Array<Basemap>;
 
     protected constructor (iApi: InstanceAPI) {
         super(iApi);
 
-        this._innerMap = undefined;
+        this.esriMap = undefined;
         this._basemapStore = [];
     }
 
     // will generate the actual Map control objects, put it on the page
     createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
-        // TODO if ._innerMap exists, do we want to do any cleanup on it? E.g. remove event handlers?
+        // TODO if .esriMap exists, do we want to do any cleanup on it? E.g. remove event handlers?
 
         this._basemapStore = config.basemaps.map(bmConfig => new Basemap(bmConfig));
 
@@ -35,7 +35,7 @@ export class CommonMapAPI extends APIScope {
         if (config.initialBasemapId) {
             esriConfig.basemap = this.findBasemap(config.initialBasemapId).innerBasemap;
         }
-        this._innerMap = new EsriMap(esriConfig);
+        this.esriMap = new EsriMap(esriConfig);
     }
 
     protected findBasemap(id: string): Basemap {
@@ -48,7 +48,7 @@ export class CommonMapAPI extends APIScope {
     }
 
     setBasemap(id: string): void {
-        if (!this._innerMap) {
+        if (!this.esriMap) {
             this.noMapErr();
             return;
         }
@@ -60,11 +60,11 @@ export class CommonMapAPI extends APIScope {
             //      would need to back out of this function call and trigger something else if we
             //      detect here.
 
-            this._innerMap.basemap = bm.innerBasemap;
+            this.esriMap.basemap = bm.innerBasemap;
         } else {
             // blank basemap case
             // TODO validate this works. the map api spec does not allow setting to undefined.
-            (this._innerMap as any).basemap = undefined;
+            (this.esriMap as any).basemap = undefined;
         }
     }
 

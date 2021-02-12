@@ -42,7 +42,7 @@ export default class NortharrowV extends Vue {
         // BAAH
         /*
         // don't think this condition should be needed but sometimes errors at startup without it
-        if (this.$iApi.map._innerView.ready) {
+        if (this.$iApi.map.esriView.ready) {
             this.updateNortharrow(this.$iApi.map.getExtent())
         }
         this.$iApi.event.on(GlobalEvents.MAP_EXTENTCHANGE, debounce(this.updateNortharrow, 300));

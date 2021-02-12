@@ -48,8 +48,8 @@ export class CommonFC {
      */
     getVisibility (): boolean {
         // basic case - fc vis === layer vis
-        if (this.parentLayer._innerLayer) {
-            return this.parentLayer._innerLayer.visible;
+        if (this.parentLayer.esriLayer) {
+            return this.parentLayer.esriLayer.visible;
         } else {
             this.noLayerErr();
             return false; // default to chill things.
@@ -64,8 +64,8 @@ export class CommonFC {
      */
     setVisibility (value: boolean): void {
         // basic case - set layer visibility
-        if (this.parentLayer._innerLayer) {
-            this.parentLayer._innerLayer.visible = value;
+        if (this.parentLayer.esriLayer) {
+            this.parentLayer.esriLayer.visible = value;
         } else {
             this.noLayerErr();
         }
@@ -79,8 +79,8 @@ export class CommonFC {
      */
     getOpacity (): number {
         // basic case - fc opac === layer opac
-        if (this.parentLayer._innerLayer) {
-            return this.parentLayer._innerLayer.opacity;
+        if (this.parentLayer.esriLayer) {
+            return this.parentLayer.esriLayer.opacity;
         } else {
             this.noLayerErr();
             return 1; // default to chill things.
@@ -95,8 +95,8 @@ export class CommonFC {
      */
     setOpacity (value: number): void {
         // basic case - set layer opacity
-        if (this.parentLayer._innerLayer) {
-            this.parentLayer._innerLayer.opacity = value;
+        if (this.parentLayer.esriLayer) {
+            this.parentLayer.esriLayer.opacity = value;
         } else {
             this.noLayerErr();
         }

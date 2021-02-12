@@ -1,5 +1,5 @@
 // layers api and other public, general layer things.
-
+import esri = __esri;
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { LayerBase } from '../internal';
 
@@ -301,6 +301,16 @@ export class LayerInstance extends APIScope implements LayerBase {
 
         this.config = config;
     }
+
+    isReadyForMap(): Promise<void> {
+        // TODO revist the intelligence of this. it should get overwritten,
+        //      but i guess auto-resolve is best thing for 3rd party if they
+        //      don't care; otherwise will never get added to the map.
+        return Promise.resolve();
+    }
+
+    esriLayer: esri.Layer | undefined;
+    esriView: esri.LayerView | undefined;
 
     /**
      * Removes the specified fixture from R4MP instance.

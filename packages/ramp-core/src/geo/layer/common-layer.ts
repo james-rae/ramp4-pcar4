@@ -23,8 +23,8 @@ export class CommonLayer extends LayerInstance {
 
     // NOTE while having this var be protected makes sense, there are also cases where other parts of the geoapi need to access this.
     //      being public will also to allow hacking, which can be useful in a pinch. use underscore to make it clear this in not for playtimes.
-    _innerLayer: esri.Layer | undefined;
-    _innerView: esri.LayerView | undefined;
+    esriLayer: esri.Layer | undefined;
+    esriView: esri.LayerView | undefined;
 
     // used to manage debouncing when applying filter updates against a layer. Private! but needs to be seen by FCs.
     _lastFilterUpdate: string = '';
@@ -144,12 +144,12 @@ export class CommonLayer extends LayerInstance {
         // TODO consider putting lots of info on the events.  e.g. instead of just state changed, have .state, .layerid
         //      visibility might need an optional FC index (whatever we're calling that)
 
-        if (!this._innerLayer) {
+        if (!this.esriLayer) {
             this.noLayerErr();
             return
         }
 
-        this._innerLayer.watch('visible', (newval: boolean) => {
+        this.esriLayer.watch('visible', (newval: boolean) => {
             // TODO re-evaluate the event parameter. This is common routine. Need to think about how sublayer would factor in to this.
             //      might need a secondary sublayer event, triggered on the FC? Sublayer visibility can change without affecting
             //      overall layer. TRICKY.
@@ -160,7 +160,7 @@ export class CommonLayer extends LayerInstance {
             });
         });
 
-        this._innerLayer.watch('opacity', (newval: number) => {
+        this.esriLayer.watch('opacity', (newval: number) => {
             // TODO re-evaluate the event parameter. This is common routine. Need to think about how sublayer would factor in to this.
             //      might need a secondary sublayer event, triggered on the FC? Sublayer opacity can change without affecting
             //      overall layer opacity. TRICKY.
@@ -174,7 +174,7 @@ export class CommonLayer extends LayerInstance {
         // TODO for state stuff, do we need to also synch this.state?
         //      if so probably want a protected worker changeMyState function that sets prop and fires event.
 
-        this._innerLayer.watch('loadStatus', (newval: string) => {
+        this.esriLayer.watch('loadStatus', (newval: string) => {
             const statemap: any = {
                 'not-loaded': LayerState.LOADING,
                 loading: LayerState.LOADING,
@@ -193,8 +193,8 @@ export class CommonLayer extends LayerInstance {
             }
         });
 
-        this._innerLayer.on('layerview-create', (e: esri.LayerLayerviewCreateEvent) => {
-            this._innerView = e.layerView;
+        this.esriLayer.on('layerview-create', (e: esri.LayerLayerviewCreateEvent) => {
+            this.esriView = e.layerView;
             e.layerView.watch('updating', (newval: boolean) => {
                 this.updateState(newval ? LayerState.REFRESH : LayerState.LOADED );
                 if (newval) {
@@ -252,7 +252,7 @@ export class CommonLayer extends LayerInstance {
     protected onLoadActions(): Array<Promise<void>> {
         if (!this.name) {
             // no name from config. attempt layer name
-            this.name = this._innerLayer?.title || '';
+            this.name = this.esriLayer?.title || '';
         }
 
         // make the root of the tree
@@ -264,7 +264,7 @@ export class CommonLayer extends LayerInstance {
         /*
         if (!this.extent) {
             // no extent from config. attempt layer extent
-            this.extent = this._innerLayer.fullExtent;
+            this.extent = this.esriLayer.fullExtent;
         }
 
         this.extent = shared.makeSafeExtent(this.extent);
@@ -272,7 +272,7 @@ export class CommonLayer extends LayerInstance {
 
        // layer base class doesnt have spatial ref, but we will assume all our layers do.
        // consider adding fancy checks if its missing, and if so just promise.resolve
-       const lookupPromise = this.$iApi.geo.utils.proj.checkProj((<any>this._innerLayer).spatialReference).then((goodSR: boolean) => {
+       const lookupPromise = this.$iApi.geo.utils.proj.checkProj((<any>this.esriLayer).spatialReference).then((goodSR: boolean) => {
             if (goodSR) {
                 return Promise.resolve();
             } else {
@@ -407,7 +407,7 @@ export class CommonLayer extends LayerInstance {
             } else {
                 // asked for the root when not valid
                 // TODO would it be kinder/friendlier to return the first child fc?
-                // throw new Error(`Attempt to access a function on layer root that only applies to an index of the layer [layerid ${this._innerLayer.id}]`);
+                // throw new Error(`Attempt to access a function on layer root that only applies to an index of the layer [layerid ${this.esriLayer.id}]`);
                 // TODO going with return first for the time being, revisit later
                 return this.fcs.find((fc: CommonFC) => fc);
             }

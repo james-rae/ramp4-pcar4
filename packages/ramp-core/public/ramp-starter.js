@@ -44,6 +44,18 @@ function initRAMP() {
             },
             layers: [
                 {
+                    id: 'TestTile',
+                    layerType: 'esriTile',
+                    url: 'https://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer',
+                    state: {
+                        opacity: 1,
+                        visibility: true
+                    },
+                    customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
+                }
+                /*
+                ,
+                {
                     id: 'WaterQuantity',
                     layerType: 'esriMapImage',
                     url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
@@ -110,6 +122,7 @@ function initRAMP() {
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 }
+                */
             ],
             fixtures: {
                 legend: {

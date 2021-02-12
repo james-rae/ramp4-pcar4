@@ -29,7 +29,7 @@ export default class CrosshairsV extends Vue {
         //      possibly have a .viewPromise on the map like we have on layers.
         // BAAH
         /*
-        this.$iApi.geo.map._innerView.when(() => {
+        this.$iApi.geo.map.esriView.when(() => {
             this.left = (this.$iApi.geo.map.getPixelWidth() - this.$el.getBoundingClientRect().width) / 2;
             this.top = (this.$iApi.geo.map.getPixelHeight() - this.$el.getBoundingClientRect().height) / 2;
         });

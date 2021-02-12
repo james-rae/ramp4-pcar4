@@ -4,7 +4,7 @@
 import esri = __esri;
 
 import { GlobalEvents, InstanceAPI } from '../../api/internal';
-import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, RampMapConfig, MapClick,
+import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, LayerInstance, RampMapConfig, MapClick,
     MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
 import { EsriLOD, EsriMapView } from '../esri';
 import { LayerStore } from '@/store/modules/layer';
@@ -23,7 +23,7 @@ export class MapAPI extends CommonMapAPI {
      * The internal esri map view. Avoid referencing outside of geoapi.
      * @private
      */
-    _innerView: esri.MapView | undefined;
+    esriView: esri.MapView | undefined;
 
     /**
      * The map spatial reference in RAMP API Spatial Reference format.
@@ -50,12 +50,12 @@ export class MapAPI extends CommonMapAPI {
     createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
         super.createMap(config, targetDiv);
 
-        // TODO if ._innerMap or ._innerView exists, do we want to do any cleanup on it? E.g. remove event handlers?
+        // TODO if .esriMap or .esriView exists, do we want to do any cleanup on it? E.g. remove event handlers?
 
         this._rampSR = SpatialReference.fromConfig(config.extent.spatialReference);
 
         const esriViewConfig: esri.MapViewProperties = {
-            map: this._innerMap,
+            map: this.esriMap,
             container: targetDiv,
             constraints: {
                 lods: <Array<EsriLOD>>config.lods,
@@ -66,9 +66,9 @@ export class MapAPI extends CommonMapAPI {
         };
 
         // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
-        this._innerView = new EsriMapView(esriViewConfig);
+        this.esriView = new EsriMapView(esriViewConfig);
 
-        this._innerView.watch('extent', (newval: esri.Extent) => {
+        this.esriView.watch('extent', (newval: esri.Extent) => {
             // NOTE: yes, double events. rationale is a block of code dealing with filters will not
             //       want to have two event handlers (one on filter, one on extent change) and synch
             //       between them. They can subscribe to the filter event and get all the info they need.
@@ -81,46 +81,46 @@ export class MapAPI extends CommonMapAPI {
             });
         });
 
-        this._innerView.watch('scale', (newval: number) => {
+        this.esriView.watch('scale', (newval: number) => {
             this.$iApi.event.emit(GlobalEvents.MAP_SCALECHANGE, newval);
         });
 
-        this._innerView.on('click', esriClick => {
+        this.esriView.on('click', esriClick => {
             this.$iApi.event.emit(GlobalEvents.MAP_CLICK, this.$iApi.geo.utils.geom.esriMapClickToRamp(esriClick, 'map_click_point'));
         });
 
-        this._innerView.on('double-click', esriClick => {
+        this.esriView.on('double-click', esriClick => {
             this.$iApi.event.emit(GlobalEvents.MAP_DOUBLECLICK, this.$iApi.geo.utils.geom.esriMapClickToRamp(esriClick, 'map_doubleclick_point'));
         });
 
-        this._innerView.on('pointer-move', esriMouseMove => {
+        this.esriView.on('pointer-move', esriMouseMove => {
             // TODO debounce here? the map event fires pretty much every change in pixel value.
             this.$iApi.event.emit(GlobalEvents.MAP_MOUSEMOVE, this.$iApi.geo.utils.geom.esriMapMouseToRamp(esriMouseMove));
         });
 
-        this._innerView.on('pointer-down', esriMouseDown => {
+        this.esriView.on('pointer-down', esriMouseDown => {
             // .native is a DOM pointer event
             this.$iApi.event.emit(GlobalEvents.MAP_MOUSEDOWN, esriMouseDown.native);
         });
 
-        this._innerView.on('key-down', esriKeyDown => {
+        this.esriView.on('key-down', esriKeyDown => {
             // .native is a DOM keyboard event
             this.$iApi.event.emit(GlobalEvents.MAP_KEYDOWN, esriKeyDown.native);
             esriKeyDown.stopPropagation();
         });
 
-        this._innerView.on('key-up', esriKeyUp => {
+        this.esriView.on('key-up', esriKeyUp => {
             // .native is a DOM keyboard event
             this.$iApi.event.emit(GlobalEvents.MAP_KEYUP, esriKeyUp.native);
             esriKeyUp.stopPropagation();
         });
 
-        this._innerView.on('blur', esriBlur => {
+        this.esriView.on('blur', esriBlur => {
             // .native is a DOM keyboard event
             this.$iApi.event.emit(GlobalEvents.MAP_BLUR, esriBlur.native);
         });
 
-        this._innerView.container.addEventListener('touchmove', e => {
+        this.esriView.container.addEventListener('touchmove', e => {
             // need this for panning and zooming to work on mobile devices / touchscreens
             // touchmove stops the drag event (what the MapView reacts to) from firing properly
             e.preventDefault();
@@ -154,14 +154,19 @@ export class MapAPI extends CommonMapAPI {
      * @param {LayerBase} layer the GeoAPI layer to add
      * @returns {Promise<void>} a promise that resolves when the layer has been added to the map
      */
-    // BAAH
-    /*
-    async addLayer (layer: LayerBase): Promise<void> {
+    async addLayer (layer: LayerInstance): Promise<void> {
+        if (!this.esriMap) {
+            this.noMapErr();
+            return;
+        }
         await layer.isReadyForMap();
-        this._innerMap.add(layer._innerLayer);
-        layer.hostMap = this;
+        if (layer.esriLayer) {
+            this.esriMap.add(layer.esriLayer);
+        } else {
+            console.error('layer resolved promise .isReadyForMap without an esri layer');
+        }
+        // layer.hostMap = this;
     }
-    */
 
     /**
      * Adds a highlight layer to the map
@@ -171,7 +176,7 @@ export class MapAPI extends CommonMapAPI {
     // BAAH
     /*
     addHighlightLayer (highlightLayer: HighlightLayer): void {
-        this._innerMap.add(highlightLayer._innerLayer);
+        this.esriMap.add(highlightLayer.esriLayer);
     }
     */
 
@@ -187,7 +192,7 @@ export class MapAPI extends CommonMapAPI {
      */
     async zoomMapTo(geom: BaseGeometry, scale?: number, animate: boolean = true): Promise<void> {
         // TODO technically this can accept any geometry. should we open up the suggested signatures to allow various things?
-        if (this._innerView) {
+        if (this.esriView) {
             const g = await this.geomToMapSR(geom);
             // TODO investigate the `snapTo` parameter if we have an extent / poly coming in
             //      see how it compares to the old "fit to view" parameter of ESRI3
@@ -198,8 +203,8 @@ export class MapAPI extends CommonMapAPI {
                 zoomP.scale = scale || 50000;
             }
             const opts: any = { animate: animate };
-            if (this._innerView) {
-                return this._innerView.goTo(zoomP, opts);
+            if (this.esriView) {
+                return this.esriView.goTo(zoomP, opts);
             }
 
         } else {
@@ -215,8 +220,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
     async zoomToLevel(zoomLevel: number): Promise<void> {
-        if (this._innerView) {
-            return this._innerView.goTo({ zoom: zoomLevel });
+        if (this.esriView) {
+            return this.esriView.goTo({ zoom: zoomLevel });
         } else {
             this.noMapErr();
         }
@@ -230,8 +235,8 @@ export class MapAPI extends CommonMapAPI {
      */
     async zoomIn(): Promise<void> {
         // TODO fancy it up and add some bounds checking
-        if (this._innerView) {
-            return this.zoomToLevel(this._innerView.zoom + 1);
+        if (this.esriView) {
+            return this.zoomToLevel(this.esriView.zoom + 1);
         } else {
             this.noMapErr();
         }
@@ -245,8 +250,8 @@ export class MapAPI extends CommonMapAPI {
      */
     async zoomOut(): Promise<void> {
         // TODO fancy it up and add some bounds checking
-        if (this._innerView) {
-            return this.zoomToLevel(this._innerView.zoom - 1);
+        if (this.esriView) {
+            return this.zoomToLevel(this.esriView.zoom - 1);
         } else {
             this.noMapErr();
         }
@@ -259,7 +264,7 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Promise<void>} A promise that resolves when the map has finished zooming
      */
     async zoomToVisibleScale(scaleSet: ScaleSet): Promise<void> {
-        if (!this._innerView) {
+        if (!this.esriView) {
             this.noMapErr();
             return;
         }
@@ -268,7 +273,7 @@ export class MapAPI extends CommonMapAPI {
 
         if (!offStatus.offScale) { return; }
 
-        const lods = this._innerView.constraints.lods;
+        const lods = this.esriView.constraints.lods;
 
         if (!lods) {
             // handle case with no tiles / lods
@@ -293,8 +298,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {number} the map scale
      */
     getScale(): number {
-        if (this._innerView) {
-            return this._innerView.scale;
+        if (this.esriView) {
+            return this.esriView.scale;
         } else {
             this.noMapErr();
             return 1; // avoid returning zero, could cause divide-by-zero error in caller.
@@ -307,8 +312,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {number} the map resolution
      */
     getResolution(): number {
-        if (this._innerView) {
-            return this._innerView.resolution;
+        if (this.esriView) {
+            return this.esriView.resolution;
         } else {
             this.noMapErr();
             return 1; // avoid returning zero, could cause divide-by-zero error in caller.
@@ -321,8 +326,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Extent} the map extent in RAMP API Extent format
      */
     getExtent(): Extent {
-        if (this._innerView) {
-            return this.$iApi.geo.utils.geom._convEsriExtentToRamp(this._innerView.extent);
+        if (this.esriView) {
+            return this.$iApi.geo.utils.geom._convEsriExtentToRamp(this.esriView.extent);
         } else {
             this.noMapErr();
             return Extent.fromParams('i_am_error', 0, 1, 0, 1); // default fake value. avoids us having undefined checks everywhere.
@@ -349,8 +354,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Number} pixel height
      */
     getPixelHeight(): number {
-        if (this._innerView) {
-            return this._innerView.height;
+        if (this.esriView) {
+            return this.esriView.height;
         } else {
             this.noMapErr();
             return 1; // avoid returning zero, could cause divide-by-zero error in caller.
@@ -363,8 +368,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Number} pixel width
      */
     getPixelWidth(): number {
-        if (this._innerView) {
-            return this._innerView.width;
+        if (this.esriView) {
+            return this.esriView.width;
         } else {
             this.noMapErr();
             return 1; // avoid returning zero, could cause divide-by-zero error in caller.
@@ -379,8 +384,8 @@ export class MapAPI extends CommonMapAPI {
      * @returns {Point} the map point analagous to the screen point
      */
     screenPointToMapPoint(screenX: number, screenY: number): Point {
-        if (this._innerView) {
-            return this.$iApi.geo.utils.geom._convEsriPointToRamp(this._innerView.toMap({x: screenX, y: screenY}), 'mappoint');
+        if (this.esriView) {
+            return this.$iApi.geo.utils.geom._convEsriPointToRamp(this.esriView.toMap({x: screenX, y: screenY}), 'mappoint');
         } else {
             this.noMapErr();
             return new Point('i_am_error', [0, 0], undefined, true); //  default fake value. avoids us having undefined checks everywhere.
@@ -395,8 +400,8 @@ export class MapAPI extends CommonMapAPI {
      */
     mapPointToScreenPoint(mapPoint: Point): ScreenPoint {
 
-        if (this._innerView) {
-            const esriPoint = this._innerView.toScreen(this.$iApi.geo.utils.geom._convPointToEsri(mapPoint))
+        if (this.esriView) {
+            const esriPoint = this.esriView.toScreen(this.$iApi.geo.utils.geom._convPointToEsri(mapPoint))
             return { screenX: esriPoint.x, screenY: esriPoint.y };
         } else {
             this.noMapErr();
