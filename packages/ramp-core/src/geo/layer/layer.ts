@@ -128,6 +128,19 @@ export class LayerAPI extends APIScope {
         layerDef.layerConstructor = (await import(/* webpackChunkName: "[request]" */ `@/geo/layer/${layerDef.id}/index.ts`)).default;
     }
 
+    layerDefExists(id: string): boolean {
+        return !!this._layerDefStore[id];
+    }
+
+    async createLayer(config: any): Promise<LayerBase> {
+        // TODO update the type of config?
+        if (!this.layerDefExists(config.layerType)) {
+            throw new Error(`No layer definition loaded for layer type ${config.layerType}`);
+        }
+
+        return this._layerDefStore[config.layerTYpe].generateLayer(config);
+    }
+
     /**
      * Removes the specified fixture from R4MP instance.
      *
