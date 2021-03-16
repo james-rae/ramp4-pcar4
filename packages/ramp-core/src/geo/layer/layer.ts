@@ -9,7 +9,8 @@ import { LayerBase } from '../internal';
  */
 type ILayerBase = new (config: any, iApi: InstanceAPI) => LayerBase;
 
-// TODO revist how useful this is. LayerInstance implements LayerBase so its very similar to ILayerBase
+// TODO revist how useful this is. LayerInstance implements LayerBase so its very similar to ILayerBase.
+//      look at the Base vs Instance stuff in the fixtures section. does it still make sense?
 /**
  * A constructor returning an instance of LayerInstance class.
  */
@@ -19,7 +20,7 @@ type ILayerInstance = new (config: any, iApi: InstanceAPI) => LayerInstance;
 // metadata to store and track our layer definitions
 class LayerDef {
     layerConstructor: ILayerBase | undefined;
-    // strongLayerConstructor: ILayerInstance | undefined; // would be a layer def from inside RAMP
+    strongLayerConstructor: ILayerInstance | undefined; // would be a layer def from inside RAMP
     rawBase: boolean = false; // true if constructor is from outside the core and requires updateBaseToInstance
     loadPromise: Promise<any> | undefined; // resolves when layer definition has loaded
     id: string;
@@ -33,16 +34,15 @@ class LayerDef {
 
     // TODO figure out the config. if we have the config present for instantiation of the layer object, or we
     //      push it off to a "load layer" function which could be used for reloads as well.
-    async generateLayer(config: any): Promise<LayerBase> {
+    async generateLayer(config: any): Promise<LayerInstance> {
         await this.loadPromise;
 
-        if (!this.layerConstructor) {
-            throw new Error(`Layer Definition bug. A definition promise resolved but no definition exists. Definition id ${this.id}`);
-        }
-        if (this.rawBase) {
+        if (this.rawBase && this.layerConstructor) {
             return LayerInstance.updateBaseToInstance(new this.layerConstructor(config, this.api), this.id, this.api);
+        } else if (this.strongLayerConstructor) {
+            return new this.strongLayerConstructor(config, this.api);
         } else {
-            return new this.layerConstructor(config, this.api); // TODO prob needs instance api passed in
+            throw new Error(`Layer Definition bug. A definition promise resolved but no definition exists. Definition id ${this.id}`);
         }
     }
 }
@@ -107,9 +107,6 @@ export class LayerAPI extends APIScope {
             // store the def in the registry before blocking
             this._layerDefStore[id] = layerDef;
             await layerDef.loadPromise;
-
-            // TODO this would happen on the new layer function
-            // layerDef = new layerDef(id, this.$iApi);
         }
 
         // TODO: calling `ADD_FIXTURE` mutation directly here; might want to switch to calling the action `addFixture`
@@ -125,15 +122,15 @@ export class LayerAPI extends APIScope {
         // TODO might need some magic in the webpack to copy stuff over.
         //      we might also need to structure our layers folder to be by-id
         // perform a dynamic webpack import of a internal fixture (allows for code splitting)
-        layerDef.layerConstructor = (await import(/* webpackChunkName: "[request]" */ `@/geo/layer/${layerDef.id}/index.ts`)).default;
+        layerDef.strongLayerConstructor = (await import(/* webpackChunkName: "[request]" */ `@/geo/layer/${layerDef.id}/index.ts`)).default;
     }
 
     layerDefExists(id: string): boolean {
         return !!this._layerDefStore[id];
     }
 
-    async createLayer(config: any): Promise<LayerBase> {
-        // TODO update the type of config?
+    async createLayer(config: any): Promise<LayerInstance> {
+        // TODO update the type of config? want to type it as RampLayerConfig but we could have 3rd party random thing passed in
         if (!this.layerDefExists(config.layerType)) {
             throw new Error(`No layer definition loaded for layer type ${config.layerType}`);
         }

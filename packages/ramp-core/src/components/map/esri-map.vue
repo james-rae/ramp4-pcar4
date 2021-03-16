@@ -7,7 +7,7 @@ import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 // BAAH
 // import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'rampgeoapi';
-import { LayerInstance, MapAPI, RampMapConfig } from '../../geo/internal';
+import { LayerInstance, MapAPI, RampLayerConfig, RampMapConfig } from '../../geo/internal';
 import { GlobalEvents } from '../../api/internal';
 import { APIInterface /*, RampGeo // BAAH */ } from '../../api';
 // import { window } from '@/main';
@@ -21,6 +21,8 @@ export default class EsriMap extends Vue {
 
     @Get(LayerStore.layers) layers!: LayerInstance[];
 
+    @Get(LayerStore.layerConfigs) layerConfigs!: RampLayerConfig[];
+
     map!: MapAPI; // TODO assuming we need this as a local property for vue binding. if we don't, remove it and just use $iApi.geo.map
 
     created() {
@@ -28,17 +30,42 @@ export default class EsriMap extends Vue {
         console.log(this.layers);
     }
 
-    // BAAH
-    @Watch('layers')
-    onLayerArrayChange(newValue: LayerInstance[], oldValue: LayerInstance[]) { // BAAH
+    @Watch('layerConfigs')
+    onLayerConfigArrayChange(newValue: RampLayerConfig[], oldValue: RampLayerConfig[]) { // BAAH
         // TODO we are getting frequent errors at startup; something reacts to layer array
         //      change before map exists. kicking out for now to make demos work.
         //      possibly this is evil in vue state land. if so, then someone figure out
         //      the root cause and fix that.
         if (!this.map) { return; }
 
-        newValue.filter(l => !oldValue.includes(l)).forEach(layer => {
-            this.map.addLayer(layer);
+        newValue.filter(lc => !oldValue.includes(lc)).forEach(layerConfig => {
+
+            let defLoadProm: Promise<string>;
+
+            // check if we need to load the layer class
+            if (this.$iApi.geo.layer.layerDefExists(layerConfig.layerType)) {
+                defLoadProm = Promise.resolve(layerConfig.layerType);
+            } else {
+                // if the definition is a custom number, the site host would have had to add the
+                // definition already. this block should only run for layer types that are bundled
+                // in the ramp core codebase.
+                defLoadProm = this.$iApi.geo.layer.addLayerDef(layerConfig.layerType);
+            }
+
+            // wait for definition to load, or ride the resolve if already loaded
+            defLoadProm.then(() => {
+                // create the layer instantiation
+                this.$iApi.geo.layer.createLayer(layerConfig).then(layer => {
+                    // TODO call the new layer load method.
+                    //      might need to wait on that (think file layers that are making asynch calls prior to creating esri layer)
+                    //      see if layers are going to expose an "esri layer exists" promise, leverage that if they do
+                    this.map.addLayer(layer);
+                });
+            });
+
+            // load the layer
+
+            // add to the map
 
             // a bit dangerous but ideally https://github.com/ramp4-pcar4/ramp4-pcar4/issues/126 and https://github.com/ramp4-pcar4/ramp4-pcar4/issues/173
             // will make this more seamless and not need to worry about having multiple listeners.
@@ -62,7 +89,9 @@ export default class EsriMap extends Vue {
         this.map = this.$iApi.geo.map;
         this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
 
-        this.onLayerArrayChange(this.layers, []);
+        // TODO see if we still need this. map config should trigger the array watcher due to the store.
+        //      possibly layer config is processed before map config is done creating map?
+        // this.onLayerArrayChange(this.layers, []);
     }
 
 }
