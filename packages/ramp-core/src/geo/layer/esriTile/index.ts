@@ -10,16 +10,18 @@ import { EsriTileLayer } from '../../esri';
 
 class TileLayer extends CommonLayer {
 
-    esriLayer: esri.TileLayer;
+    esriLayer: esri.TileLayer | undefined;
 
     constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);
         this.supportsIdentify = false;
         this._layerType = LayerType.TILE;
+    }
 
-        // TODO this will all get restructured to allow reloading to use the same methods
-        this.esriLayer = new EsriTileLayer(this.makeEsriLayerConfig(rampConfig));
-        this.initLayer();
+    async initiate(): Promise<void> {
+
+        this.esriLayer = new EsriTileLayer(this.makeEsriLayerConfig(this.origRampConfig));
+        await super.initiate();
     }
 
     /**

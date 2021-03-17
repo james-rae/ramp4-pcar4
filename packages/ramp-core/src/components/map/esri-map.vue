@@ -59,18 +59,18 @@ export default class EsriMap extends Vue {
                     // TODO call the new layer load method.
                     //      might need to wait on that (think file layers that are making asynch calls prior to creating esri layer)
                     //      see if layers are going to expose an "esri layer exists" promise, leverage that if they do
-                    this.map.addLayer(layer);
+                    layer.initiate().then(() => {
+                        // TODO do we need to care about map layer order?
+                        this.map.addLayer(layer);
+                    });
                 });
             });
-
-            // load the layer
-
-            // add to the map
 
             // a bit dangerous but ideally https://github.com/ramp4-pcar4/ramp4-pcar4/issues/126 and https://github.com/ramp4-pcar4/ramp4-pcar4/issues/173
             // will make this more seamless and not need to worry about having multiple listeners.
 
             // BAAH
+            // TODO verify layer object is tapped into the event API, then delete this.
             /*
             layer.filterChanged.listen((payload: FilterEventParam) => {
                 this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, payload);

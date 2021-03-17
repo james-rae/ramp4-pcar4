@@ -48,7 +48,7 @@ export class CommonLayer extends LayerInstance {
     // TODO consider also having a loaded boolean property, allowing a synch check if layer has loaded or not. state can flip around to update, etc.
     //      alternately implement something like function layerLoaded() from old geoApi
     protected loadPromise: DefPromise; // a promise that resolves when layer is fully ready and safe to use. for convenience of caller
-    protected esriPromise: DefPromise; // a promise that resolves when esri layer object has been created
+    // protected esriPromise: DefPromise; // a promise that resolves when esri layer object has been created
     protected viewPromise: DefPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     // FC management
@@ -72,7 +72,7 @@ export class CommonLayer extends LayerInstance {
         this.sawLoad = false;
         this.sawRefresh = false;
         this.loadPromise = new DefPromise();
-        this.esriPromise = new DefPromise();
+        // this.esriPromise = new DefPromise();
         this.viewPromise = new DefPromise();
 
         this.fcs = [];
@@ -111,8 +111,10 @@ export class CommonLayer extends LayerInstance {
         });
     }
 
-    // generic init stuff, like adding listeners/propogaters to events
-    protected initLayer() {
+    async initiate(): Promise<void> {
+        // TODO add note about this being a superclass and it should be called via
+        //      super.initiate() in subclass.initiate() at appropriate time
+
         // TODO add event handlers.  basic stuff here, super classes can add more.
         // TODO clean up comment mass after design is settled and working
 
@@ -145,6 +147,7 @@ export class CommonLayer extends LayerInstance {
         //      visibility might need an optional FC index (whatever we're calling that)
 
         if (!this.esriLayer) {
+            // TODO maybe different more specific error here. We assume the .initiate() on the subclass would have created the layer by now.
             this.noLayerErr();
             return
         }
@@ -204,9 +207,22 @@ export class CommonLayer extends LayerInstance {
             this.viewPromise.resolveMe();
         });
 
-        this.esriPromise.resolveMe();
-
+        // this.esriPromise.resolveMe();
+        return Promise.resolve();
     }
+
+     async terminate(): Promise<void> {
+        // TODO undo any listeners / on() / event madness.
+        //      preserve layer tree if it's not done automatically.
+        //      reset statuses.
+        //      reset deferred promises?
+        //      null out layer objects? clear FC array? call cleanup on FCs first?
+
+        this.updateState(LayerState.NEW);
+
+        return Promise.resolve();
+    }
+
 
     // TODO strongly type if it makes sense. unsure if we want client config definitions in here
     //      that said if client shema is different that here, things are gonna break so maybe this is good idea
@@ -314,9 +330,11 @@ export class CommonLayer extends LayerInstance {
      * @method isReadyForMap
      * @returns {Promise} resolves when the layer has finished loading
      */
+    /*
     isReadyForMap(): Promise<void> {
         return this.esriPromise.getPromise();
     }
+    */
 
     // ----------- LAYER MANAGEMENT -----------
 

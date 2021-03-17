@@ -1,7 +1,7 @@
 // layers api and other public, general layer things.
 import esri = __esri;
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { LayerBase } from '../internal';
+import { LayerBase, TreeNode } from '../internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
@@ -297,7 +297,7 @@ export class LayerInstance extends APIScope implements LayerBase {
      * @type {string}
      * @memberof FixtureInstance
      */
-    // readonly id: string;
+    id: string;
 
     /**
      * Creates an instance of LayerInstance.
@@ -308,19 +308,46 @@ export class LayerInstance extends APIScope implements LayerBase {
      */
     constructor(config: any, iApi: InstanceAPI) {
         super(iApi);
-
+        this.id = ''; // take from config here?
         this.config = config;
     }
 
+    /*
     isReadyForMap(): Promise<void> {
         // TODO revist the intelligence of this. it should get overwritten,
         //      but i guess auto-resolve is best thing for 3rd party if they
         //      don't care; otherwise will never get added to the map.
+        // TODO will probably not be needed, the initiate function will provide the promise
         return Promise.resolve();
     }
+    */
 
     esriLayer: esri.Layer | undefined;
     esriView: esri.LayerView | undefined;
+
+    /**
+     * Sets up the internal layer object (ESRI) and initiates the loading process.
+     * The promise returned resolves when the object exists (i.e. .esriLayer is populated).
+     * This means the layer can be added to the map.
+     */
+    async initiate(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    /**
+     * Resets the layer class to the state it was in "pre-initialize". Implementers can decide if they want
+     * to retain any state (e.g. UIDs/layerTree would be a good idea).
+     * Also an appropriate function to remove any event listeners/triggers.
+     * This would be called in situations like a layer getting deleted, or in a layer reload (initialize would be called again afterwards).
+     * Note this does not remove any layers from the map stack, that must be done by the caller.
+     */
+    async terminate(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    getLayerTree(): TreeNode {
+        return new TreeNode(0, 'Fake tree', 'getLayerTree() was not implemented in layer');
+    }
 
     /**
      * Removes the specified fixture from R4MP instance.
@@ -365,10 +392,10 @@ export class LayerInstance extends APIScope implements LayerBase {
     }
     */
 
-    added?(): void;
-    removed?(): void;
-    initialized?(): void;
-    terminated?(): void;
+    // added?(): void;
+    // removed?(): void;
+    // initialized?(): void;
+    // terminated?(): void;
 
     /**
      * Returns the fixture config section (JSON) taken from the global config.

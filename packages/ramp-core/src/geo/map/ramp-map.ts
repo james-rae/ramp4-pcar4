@@ -154,18 +154,18 @@ export class MapAPI extends CommonMapAPI {
      * @param {LayerBase} layer the GeoAPI layer to add
      * @returns {Promise<void>} a promise that resolves when the layer has been added to the map
      */
-    async addLayer (layer: LayerInstance): Promise<void> {
+    addLayer(layer: LayerInstance): void {
         if (!this.esriMap) {
             this.noMapErr();
             return;
         }
-        await layer.isReadyForMap();
+        // await layer.isReadyForMap();
         if (layer.esriLayer) {
             this.esriMap.add(layer.esriLayer);
         } else {
-            console.error('layer resolved promise .isReadyForMap without an esri layer');
+            // TODO maybe we should call layer.initiate() and block? Could be a nice shortcut. But also might have unintended effects.
+            console.error('Layer added to map without an esri layer. Likely layer.initiate() was not called or had not finished.');
         }
-        // layer.hostMap = this;
     }
 
     /**

@@ -191,7 +191,7 @@ export interface DojoWindow extends Window {
 }
 
 export enum LayerState { // these are used as css classes; hence the `rv` prefix
-    NEW = 'rv-new',
+    NEW = 'rv-new', // this means layer class exists but needs to be initialized()
     REFRESH = 'rv-refresh',
     LOADING = 'rv-loading',
     LOADED = 'rv-loaded',
