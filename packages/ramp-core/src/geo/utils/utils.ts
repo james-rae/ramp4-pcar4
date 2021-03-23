@@ -3,7 +3,6 @@
 // this makes the module that gets exposed on GeoAPI under .util(s)
 // TODO add proper comments
 
-import esri = __esri;
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { EpsgLookup, GeometryAPI, ProjectionAPI, SharedUtilsAPI } from '../internal';
 

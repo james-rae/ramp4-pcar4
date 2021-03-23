@@ -5,7 +5,6 @@
 
 // TODO add proper comments
 
-import esri = __esri;
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { EsriMap } from '../esri';
 import { Basemap, RampMapConfig } from '../internal';
@@ -31,7 +30,7 @@ export class CommonMapAPI extends APIScope {
 
         this._basemapStore = config.basemaps.map(bmConfig => new Basemap(bmConfig));
 
-        const esriConfig: esri.MapProperties = {};
+        const esriConfig: __esri.MapProperties = {};
         if (config.initialBasemapId) {
             esriConfig.basemap = this.findBasemap(config.initialBasemapId).innerBasemap;
         }

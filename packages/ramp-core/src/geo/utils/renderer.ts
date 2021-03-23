@@ -3,7 +3,6 @@
 // contains renderer classes that let us decorate and work with ESRI renderer classes.
 // we can add more classes to support more renderer types if we need to
 
-// import esri = __esri;
 import { Attributes } from '../internal';
 import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '../esri';
 

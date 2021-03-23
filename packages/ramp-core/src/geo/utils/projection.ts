@@ -1,5 +1,3 @@
-import esri = __esri;
-
 import { Tools } from 'terraformer';
 import GeoJson from 'geojson';
 import { APIScope, InstanceAPI } from '../../api/internal';
@@ -63,12 +61,12 @@ export class ProjectionAPI extends APIScope {
 
         return new Promise((resolve, reject) => {
             const epsgUrl: string = (window.location.protocol === 'https:' ? 'https:' : 'http:') + `//epsg.io/${matcher[1]}.proj4`;
-            const params: esri.RequestOptions = {
+            const params: __esri.RequestOptions = {
                 responseType : 'text'
             };
-            const restReq: IPromise<esri.RequestResponse> = EsriRequest(epsgUrl, params); // TODO since this is outside of esri api, consider using the vue web request lib here
+            const restReq: IPromise<__esri.RequestResponse> = EsriRequest(epsgUrl, params); // TODO since this is outside of esri api, consider using the vue web request lib here
 
-            restReq.then((serviceResult: esri.RequestResponse) => {
+            restReq.then((serviceResult: __esri.RequestResponse) => {
                 if (serviceResult.data) {
                     resolve(serviceResult.data); // should be a string. TEST!
                 } else {

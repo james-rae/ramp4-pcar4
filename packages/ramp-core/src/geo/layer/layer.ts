@@ -1,5 +1,5 @@
 // layers api and other public, general layer things.
-import esri = __esri;
+
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { LayerBase, TreeNode } from '../internal';
 
@@ -134,8 +134,9 @@ export class LayerAPI extends APIScope {
         if (!this.layerDefExists(config.layerType)) {
             throw new Error(`No layer definition loaded for layer type ${config.layerType}`);
         }
+        // console.log('CreateLayer - this is the layer def from the store')
 
-        return this._layerDefStore[config.layerTYpe].generateLayer(config);
+        return this._layerDefStore[config.layerType].generateLayer(config);
     }
 
     /**
@@ -322,8 +323,8 @@ export class LayerInstance extends APIScope implements LayerBase {
     }
     */
 
-    esriLayer: esri.Layer | undefined;
-    esriView: esri.LayerView | undefined;
+    esriLayer: __esri.Layer | undefined;
+    esriView: __esri.LayerView | undefined;
 
     /**
      * Sets up the internal layer object (ESRI) and initiates the loading process.

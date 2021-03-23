@@ -1,7 +1,5 @@
 // TODO add proper comments
 
-import esri = __esri;
-
 import { APIScope, GlobalEvents, InstanceAPI } from '../../../api/internal';
 import { AttributeSet, CommonFC, CommonLayer, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
@@ -10,7 +8,7 @@ import { EsriTileLayer } from '../../esri';
 
 class TileLayer extends CommonLayer {
 
-    esriLayer: esri.TileLayer | undefined;
+    esriLayer: __esri.TileLayer | undefined;
 
     constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);
@@ -30,9 +28,9 @@ class TileLayer extends CommonLayer {
      * @param rampLayerConfig snippet from RAMP for this layer
      * @returns configuration object for the ESRI layer representing this layer
      */
-    protected makeEsriLayerConfig(rampLayerConfig: RampLayerConfig): esri.TileLayerProperties {
+    protected makeEsriLayerConfig(rampLayerConfig: RampLayerConfig): __esri.TileLayerProperties {
         // TODO flush out
-        const esriConfig: esri.TileLayerProperties = super.makeEsriLayerConfig(rampLayerConfig);
+        const esriConfig: __esri.TileLayerProperties = super.makeEsriLayerConfig(rampLayerConfig);
 
         return esriConfig;
     }

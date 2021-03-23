@@ -32,6 +32,9 @@ export default class EsriMap extends Vue {
 
     @Watch('layerConfigs')
     onLayerConfigArrayChange(newValue: RampLayerConfig[], oldValue: RampLayerConfig[]) { // BAAH
+
+        console.log('Saw layer config change', oldValue, newValue, !!this.map);
+
         // TODO we are getting frequent errors at startup; something reacts to layer array
         //      change before map exists. kicking out for now to make demos work.
         //      possibly this is evil in vue state land. if so, then someone figure out
@@ -63,6 +66,9 @@ export default class EsriMap extends Vue {
                         // TODO do we need to care about map layer order?
                         this.map.addLayer(layer);
                     });
+
+                    // add layer to layer store
+                    this.$iApi.$vApp.$store.set(LayerStore.addLayers, [layer]);
                 });
             });
 
@@ -91,7 +97,7 @@ export default class EsriMap extends Vue {
 
         // TODO see if we still need this. map config should trigger the array watcher due to the store.
         //      possibly layer config is processed before map config is done creating map?
-        // this.onLayerArrayChange(this.layers, []);
+        this.onLayerConfigArrayChange(this.layerConfigs, []);
     }
 
 }

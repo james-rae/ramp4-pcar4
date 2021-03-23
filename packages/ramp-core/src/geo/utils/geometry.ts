@@ -1,6 +1,5 @@
 // TODO fancy up the docs
 
-import esri = __esri;
 import GeoJson from 'geojson';
 import { Graphic, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
     MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
@@ -38,7 +37,7 @@ export class GeometryAPI {
      * @param {String | Number} [id] optional id for the map point geometry on the result
      * @returns {MapClick} a generic bundle of data matching a subset of the incoming esri data
      */
-    esriMapClickToRamp(esriMapClick: esri.MapViewClickEvent | esri.MapViewDoubleClickEvent, id?: number | string): MapClick {
+    esriMapClickToRamp(esriMapClick: __esri.MapViewClickEvent | __esri.MapViewDoubleClickEvent, id?: number | string): MapClick {
         return {
             mapPoint: this._convEsriPointToRamp(esriMapClick.mapPoint, id),
             screenX: esriMapClick.x,
@@ -54,7 +53,7 @@ export class GeometryAPI {
      * @param {MapViewPointerMoveEvent} esriMapMove an event param from an esri 2D map click or double-click event
      * @returns {MapMove} a generic bundle of data matching a subset of the incoming esri data
      */
-    esriMapMouseToRamp(esriMapMove: esri.MapViewPointerMoveEvent): MapMove {
+    esriMapMouseToRamp(esriMapMove: __esri.MapViewPointerMoveEvent): MapMove {
         return {
             screenX: esriMapMove.x,
             screenY: esriMapMove.y,
@@ -69,7 +68,7 @@ export class GeometryAPI {
      * @param {BaseGeometry} rampApiGeom a RAMP API geometry
      * @returns {Geometry} an ESRI geometry
      */
-    geomRampToEsri(rampApiGeom: BaseGeometry): esri.Geometry {
+    geomRampToEsri(rampApiGeom: BaseGeometry): __esri.Geometry {
 
         switch (rampApiGeom.type) {
             case GeometryType.POINT:
@@ -100,19 +99,19 @@ export class GeometryAPI {
      * @param {String | Number} [id] optional id for the result geometry
      * @returns {BaseGeometry} a RAMP API geometry
      */
-    geomEsriToRamp(esriGeometry: esri.Geometry, id?: number | string): BaseGeometry {
+    geomEsriToRamp(esriGeometry: __esri.Geometry, id?: number | string): BaseGeometry {
 
         switch (esriGeometry.type) {
             case 'point':
-                return this._convEsriPointToRamp(<esri.Point>esriGeometry, id);
+                return this._convEsriPointToRamp(<__esri.Point>esriGeometry, id);
             case 'polyline':
-                return this._convEsriLineToRamp(<esri.Polyline>esriGeometry, id);
+                return this._convEsriLineToRamp(<__esri.Polyline>esriGeometry, id);
             case 'polygon':
-                return this._convEsriPolygonToRamp(<esri.Polygon>esriGeometry, id);
+                return this._convEsriPolygonToRamp(<__esri.Polygon>esriGeometry, id);
             case 'extent':
-                return this._convEsriExtentToRamp(<esri.Extent>esriGeometry, id);
+                return this._convEsriExtentToRamp(<__esri.Extent>esriGeometry, id);
             case 'multipoint':
-                return this._convEsriMultiPointToRamp(<esri.Multipoint>esriGeometry, id);
+                return this._convEsriMultiPointToRamp(<__esri.Multipoint>esriGeometry, id);
             default:
                 throw new Error(`Encountered unhandled geometry type ${esriGeometry.type}`);
         }

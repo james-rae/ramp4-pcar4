@@ -1,8 +1,6 @@
 // wraps and represents a 2D esri map
 // TODO add proper comments
 
-import esri = __esri;
-
 import { GlobalEvents, InstanceAPI } from '../../api/internal';
 import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, LayerInstance, RampMapConfig, MapClick,
     MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
@@ -23,7 +21,7 @@ export class MapAPI extends CommonMapAPI {
      * The internal esri map view. Avoid referencing outside of geoapi.
      * @private
      */
-    esriView: esri.MapView | undefined;
+    esriView: __esri.MapView | undefined;
 
     /**
      * The map spatial reference in RAMP API Spatial Reference format.
@@ -54,7 +52,7 @@ export class MapAPI extends CommonMapAPI {
 
         this._rampSR = SpatialReference.fromConfig(config.extent.spatialReference);
 
-        const esriViewConfig: esri.MapViewProperties = {
+        const esriViewConfig: __esri.MapViewProperties = {
             map: this.esriMap,
             container: targetDiv,
             constraints: {
@@ -68,7 +66,7 @@ export class MapAPI extends CommonMapAPI {
         // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
         this.esriView = new EsriMapView(esriViewConfig);
 
-        this.esriView.watch('extent', (newval: esri.Extent) => {
+        this.esriView.watch('extent', (newval: __esri.Extent) => {
             // NOTE: yes, double events. rationale is a block of code dealing with filters will not
             //       want to have two event handlers (one on filter, one on extent change) and synch
             //       between them. They can subscribe to the filter event and get all the info they need.

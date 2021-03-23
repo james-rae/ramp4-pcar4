@@ -9,7 +9,6 @@
 // they probably won't have access to "class" LayerInstance when using compiled RAMP (raw javascript).
 // this pattern is stolen from the fixture class model.
 
-import esri = __esri;
 import { TreeNode } from '../internal';
 
 // TODO consider making a number of these things optional with ? markup.
@@ -20,8 +19,8 @@ export interface LayerBase {
     layerType: string;
     // isReadyForMap(): Promise<void>;
 
-    esriLayer: esri.Layer | undefined;
-    esriView: esri.LayerView | undefined;
+    esriLayer: __esri.Layer | undefined;
+    esriView: __esri.LayerView | undefined;
 
     initiate(): Promise<void>;
     terminate(): Promise<void>;

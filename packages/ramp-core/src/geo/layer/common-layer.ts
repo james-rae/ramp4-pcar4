@@ -2,8 +2,6 @@
 // used for layer types defined by Core RAMP.
 // TODO add proper comments
 
-import esri = __esri;
-
 // import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
 //    FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
 
@@ -23,8 +21,8 @@ export class CommonLayer extends LayerInstance {
 
     // NOTE while having this var be protected makes sense, there are also cases where other parts of the geoapi need to access this.
     //      being public will also to allow hacking, which can be useful in a pinch. use underscore to make it clear this in not for playtimes.
-    esriLayer: esri.Layer | undefined;
-    esriView: esri.LayerView | undefined;
+    esriLayer: __esri.Layer | undefined;
+    esriView: __esri.LayerView | undefined;
 
     // used to manage debouncing when applying filter updates against a layer. Private! but needs to be seen by FCs.
     _lastFilterUpdate: string = '';
@@ -196,7 +194,7 @@ export class CommonLayer extends LayerInstance {
             }
         });
 
-        this.esriLayer.on('layerview-create', (e: esri.LayerLayerviewCreateEvent) => {
+        this.esriLayer.on('layerview-create', (e: __esri.LayerLayerviewCreateEvent) => {
             this.esriView = e.layerView;
             e.layerView.watch('updating', (newval: boolean) => {
                 this.updateState(newval ? LayerState.REFRESH : LayerState.LOADED );

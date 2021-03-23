@@ -3,8 +3,6 @@
 
 // TODO add proper comments
 
-import esri = __esri;
-
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { CommonLayer, DataFormat, LayerBase, LegendSymbology, ScaleSet } from '../internal';
 
