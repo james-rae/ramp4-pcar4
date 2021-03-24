@@ -31,7 +31,7 @@ import EsriRenderer from '@arcgis/core/renderers/Renderer';
 import EsriSimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
 import EsriUniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import EsriClassBreakInfo from '@arcgis/core/renderers/support/ClassBreakInfo';
-//import EsriRendererUtils from '@arcgis/core/renderers/support/jsonUtils';
+import EsriRendererUtils from '@arcgis/core/renderers/support/jsonUtils';
 import EsriUniqueValueInfo from '@arcgis/core/renderers/support/UniqueValueInfo';
 import EsriRequest from '@arcgis/core/request';
 import EsriPictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
@@ -88,7 +88,7 @@ export {
     EsriQuery,
     EsriQueryTask,
     EsriRenderer,
-    // EsriRendererUtils,
+    EsriRendererUtils,
     EsriRequest,
     EsriScaleBar,
     EsriSimpleFillSymbol,

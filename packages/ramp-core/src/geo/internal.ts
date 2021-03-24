@@ -30,12 +30,18 @@ export * from './map/ramp-map';
 export * from './layer/layer-base';
 export * from './layer/scale-set';
 export * from './layer/tree-node';
+export * from './layer/filter';
 export * from './layer/layer';
 export * from './layer/common-fc';
 export * from './layer/common-layer';
+export * from './layer/attrib-fc';
+export * from './layer/attrib-layer';
 
+export * from './utils/attribute';
 export * from './utils/geometry';
 export * from './utils/renderer';
+export * from './utils/symbology';
+export * from './utils/query';
 export * from './utils/shared-utils';
 export * from './utils/projection';
 export * from './utils/promise';

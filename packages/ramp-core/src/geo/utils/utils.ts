@@ -4,25 +4,22 @@
 // TODO add proper comments
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { EpsgLookup, GeometryAPI, ProjectionAPI, SharedUtilsAPI } from '../internal';
+import { AttributeAPI, EpsgLookup, GeometryAPI, ProjectionAPI, QueryAPI, SharedUtilsAPI, SymbologyAPI } from '../internal';
 
 /*
-import AttributeService from './AttributeService';
-import SharedUtils from './SharedUtils';
-import QueryService from './QueryService';
 import HighlightService from './HighlightService';
-import ProjectionService from './ProjectionService';
-import SymbologyService from './SymbologyService';
-import GeometryService from './GeometryService';
 import OgcService from './OgcService';
 */
 
 // TODO extend the InstanceAPI?
 export class UtilsAPI extends APIScope {
 
+    attributes: AttributeAPI;
     geom: GeometryAPI;
-    shared: SharedUtilsAPI;
     proj: ProjectionAPI;
+    query: QueryAPI;
+    shared: SharedUtilsAPI;
+    symbology: SymbologyAPI;
 
     /*
     attributes: AttributeService; // TODO do we want shorter name "attribs" or "attributes"
@@ -40,14 +37,13 @@ export class UtilsAPI extends APIScope {
         this.geom = new GeometryAPI();
         this.shared = new SharedUtilsAPI();
         this.proj = new ProjectionAPI(iApi, epsgFunction);
+        this.attributes = new AttributeAPI();
+        this.symbology = new SymbologyAPI();
+        this.query = new QueryAPI();
 
         /*
-        this.attributes = new AttributeService(infoBundle);
-        this.shared = new SharedUtils(infoBundle);
-        this.query = new QueryService(infoBundle);
+
         this.highlight = new HighlightService(infoBundle);
-        this.proj = new ProjectionService(infoBundle, epsgFunction);
-        this.symbology = new SymbologyService(infoBundle);
         this.ogc = new OgcService(infoBundle);
         */
     }
