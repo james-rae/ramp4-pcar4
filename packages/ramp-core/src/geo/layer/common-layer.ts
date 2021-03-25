@@ -81,7 +81,7 @@ export class CommonLayer extends LayerInstance {
     }
 
     protected noLayerErr(): void {
-        console.error('Attempted to manipulate the layer before it was generated');
+        console.error('Attempted to manipulate the layer before .initiate() finished');
     }
 
     // will give a new uid to use. if appropriate, will recycle same uid from a previous

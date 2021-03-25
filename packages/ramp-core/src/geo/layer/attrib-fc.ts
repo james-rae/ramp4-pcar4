@@ -21,7 +21,7 @@ export class AttribFC extends CommonFC {
     nameField: string;
     extent: EsriExtent | undefined;
     attLoader: AttributeLoaderBase | undefined;
-    featureCount: number | undefined; // TODO figure out how to identify an unknown count. will use undefined for now. -1 would be other option
+    featureCount: number;
     renderer: BaseRenderer | undefined;
     serviceUrl: string;
     protected quickCache: QuickCache | undefined;
@@ -35,6 +35,7 @@ export class AttribFC extends CommonFC {
         this.nameField = '';
         this.serviceUrl = '';
         this.fieldList = '';
+        this.featureCount = -1;
         this.fields = [];
         this.filter = new Filter();
     }
@@ -272,8 +273,22 @@ export class AttribFC extends CommonFC {
 
         // TODO rethink how this works. is it better to read from attributes every time?
         //      if we allow attribute value updates via API, then we probably have to do that.
-        if (this.attLoader.tabularAttributesCache) {
-            return this.attLoader.tabularAttributesCache;
+        if (!this.attLoader.tabularAttributesCache) {
+            // do not use await here. we want to store the promise and pass it on, not block until the promise resolves.
+            this.attLoader.tabularAttributesCache = this.getTabularAttributesGuts();
+        }
+
+        return this.attLoader.tabularAttributesCache;
+    }
+
+    private async getTabularAttributesGuts (): Promise<TabularAttributeSet> {
+        // this does the heavy lifting. it is abstracted from getTabularAttributes()
+        // because async format is not conductive to grabbing and caching the promise halfway
+        // through the function execution.
+
+        // redundant checks to shut up typescript
+        if (!this.attLoader) {
+            throw new Error('getTabularAttributesGuts call with missing attribute loader');
         }
 
         // TODO consider changing this to a warning and just return some dummy value
@@ -320,6 +335,7 @@ export class AttribFC extends CommonFC {
                 // have to use function() to get .this to reference the row.
                 // arrow notation will reference the attribFC class.
                 const secretFunc = function() {
+                    // @ts-ignore
                     return this[c.data];
                 };
 
@@ -332,13 +348,14 @@ export class AttribFC extends CommonFC {
 
         // we are storing a promise in tabularAttributesCache
         //    might need to revert to the way it was structured before.
-        this.attLoader.tabularAttributesCache = {
+        //    or create an async guts and then main caller does a two line cache and return
+        return {
             columns,
             rows,
             fields: this.getFields(), // keep fields for reference ...
-            oidField: this.oidField, // ... keep a reference to id field ...
-            oidIndex: attSet.oidIndex, // TODO determine if we need this anymore. who uses it? // ... and keep id mapping array
-            renderer: this.renderer // TODO this should probably not be here. we should have a better way to derive data that the renderer could provide
+            oidField: this.oidField // ... keep a reference to id field ...
+            // oidIndex: attSet.oidIndex, // TODO determine if we need this anymore. who uses it? // ... and keep id mapping array
+            // renderer: this.renderer // TODO this should probably not be here. we should have a better way to derive data that the renderer could provide
         };
 
         /* OLD PROMISE CATCH BLOCK
@@ -351,8 +368,6 @@ export class AttribFC extends CommonFC {
                 }
             });
         */
-
-        return this.attLoader.tabularAttributesCache;
     }
 
     // TODO rename to getFeature for consistency?
@@ -382,7 +397,7 @@ export class AttribFC extends CommonFC {
         //      potential reasons not to: that type has additional properties like style.
 
         const resultFeat: any = {};
-        const map = opts.unboundMap || this.parentLayer.hostMap;
+        const map = this.parentLayer.$iApi.geo.map; // used to do `opts.unboundMap || ` first, but think we're getting rid of that.
 
         // redundant checks to shut up typescript
         if (!this.quickCache) {
@@ -395,7 +410,7 @@ export class AttribFC extends CommonFC {
         // const nonPoint = this.geomType !== 'esriGeometryPoint';
         let needWebAttr: boolean = false;
         let needWebGeom: boolean = false;
-        let scale: number;
+        let scale: number = 0;
 
         if (opts.getAttribs) {
             // attempt to get attributes from fastest source.
@@ -463,9 +478,9 @@ export class AttribFC extends CommonFC {
             };
 
             if (needWebGeom) {
-                serviceParams.mapSR = map.getSR().wkid.toString();
+                serviceParams.mapSR = map.getSR().wkid?.toString();
                 if (!this.quickCache.isPoint) {
-                    serviceParams.maxOffset = map._innerView.resolution;
+                    serviceParams.maxOffset = map.esriView?.resolution;
                 }
             }
 
@@ -499,8 +514,11 @@ export class AttribFC extends CommonFC {
      * @returns {Promise} resolves with an svg string encoding of the icon
      */
     async getIcon (objectId: number): Promise<string> {
+        if (!this.renderer) {
+            throw new Error('getIcon called before renderer is defined');
+        }
         const g = await this.getGraphic(objectId, { getAttribs: true });
-        return this.parentLayer.$iApi.geo.utils.symbology.getGraphicIcon(g.attributes, this.renderer);
+        return this.parentLayer.$iApi.geo.utils.symbology.getGraphicIcon(g.attributes || {}, this.renderer);
     }
 
     // TODO this is more of a utility function. leaving it public as it might be useful, revist when
@@ -549,9 +567,12 @@ export class AttribFC extends CommonFC {
         //      we could trigger a getattributes call to bulk download them upfront.
         //      would be more efficient (way less web calls).
 
-        if (typeof options.map !== 'undefined') {
-            options.map = this.parentLayer.hostMap;
+        // TODO this is likely obsolete. delete when confirmed
+        /*
+        if (typeof options.map === 'undefined') {
+            options.map = this.parentLayer.$iApi.geo.map;
         }
+        */
 
         if (!options.outFields) {
             options.outFields = this.fieldList;
@@ -562,8 +583,8 @@ export class AttribFC extends CommonFC {
         // run result ids through our quick cache pipeline
         const p: GetGraphicParams = {
             getGeom: !!options.includeGeometry,
-            getAttribs: true,
-            unboundMap: options.map
+            getAttribs: true
+            // unboundMap: options.map
         };
         const cacheQueue: Array<Promise<GetGraphicResult>> = oids.map(oid => this.getGraphic(oid, p));
         return Promise.all(cacheQueue);
@@ -579,7 +600,7 @@ export class AttribFC extends CommonFC {
      * @param {Extent} [extent] if provided, the result list will only include features intersecting the extent
      * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
      */
-    async getFilterOIDs(exclusions: Array<string> = [], extent: Extent = undefined): Promise<Array<number>> {
+    async getFilterOIDs(exclusions: Array<string> = [], extent: Extent | undefined = undefined): Promise<Array<number> | undefined> {
         // NOTE this logic should perform for both server and file based layers, as long as .queryOIDs is properly overriden
         const sql = this.filter.getCombinedSql(exclusions);
         const bExt: boolean = !!extent; // keep typescript happy
@@ -626,10 +647,15 @@ export class AttribFC extends CommonFC {
         if (whereClause === currentFilter) { return; }
 
         this.filter.setSql(filterKey, whereClause);
+
+        // BAAH
+        // wire in events api here once things are humming along
+        /*
         this.parentLayer.filterChanged.fireEvent({
             uid: this.uid,
             filterKey
         });
+        */
 
         // updating the filter on the layer can smash the server if multiple changes occur at once.
         // this will delay applying changes if more changes arrive shortly after this one.

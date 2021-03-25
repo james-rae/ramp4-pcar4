@@ -3,21 +3,20 @@
 // TODO add proper comments
 
 import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
-import { AttributeSet, CommonFC, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
+import { AttribFC, AttributeSet, CommonLayer, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
+    GeometryType, IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
     ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 import { } from '../esri';
 
-export class AttribLayer extends BaseLayer {
+export class AttribLayer extends CommonLayer {
 
-    protected constructor (infoBundle: InfoBundle, config: RampLayerConfig, reloadTree?: TreeNode) {
-
-        super(infoBundle, config, reloadTree);
+    protected constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI, reloadTree?: TreeNode) {
+        super(rampConfig, $iApi, reloadTree);
         this.supportsIdentify = true;
     }
 
     // only here to make typescript casting nice
-    protected getFC(layerIdx: number|string, validRoot: boolean = false): AttribFC {
+    protected getFC(layerIdx: number | string | undefined, validRoot: boolean = false): AttribFC | undefined {
         return (<AttribFC>super.getFC(layerIdx, validRoot));
     }
 
@@ -27,7 +26,7 @@ export class AttribLayer extends BaseLayer {
      * @param rampLayerConfig snippet from RAMP for this layer
      * @returns configuration object for the ESRI layer representing this layer
      */
-    protected makeEsriLayerConfig(rampLayerConfig: any): any {
+    protected makeEsriLayerConfig(rampLayerConfig: RampLayerConfig): any {
         // TODO flush out
         // NOTE: it would be nice to put esri.LayerProperties as the return type, but since we are cheating with refreshInterval it wont work
         //       we can make our own interface if it needs to happen (or can extent the esri one)
@@ -46,8 +45,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of attribute values
      */
-    getAttributes (layerIdx: number | string = undefined): Promise<AttributeSet> {
-        return this.getFC(layerIdx).attLoader.getAttribs();
+    getAttributes (layerIdx: number | string | undefined = undefined): Promise<AttributeSet> {
+        const fc = this.getFC(layerIdx);
+        if (fc && fc.attLoader) {
+            return fc.attLoader.getAttribs();
+        } else {
+            this.noLayerErr();
+            return Promise.resolve( {oidIndex: {}, features: []} );
+        }
     }
 
     /**
@@ -56,9 +61,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get fields for. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getFields (layerIdx: number | string = undefined): Array<FieldDefinition> {
-        // extra fancy so we dont have to expose the ESRI field class
-        return this.getFC(layerIdx).getFields();
+    getFields (layerIdx: number | string | undefined = undefined): Array<FieldDefinition> {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getFields();
+        } else {
+            this.noLayerErr();
+            return [];
+        }
     }
 
     /**
@@ -67,8 +77,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the geometry type of. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getGeomType (layerIdx: number | string = undefined): string {
-        return this.getFC(layerIdx).geomType;
+    getGeomType (layerIdx: number | string | undefined = undefined): string {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.geomType;
+        } else {
+            this.noLayerErr();
+            return GeometryType.UNKNOWN;
+        }
     }
 
     /**
@@ -77,8 +93,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name field of. Uses first/only if omitted.
      * @returns {string} name field
      */
-    getNameField (layerIdx: number | string = undefined): string {
-        return this.getFC(layerIdx).nameField;
+    getNameField (layerIdx: number | string | undefined = undefined): string {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.nameField;
+        } else {
+            this.noLayerErr();
+            return '';
+        }
     }
 
     /**
@@ -87,8 +109,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the OID field of. Uses first/only if omitted.
      * @returns {string} OID field
      */
-    getOidField (layerIdx: number | string = undefined): string {
-        return this.getFC(layerIdx).oidField;
+    getOidField (layerIdx: number | string | undefined = undefined): string {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.oidField;
+        } else {
+            this.noLayerErr();
+            return 'OBJECTID'; // bad but might save an error in a pinch
+        }
     }
 
     /**
@@ -96,8 +124,13 @@ export class AttribLayer extends BaseLayer {
      *
      * @param {Integer | String} [layerIdx] targets a layer index or uid to stop loading attributes for. Uses first/only if omitted.
      */
-    abortAttributeLoad (layerIdx: number | string = undefined): void {
-        this.getFC(layerIdx).attLoader.abortAttribLoad();
+    abortAttributeLoad (layerIdx: number | string | undefined = undefined): void {
+        const fc = this.getFC(layerIdx);
+        if (fc && fc.attLoader) {
+            fc.attLoader.abortAttribLoad();
+        } else {
+            this.noLayerErr();
+        }
     }
 
     /**
@@ -105,8 +138,13 @@ export class AttribLayer extends BaseLayer {
      *
      * @param {Integer | String} [layerIdx] targets a layer index or uid to detroy attributes for. Uses first/only if omitted.
      */
-    destroyAttributes (layerIdx: number | string = undefined): void {
-        this.getFC(layerIdx).attLoader.destroyAttribs();
+    destroyAttributes (layerIdx: number | string | undefined = undefined): void {
+        const fc = this.getFC(layerIdx);
+        if (fc && fc.attLoader) {
+            fc.attLoader.destroyAttribs();
+        } else {
+            this.noLayerErr();
+        }
     }
 
     // formerly known as getFormattedAttributes
@@ -118,8 +156,19 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get tabular attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of tabular attribute values
      */
-    getTabularAttributes (layerIdx: number | string = undefined): Promise<TabularAttributeSet> {
-        return this.getFC(layerIdx).getTabularAttributes();
+    getTabularAttributes (layerIdx: number | string | undefined = undefined): Promise<TabularAttributeSet> {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getTabularAttributes();
+        } else {
+            this.noLayerErr();
+            return Promise.resolve({
+                columns: [],
+                rows: [],
+                fields: [],
+                oidField: 'OBJECTID'
+            });
+        }
     }
 
     /**
@@ -128,8 +177,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to get the feature count for. Uses first/only if omitted.
      * @returns {Integer} number of features in the sublayer
      */
-    getFeatureCount (layerIdx: number | string = undefined): number {
-        return this.getFC(layerIdx).featureCount;
+    getFeatureCount (layerIdx: number | string | undefined = undefined): number {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.featureCount;
+        } else {
+            this.noLayerErr();
+            return -1;
+        }
     }
 
     // TODO think about this name. using getGraphic for consistency.
@@ -144,8 +199,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to find the graphic in. Uses first/only if omitted.
      * @returns {Promise} resolves with a fake graphic containing the requested information
      */
-    getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string = undefined): Promise<GetGraphicResult> {
-        return this.getFC(layerIdx).getGraphic(objectId, options);
+    getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string | undefined = undefined): Promise<GetGraphicResult> {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getGraphic(objectId, options);
+        } else {
+            this.noLayerErr();
+            return Promise.resolve({});
+        }
     }
 
     /**
@@ -155,8 +216,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to find the icon in. Uses first/only if omitted.
      * @returns {Promise} resolves with an svg string encoding of the icon
      */
-    getIcon (objectId: number, layerIdx: number | string = undefined): Promise<string> {
-        return this.getFC(layerIdx).getIcon(objectId);
+    getIcon (objectId: number, layerIdx: number | string | undefined = undefined): Promise<string> {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getIcon(objectId);
+        } else {
+            this.noLayerErr();
+            return Promise.resolve(''); // TODO if we come up with a 'blank' svg use that here
+        }
     }
 
     /**
@@ -167,8 +234,13 @@ export class AttribLayer extends BaseLayer {
      * @param {String} whereClause the WHERE clause of the filter
      * @param {Integer | String} [layerIdx] targets a layer index or uid to apply the filter to. Uses first/only if omitted.
      */
-    setSqlFilter(filterKey: string, whereClause: string, layerIdx: number | string = undefined): void {
-        this.getFC(layerIdx).setSqlFilter(filterKey, whereClause);
+    setSqlFilter(filterKey: string, whereClause: string, layerIdx: number | string | undefined = undefined): void {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            fc.setSqlFilter(filterKey, whereClause);
+        } else {
+            this.noLayerErr();
+        }
     }
 
     /**
@@ -178,8 +250,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid that has the filter. Uses first/only if omitted.
      * @returns {String} the value of the where clause for the filter. Empty string if not defined.
      */
-    getSqlFilter(filterKey: string, layerIdx: number | string = undefined): string {
-        return this.getFC(layerIdx).getSqlFilter(filterKey);
+    getSqlFilter(filterKey: string, layerIdx: number | string | undefined = undefined): string {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getSqlFilter(filterKey);
+        } else {
+            this.noLayerErr();
+            return '';
+        }
     }
 
     // TODO this makes for a fairly gnarly param. i.e. to target a sublayer with no extras, gotta call
@@ -193,8 +271,14 @@ export class AttribLayer extends BaseLayer {
      * @param {Integer | String} [layerIdx] targets a layer index or uid to inspect. Uses first/only if omitted.
      * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
      */
-    getFilterOIDs(exclusions: Array<string> = [], extent: Extent = undefined, layerIdx: number | string = undefined): Promise<Array<number>> {
-        return this.getFC(layerIdx).getFilterOIDs(exclusions, extent);
+    getFilterOIDs(exclusions: Array<string> = [], extent: Extent | undefined = undefined, layerIdx: number | string | undefined = undefined): Promise<Array<number> | undefined> {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            return fc.getFilterOIDs(exclusions, extent);
+        } else {
+            this.noLayerErr();
+            return Promise.resolve(undefined);
+        }
     }
 
     /**
@@ -204,8 +288,17 @@ export class AttribLayer extends BaseLayer {
      * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
      * @param {Integer | String} [layerIdx] targets a layer index or uid to update. Uses first/only if omitted.
      */
-    applySqlFilter (exclusions: Array<string> = [], layerIdx: number | string = undefined): void {
-        this.getFC(layerIdx).applySqlFilter(exclusions);
+    applySqlFilter (exclusions: Array<string> = [], layerIdx: number | string | undefined = undefined): void {
+        const fc = this.getFC(layerIdx);
+        if (fc) {
+            fc.applySqlFilter(exclusions);
+        } else {
+            this.noLayerErr();
+        }
+    }
+
+    protected notLoadedErr(): void {
+        console.error('Attempted to manipulate the layer before it was loaded');
     }
 
 }

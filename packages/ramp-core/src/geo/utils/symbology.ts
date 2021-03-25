@@ -1,4 +1,4 @@
-import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
+import { Attributes, AttributeSet, BaseGeometry, BaseRenderer, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
     MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
 import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
 
@@ -35,7 +35,7 @@ export class SymbologyAPI {
      * @param {Object} renderer an enhanced renderer (see function enhanceRenderer)
      * @return {String} svgcode Url to the features symbology image
      */
-    getGraphicIcon(attributes: Object, renderer: BaseRenderer): string {
+    getGraphicIcon(attributes: Attributes, renderer: BaseRenderer): string {
         return renderer.getGraphicIcon(attributes);
     }
 
