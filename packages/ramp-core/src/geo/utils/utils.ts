@@ -11,7 +11,6 @@ import HighlightService from './HighlightService';
 import OgcService from './OgcService';
 */
 
-// TODO extend the InstanceAPI?
 export class UtilsAPI extends APIScope {
 
     attributes: AttributeAPI;
@@ -34,12 +33,12 @@ export class UtilsAPI extends APIScope {
     constructor (iApi: InstanceAPI, epsgFunction: EpsgLookup | undefined = undefined) {
         super(iApi);
 
+        this.attributes = new AttributeAPI(iApi);
         this.geom = new GeometryAPI();
-        this.shared = new SharedUtilsAPI();
         this.proj = new ProjectionAPI(iApi, epsgFunction);
-        this.attributes = new AttributeAPI();
-        this.symbology = new SymbologyAPI();
-        this.query = new QueryAPI();
+        this.query = new QueryAPI(iApi);
+        this.shared = new SharedUtilsAPI();
+        this.symbology = new SymbologyAPI(iApi);
 
         /*
 

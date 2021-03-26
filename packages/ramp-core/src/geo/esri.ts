@@ -12,7 +12,7 @@ import EsriPoint from '@arcgis/core/geometry/Point';
 import EsriPolygon from '@arcgis/core/geometry/Polygon';
 import EsriPolyline from '@arcgis/core/geometry/Polyline';
 import EsriSpatialReference from '@arcgis/core/geometry/SpatialReference';
-//import EsriGeometryJsonUtils from '@arcgis/core/geometry/support/jsonUtils';
+import EsriGeometryJsonUtils from '@arcgis/core/geometry/support/jsonUtils';
 import EsriGraphic from '@arcgis/core/Graphic';
 import EsriFeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import EsriGraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
@@ -64,7 +64,7 @@ export {
     EsriFeatureFilter,
     EsriFeatureLayer,
     EsriField,
-    // EsriGeometryJsonUtils,
+    EsriGeometryJsonUtils,
     EsriGeometryService,
     EsriGraphic,
     EsriGraphicsLayer,

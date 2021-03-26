@@ -3,17 +3,26 @@
 // TODO add proper comments
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
+import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, GetGraphicResult, GetGraphicServiceDetails, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
     MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
-import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
+import { EsriExtent, EsriGeometryJsonUtils, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
 
-export class AttributeAPI {
+// TODO this feels like it should be an interface. it is never new'd
+export interface AttributeLoaderDetails {
+    supportsLimit?: boolean; // indicates if server will return information about what the maximum number of attributes will be downloaded in a single request
+    attribs?: string; // comma delimited list of attributes to download. '*' for all
+    serviceUrl?: string; // feature layer endpoint on an arcgis server
+    sourceGraphics?: __esri.Collection<__esri.Graphic>; // set of graphics from non-ArcGIS server source
+    maxId?: number; // current maximum OID we have downloaded. i.e. keeps track of where we are over multiple batches of downloads
+    batchSize: number; // calculated maximum amount of attributes that can be downloaded in a single request
+    oidField: string; // attribute name of the OID field
+}
 
-    /*
-    constructor (infoBundle: InfoBundle) {
-        super(infoBundle);
+export class AttributeAPI extends APIScope {
+
+    constructor (iApi: InstanceAPI) {
+        super(iApi);
     }
-    */
 
     private oidIndexer(attSet: AttributeSet, oidField: string): void {
         // make index on object id
@@ -23,12 +32,13 @@ export class AttributeAPI {
         });
     }
 
-    private arcGisBatchLoad (details: AttributeLoaderDetails, controller: AsynchAttribController): Promise<Array<any>> {
+    private async arcGisBatchLoad (details: AttributeLoaderDetails, controller: AsynchAttribController): Promise<Array<any>> {
         if (controller.loadAbortFlag) {
             // stop that stop that
-            return Promise.resolve([]);
+            return [];
         }
 
+        // make a web call that downloads a chunk of attributes.
         const params: __esri.RequestOptions = {
             query: {
                 where: `${details.oidField}>${details.maxId}`,
@@ -37,60 +47,59 @@ export class AttributeAPI {
                 f: 'json'
             }
         };
-        const restReq = EsriRequest(details.serviceUrl + '/query', params);
 
-        return new Promise((resolve, reject) => {
-            // TODO revisit error handling. might need a try-catch?
-            restReq.then((serviceResult: __esri.RequestResponse) => {
-                if (serviceResult.data && serviceResult.data.features) {
-                    const feats: Array<any> = serviceResult.data.features;
-                    const len: number = feats.length;
+        // TODO possibly put a .catch on the end of the esri request? see commented error handler at bottom
+        const serviceResult = await EsriRequest(details.serviceUrl + '/query', params);
 
-                    if (len > 0) {
-                        // figure out if we hit the end of the data. different logic for newer vs older servers.
-                        controller.loadedCount += len;
-                        let moreDataToLoad: boolean;
-                        if (details.supportsLimit) {
-                            moreDataToLoad = serviceResult.data.exceededTransferLimit;
-                        } else {
-                            if (details.batchSize === -1) {
-                                // this is our first batch. set the max batch size to this batch size
-                                details.batchSize = len;
-                            }
-                            moreDataToLoad = (len >= details.batchSize);
-                        }
+        if (serviceResult.data && serviceResult.data.features) {
+            const feats: Array<any> = serviceResult.data.features;
+            const len = feats.length;
 
-                        if (moreDataToLoad) {
-                            // call the service again for the next batch of data.
-                            // max id becomes last object id in the current batch
-
-                            details.maxId = feats[len - 1].attributes[details.oidField];
-                            this.arcGisBatchLoad(details, controller).then((futureFeats: Array<any>) => {
-                                // take our current batch, append on everything the recursive call loaded, and return
-                                resolve(feats.concat(futureFeats));
-                            }, (e: any) => {
-                                reject(e);
-                            });
-
-                        } else {
-                            // done thanks
-                            resolve(feats);
-                        }
-                    } else {
-                        // no more data.  we are done
-                       resolve([]);
+            if (len > 0) {
+                // figure out if we hit the end of the data. different logic for newer vs older servers.
+                controller.loadedCount += len;
+                let moreDataToLoad: boolean;
+                if (details.supportsLimit) {
+                    moreDataToLoad = serviceResult.data.exceededTransferLimit;
+                } else {
+                    if (details.batchSize === -1) {
+                        // this is our first batch. set the max batch size to this batch size
+                        details.batchSize = len;
                     }
+                    moreDataToLoad = (len >= details.batchSize);
+                }
+
+                if (moreDataToLoad) {
+                    // call the service again for the next batch of data.
+                    // max id becomes last object id in the current batch
+
+                    details.maxId = feats[len - 1].attributes[details.oidField];
+                    const futureFeats = await this.arcGisBatchLoad(details, controller);
+                    // take our current batch, append on everything the recursive call loaded, and return
+                    return feats.concat(futureFeats);
+
 
                 } else {
-                    // TODO nothing came back, handle appropriately with error party rejectorama
-                    throw new Error('whoooops');
+                    // done thanks
+                    return feats;
                 }
-            }, (e: any) => {
-                // TODO handle errors properly
-                // TODO investigate if this is proper location where EsriErrorDetails will appear
-                throw new Error('Service attribute load error : ' + e.EsriErrorDetails || e);
-            });
+            } else {
+                // no more data.  we are done
+                return [];
+            }
+
+        } else {
+            // TODO nothing came back, handle appropriately with error party rejectorama
+            throw new Error('whoooops');
+        }
+
+        /*
+        }, (e: any) => {
+            // TODO handle errors properly
+            // TODO investigate if this is proper location where EsriErrorDetails will appear
+            throw new Error('Service attribute load error : ' + e.EsriErrorDetails || e);
         });
+        */
     }
 
     async loadArcGisServerAttributes(details: AttributeLoaderDetails, controller: AsynchAttribController): Promise<AttributeSet> {
@@ -113,12 +122,11 @@ export class AttributeAPI {
     }
 
     async loadGraphicsAttributes(details: AttributeLoaderDetails, controller: AsynchAttribController): Promise<AttributeSet> {
-         // TODO call code to strip from layer
-         if (!details.sourceGraphics) {
+        if (!details.sourceGraphics) {
             throw new Error('No .sourceGraphics provided to file layer attribute loader');
         }
 
-        const pluckedAttributes: esri.Collection<any> = details.sourceGraphics.map((g: esri.Graphic) => {
+        const pluckedAttributes = details.sourceGraphics.map((g: __esri.Graphic) => {
             // TODO we may need to strip off attributes here based on what we decide to do.
             //      there is no network traffic advantage for files (all data is already loaded).
             //      but we may need to do it for stuff like populating a grid with reduced columns.
@@ -138,8 +146,8 @@ export class AttributeAPI {
         return attSet;
     }
 
-    loadSingleFeature(details: GetGraphicServiceDetails): Promise<GetGraphicResult> {
-        const params: esri.RequestOptions = {
+    async loadSingleFeature(details: GetGraphicServiceDetails): Promise<GetGraphicResult> {
+        const params: __esri.RequestOptions = {
             query: {
                 f: 'json',
                 objectIds: details.oid,
@@ -147,10 +155,10 @@ export class AttributeAPI {
                 outFields: details.attribs
             }
         };
-        if (!this.isUndefined(details.maxOffset)) {
+        if (typeof details.maxOffset !== 'undefined') {
             params.query.maxAllowableOffset = details.maxOffset;
         }
-        if (!this.isUndefined(details.mapSR)) {
+        if (typeof details.mapSR !== 'undefined') {
             params.query.outSR = details.mapSR;
         }
 
@@ -161,46 +169,31 @@ export class AttributeAPI {
         //      could add this to the tile schema object of our config. if missing we omit, but allow
         //      author to define a precision for better performance. could we apply that elsewhere? (e.g. featurelayers?)
 
-        const restReq = this.esriBundle.esriRequest(details.serviceUrl + '/query', params);
+        const serviceResult = await EsriRequest(details.serviceUrl + '/query', params);
 
-        return restReq.then((serviceResult: esri.RequestResponse) => {
-            if (serviceResult.data && serviceResult.data.features) {
-                const feats: Array<any> = serviceResult.data.features;
-                 if (feats.length > 0) {
+        if (serviceResult.data && serviceResult.data.features) {
+            const feats: Array<any> = serviceResult.data.features;
+            if (feats.length > 0) {
 
-                    const feat = feats[0];
-                    const result: GetGraphicResult = {
-                        attributes: feat.attributes // attributes are always there, so we always return them. letter caller decide to discard them or not.
-                    };
+                const feat = feats[0];
+                const result: GetGraphicResult = {
+                    attributes: feat.attributes // attributes are always there, so we always return them. letter caller decide to discard them or not.
+                };
 
-                    if (details.includeGeometry) {
-                        // server result omits spatial reference
-                        feat.geometry.spatialReference = serviceResult.data.spatialReference;
-                        const localEsriGeom = this.esriBundle.geometryJsonUtils.fromJSON(feat.geometry);
-                        result.geometry = this.gapi.utils.geom.geomEsriToRamp(localEsriGeom);
-                    }
-
-                    return result;
-
+                if (details.includeGeometry) {
+                    // server result omits spatial reference
+                    feat.geometry.spatialReference = serviceResult.data.spatialReference;
+                    const localEsriGeom = EsriGeometryJsonUtils.fromJSON(feat.geometry);
+                    result.geometry = this.$iApi.geo.utils.geom.geomEsriToRamp(localEsriGeom);
                 }
+
+                return result;
             }
+        }
 
-            // if we got this far, we failed to get something
-            throw new Error(`Could not locate feature ${details.oid} for layer ${details.serviceUrl}`);
-        });
+        // if we got this far, we failed to get something
+        throw new Error(`Could not locate feature ${details.oid} for layer ${details.serviceUrl}`);
     }
-
-}
-
-
-export class AttributeLoaderDetails {
-    supportsLimit?: boolean; // indicates if server will return information about what the maximum number of attributes will be downloaded in a single request
-    attribs?: string; // comma delimited list of attributes to download. '*' for all
-    serviceUrl?: string; // feature layer endpoint on an arcgis server
-    sourceGraphics?: esri.Collection<esri.Graphic>; // set of graphics from non-ArcGIS server source
-    maxId?: number; // current maximum OID we have downloaded. i.e. keeps track of where we are over multiple batches of downloads
-    batchSize?: number; // calculated maximum amount of attributes that can be downloaded in a single request
-    oidField?: string; // attribute name of the OID field
 }
 
 // an object that is passed into the asynch attribute loader. the loader can read and update these properties on each iteration
@@ -221,9 +214,9 @@ export class AttributeLoaderBase extends APIScope {
     // TODO need to specificy either load url or load source (a file, a layer with baked attributes)
 
     protected aac: AsynchAttribController;
-    protected loadPromise: Promise<AttributeSet>;
+    protected loadPromise: Promise<AttributeSet> | undefined;
     protected details: AttributeLoaderDetails;
-    tabularAttributesCache: Promise<any>; // TODO enhance type
+    tabularAttributesCache: Promise<any> | undefined; // TODO enhance type
 
     protected constructor (iApi: InstanceAPI, details: AttributeLoaderDetails) {
         super(iApi);
@@ -340,18 +333,18 @@ export class QuickCache {
         return this.geoms[scale];
     }
 
-    private getGeomStore(scale: number = undefined): {[key: number]: BaseGeometry} {
+    private getGeomStore(scale: number | undefined = undefined): {[key: number]: BaseGeometry} {
         // polygon and line layers have to also cache their geometry by scale level, as the
         // geometry can be simplified at smaller scales
 
         if (this.isPoint) {
             return this.geoms;
         } else {
+            if (typeof scale === 'undefined') {
+                throw new Error('Attempted to access geometry store for non-point layer without providing a map scale');
+            }
             return this.getScaleStore(scale);
         }
-
-        // dont think we need this error check, keeping in comments incase we need to restore it
-        // throw new Error('LOD must be provided for geometry quickcache on line or polygon layer');
     }
 
     getAttribs(key: number): Attributes {
@@ -362,14 +355,14 @@ export class QuickCache {
         this.attribs[key] = atts;
     }
 
-    getGeom(key: number, scale: number = undefined): BaseGeometry {
+    getGeom(key: number, scale: number | undefined = undefined): BaseGeometry {
 
         // polygon and line layers have to also cache their geometry by scale level, as the
         // geometry can be simplified at smaller scales
         return this.getGeomStore(scale)[key];
     }
 
-    setGeom(key: number, geom: BaseGeometry, scale: number = undefined): void {
+    setGeom(key: number, geom: BaseGeometry, scale: number | undefined = undefined): void {
         const store = this.getGeomStore(scale);
         store[key] = geom;
     }

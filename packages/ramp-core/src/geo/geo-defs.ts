@@ -4,6 +4,7 @@
 //      we want types here to be available before the instance is generated,
 //      so don't want some weird dependency loop.
 import { BaseGeometry, BaseRenderer, Extent, Point, SpatialReference } from './internal';
+import { CommonLayer } from './layer/common-layer';
 
 // NOTE: some values have changed since RAMP2.
 //       this is due to esri api 4 using different constants, and working exclusively in the
@@ -308,7 +309,7 @@ export interface QueryFeaturesArcServerParams extends QueryFeaturesParams {
 }
 
 export interface QueryFeaturesGeoJsonParams extends QueryFeaturesParams {
-    layer: any; // BAAH // GeoJsonLayer;
+    layer: CommonLayer; // BAAH // GeoJsonLayer <-- this still needs to be updated, do not settle for the commonlayer;
 }
 
 export interface IdentifyParameters {

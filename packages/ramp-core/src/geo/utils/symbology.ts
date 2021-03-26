@@ -1,19 +1,20 @@
-import { Attributes, AttributeSet, BaseGeometry, BaseRenderer, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
-import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
+import { APIScope, InstanceAPI } from '../../api/internal';
+import { Attributes, AttributeSet, BaseRenderer, BaseSymbolUnit, ClassBreaksRenderer, LegendSymbology, LineStyle,
+    SimpleRenderer, SpatialReference, UniqueValueRenderer } from '../internal';
+import { EsriRendererUtils, EsriRequest, EsriSpatialReference } from '../esri';
 
- { InfoBundle, LegendSymbology } from '../gapiTypes';
- { BaseRenderer, BaseSymbolUnit, SimpleRenderer, ClassBreaksRenderer, UniqueValueRenderer } from './Renderers';
- { LineStyle } from '../api/apiDefs';
 import svgjs from 'svg.js';
-
 
 // Functions for turning ESRI Renderers into images
 // Specifically, converting ESRI "Simple" symbols into images,
 // and deriving the appropriate image for a feature based on
 // a renderer
 
-export class SymbologyAPI {
+export class SymbologyAPI extends APIScope {
+
+    constructor (iApi: InstanceAPI) {
+        super(iApi);
+    }
 
     // layer renderer types
     protected SIMPLE = 'simple';
@@ -47,20 +48,20 @@ export class SymbologyAPI {
      * @param {Object} renderer an enhanced renderer (see function enhanceRenderer)
      * @return {Object} an ESRI Symbol object in server format
      */
-    getGraphicSymbol(attributes: Object, renderer: BaseRenderer): esri.Symbol {
+    getGraphicSymbol(attributes: Object, renderer: BaseRenderer): __esri.Symbol {
         return renderer.getGraphicSymbol(attributes);
     }
 
-    makeRenderer(esriRenderer: esri.Renderer, fields: Array<esri.Field>, falseRenderer: boolean = false): BaseRenderer {
+    makeRenderer(esriRenderer: __esri.Renderer, fields: Array<__esri.Field>, falseRenderer: boolean = false): BaseRenderer {
         switch (esriRenderer.type) {
             case this.SIMPLE:
-                return new SimpleRenderer(<esri.SimpleRenderer>esriRenderer, fields);
+                return new SimpleRenderer(<__esri.SimpleRenderer>esriRenderer, fields);
 
             case this.CLASS_BREAKS:
-                return new ClassBreaksRenderer(<esri.ClassBreaksRenderer>esriRenderer, fields, falseRenderer);
+                return new ClassBreaksRenderer(<__esri.ClassBreaksRenderer>esriRenderer, fields, falseRenderer);
 
             case this.UNIQUE_VALUE:
-                return new UniqueValueRenderer(<esri.UniqueValueRenderer>esriRenderer, fields, falseRenderer);
+                return new UniqueValueRenderer(<__esri.UniqueValueRenderer>esriRenderer, fields, falseRenderer);
 
             default:
                 // TODO find a way to make a fake renderer (i.e. a simple renderer with just a white square)
@@ -85,7 +86,7 @@ export class SymbologyAPI {
 
         const symbologyItem = {
             name,
-            svgcode: null
+            svgcode: ''
         };
 
         if (imageUri) {
@@ -112,7 +113,7 @@ export class SymbologyAPI {
             const result = {
                 name: text,
                 image, // url
-                svgcode: null
+                svgcode: ''
             };
 
             conversionFunction(image).then((svgcode: string) => {
@@ -149,17 +150,20 @@ export class SymbologyAPI {
                 .viewbox(0, 0, 0, 0);
         }
 
-        return this.gapi.utils.shared.convertImagetoDataURL(imageUri)
-            .then(imageUri =>
-                this.svgDrawImage(draw, imageUri))
-            .then(({ loader }) => {
-                draw.viewbox(0, 0, loader.width, loader.height);
-                return draw.svg();
-            })
+        const dataUri = await this.$iApi.geo.utils.shared.convertImagetoDataURL(imageUri);
+
+        const { loader } = await this.svgDrawImage(draw, dataUri);
+
+        draw.viewbox(0, 0, loader.width, loader.height);
+        return draw.svg();
+
+        // TODO attempt to put this catch back into the async reformatting of this functoin.
+        /*
             .catch(err => {
                 console.error('Cannot draw symbology image; returning empty', err);
                 return draw.svg();
             });
+        */
     }
 
     /**
@@ -182,7 +186,7 @@ export class SymbologyAPI {
         }
 
         // need to draw the image to get its size (technically not needed if we have a url, but this is simpler)
-        const convertedUrl = await this.gapi.utils.shared.convertImagetoDataURL(imageUri);
+        const convertedUrl = await this.$iApi.geo.utils.shared.convertImagetoDataURL(imageUri);
 
         const { image } = await this.svgDrawImage(draw, convertedUrl);
 
@@ -228,7 +232,7 @@ export class SymbologyAPI {
     }
 
     async generateBlankSymbology(): Promise<string> {
-        return svgjs(this.window.document.createElement('div')).size(this.CONTAINER_SIZE, this.CONTAINER_SIZE).svg();
+        return svgjs(window.document.createElement('div')).size(this.CONTAINER_SIZE, this.CONTAINER_SIZE).svg();
     }
 
     /**
@@ -240,6 +244,7 @@ export class SymbologyAPI {
     private async symbolToSvg(symbol: any): Promise<string> {
         // TODO now that we are enlightened and using typescript and classes and such, consider taking this monster
         //      function with all it's nested functions and moving them to some type of SVG service / class.
+        //      For now, we are using the typescript ignore flag to stop whining about our object-key mappings.
 
         const _this = this;
 
@@ -254,9 +259,9 @@ export class SymbologyAPI {
         const pts2Pxl: number = 1.33333; // points to pixels factor
 
         // create a temporary svg element and add it to the page; if not added, the element's bounding box cannot be calculated correctly
-        const container = this.window.document.createElement('div');
+        const container = window.document.createElement('div');
         container.setAttribute('style', 'opacity:0;position:fixed;left:100%;top:100%;overflow:hidden');
-        this.window.document.body.appendChild(container);
+        window.document.body.appendChild(container);
 
         const draw = svgjs(container)
             .size(this.CONTAINER_SIZE, this.CONTAINER_SIZE)
@@ -267,24 +272,31 @@ export class SymbologyAPI {
         // jscs doesn't like enhanced object notation
         // jscs:disable requireSpacesInAnonymousFunctionExpression
         const esriSimpleMarkerSimbol = {
+            // @ts-ignore
             path({ size, path }) { // esriSMSPath
                 return draw.path(path).size(size * pts2Pxl);
             },
+            // @ts-ignore
             circle({ size }) { // esriSMSCircle
                 return draw.circle(size * pts2Pxl);
             },
+            // @ts-ignore
             cross({ size }) { // esriSMSCross
                 return draw.path('M 0,10 L 20,10 M 10,0 L 10,20').size(size * pts2Pxl);
             },
+            // @ts-ignore
             x({ size }) { // esriSMSX
                 return draw.path('M 0,0 L 20,20 M 20,0 L 0,20').size(size * pts2Pxl);
             },
+            // @ts-ignore
             triangle({ size }) { // esriSMSTriangle
                 return draw.path('M 20,20 L 10,0 0,20 Z').size(size * pts2Pxl);
             },
+            // @ts-ignore
             diamond({ size }) { // esriSMSDiamond
                 return draw.path('M 20,10 L 10,0 0,10 10,20 Z').size(size * pts2Pxl);
             },
+            // @ts-ignore
             square({ size }) { // esriSMSSquare
                 return draw.path('M 0,0 20,0 20,20 0,20 Z').size(size * pts2Pxl);
             }
@@ -401,10 +413,12 @@ export class SymbologyAPI {
                     color: outlineColour.colour,
                     opacity: outlineColour.opacity,
                     width: symbol.outline.width,
+                    // @ts-ignore
                     dasharray: ESRI_DASH_MAPS[symbol.outline.style]
                 });
 
                 // make an ESRI simple symbol and apply fill and outline to it
+                // @ts-ignore
                 const marker = esriSimpleMarkerSimbol[symbol.style](symbol)
                     .fill({
                         color: symbolColour.colour,
@@ -423,6 +437,7 @@ export class SymbologyAPI {
                     opacity: lineColour.opacity,
                     width: symbol.width,
                     linecap: 'butt',
+                    // @ts-ignore
                     dasharray: ESRI_DASH_MAPS[symbol.style]
                 });
 
@@ -441,6 +456,7 @@ export class SymbologyAPI {
                     color: symbolColour.colour,
                     opacity: symbolColour.opacity
                 });
+                // @ts-ignore
                 const symbolFill = esriSFSFills[symbol.style](symbolColour, symbolStroke);
 
                 symbol.outline = symbol.outline || DEFAULT_OUTLINE;
@@ -450,6 +466,7 @@ export class SymbologyAPI {
                     opacity: outlineColour.opacity,
                     width: symbol.outline.width,
                     linecap: 'butt',
+                    // @ts-ignore
                     dasharray: ESRI_DASH_MAPS[symbol.outline.style]
                 });
 
@@ -476,10 +493,11 @@ export class SymbologyAPI {
                     color: outlineColour.colour,
                     opacity: outlineColour.opacity,
                     width: symbol.outline.width,
+                    // @ts-ignore
                     dasharray: ESRI_DASH_MAPS[symbol.outline.style]
                 });
 
-                const picturePromise = _this.gapi.utils.shared.convertImagetoDataURL(imageUri)
+                const picturePromise = _this.$iApi.geo.utils.shared.convertImagetoDataURL(imageUri)
                     .then((imageUri: string) => {
                         // make a fill from a tiled image
                         const symbolFill = draw.pattern(imageWidth, imageHeight, add =>
@@ -502,7 +520,7 @@ export class SymbologyAPI {
                 const imageUri = (sSrc && sSrc.imageData ) ? `data:${sSrc.contentType};base64,${sSrc.imageData}` : symbol.url;
 
                 // need to draw the image to get its size (technically not needed if we have a url, but this is simpler)
-                const picturePromise = _this.gapi.utils.shared.convertImagetoDataURL(imageUri)
+                const picturePromise = _this.$iApi.geo.utils.shared.convertImagetoDataURL(imageUri)
                     .then((imageUri: string) =>
                         _this.svgDrawImage(draw, imageUri))
                     .then(({ image }) => {
@@ -524,6 +542,7 @@ export class SymbologyAPI {
         // console.log(symbol);
 
         try {
+            // @ts-ignore
             await Promise.resolve(symbolTypes[symbol.type]());
             // console.log(symbol.type, label, '--DONE--');
             // remove element from the page
@@ -551,7 +570,7 @@ export class SymbologyAPI {
          * @param  {Object} c ESRI Colour object
          * @return {Object} colour and opacity in SVG format
          */
-        function parseEsriColour(c: esri.Color): Object {
+        function parseEsriColour(c: __esri.Color): Object {
             if (c) {
                 return {
                     colour: `rgb(${c.r},${c.g},${c.b})`,
@@ -579,6 +598,7 @@ export class SymbologyAPI {
      * @return {Promise} promise resolving with the loaded image and its loader object (see svg.js http://documentup.com/wout/svg.js#image for details)
      */
     svgDrawImage(draw: any, imageUri: string, width: number = 0, height: number = 0, crossOrigin: boolean = true): Promise<any> {
+        // TODO enhance to some proper types? make this async?
         const promise = new Promise((resolve, reject) => {
             const image = draw.image(imageUri, width, height, crossOrigin)
                 .loaded((loader: any) =>
@@ -683,12 +703,13 @@ export class SymbologyAPI {
      *
      */
     private getMapServerLegend(layerUrl: string): Promise<any> {
+        // TODO make async? handle error properly if so.
 
         // standard json request with error checking
-        const reqParams: esri.RequestOptions = {
+        const reqParams: __esri.RequestOptions = {
             query: { f: 'json' }
         };
-        const serviceRequest: Promise<esri.RequestResponse> = this.esriBundle.esriRequest(`${layerUrl}/legend`, reqParams);
+        const serviceRequest = EsriRequest(`${layerUrl}/legend`, reqParams);
 
         return serviceRequest.then(srvResult => {
 
@@ -723,7 +744,7 @@ export class SymbologyAPI {
         // when no layer has been found it can be a layer whitout a legend like annotation layer
         // in this case, do not apply a renderer
         let renderer: Object;
-        if (!this.isUndefined(layerLegend)) {
+        if (typeof layerLegend !== 'undefined') {
             // make the mock renderer
 
             // this is in arcgis server format. the fromJSON() call below converts it to JS API format.
@@ -743,8 +764,8 @@ export class SymbologyAPI {
                 })
             };
 
-            // ok to pass empty array. this renderer will only be used to
-            return this.makeRenderer(this.esriBundle.rendererUtils.fromJSON(renderer), [], true);
+            // ok to pass empty array. this renderer will only be used to generate a legend; no symbol lookups
+            return this.makeRenderer(EsriRendererUtils.fromJSON(renderer), [], true);
 
         } else {
             // TODO does this case ever exist? need to figure out a way to encode this in our official renderer objects
@@ -792,7 +813,7 @@ export class SymbologyAPI {
             uniqueValueInfos: [].concat(...layerRenders)
         };
 
-        return this.makeRenderer(this.esriBundle.rendererUtils.fromJSON(fullRenderer), [], true);
+        return this.makeRenderer(EsriRendererUtils.fromJSON(fullRenderer), [], true);
     }
 
     /**
@@ -808,7 +829,7 @@ export class SymbologyAPI {
      * @returns {Promise} resolves in a viewer-compatible legend for the given server and layer index
      *
      */
-    async mapServerToLocalLegend(mapServerUrl: string, layerIndex: number | string = undefined): Promise<Array<LegendSymbology>> {
+    async mapServerToLocalLegend(mapServerUrl: string, layerIndex: number | string | undefined = undefined): Promise<Array<LegendSymbology>> {
 
         // get esri legend from server
 
@@ -816,7 +837,7 @@ export class SymbologyAPI {
         // derive renderer for specified layer
         let fakeRenderer: BaseRenderer;
         let intIndex: number;
-        if (this.isUndefined(layerIndex)) {
+        if (typeof layerIndex === 'undefined') {
             intIndex = 0;
             fakeRenderer = this.mapServerLegendToRendererAll(serverLegendData);
         }

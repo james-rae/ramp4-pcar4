@@ -4,7 +4,7 @@
 // we can add more classes to support more renderer types if we need to
 
 import { Attributes } from '../internal';
-import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '../esri';
+import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleMarkerSymbol, EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '../esri';
 
 /*
 import EsriClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
@@ -69,7 +69,7 @@ export class BaseRenderer {
         return this.searchRenderer(attributes).svgCode;
     }
 
-    getGraphicSymbol(attributes: any): EsriSymbol | undefined {
+    getGraphicSymbol(attributes: any): EsriSymbol {
         return this.searchRenderer(attributes).symbol;
     }
 
@@ -146,13 +146,14 @@ export class BaseRenderer {
 export class BaseSymbolUnit {
     isDefault: boolean = false;
     svgCode: string = '';
-    symbol: EsriSymbol | undefined;
+    symbol: EsriSymbol;
     definitionClause: string = '';
     label: string = '';
     parent: BaseRenderer;
 
     constructor (parent: BaseRenderer) {
         this.parent = parent;
+        this.symbol = new EsriSimpleMarkerSymbol(); // throwaway value to stop typescript from whining about undefineds.
     }
 
     match(searchParams: any): boolean {

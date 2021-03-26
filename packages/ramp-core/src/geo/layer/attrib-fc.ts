@@ -4,13 +4,14 @@
 // TODO add proper comments
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { ArcServerAttributeLoader, AttributeLoaderBase, AttributeLoaderDetails, AttributeSet, BaseRenderer,
+import { ArcServerAttributeLoader, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseRenderer,
     CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
     LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '../internal';
 
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '../esri';
 
 import deepmerge from 'deepmerge';
+import { BaseGeometry } from '../api/graphic/geometry/base-geometry';
 
 export class AttribFC extends CommonFC {
 
@@ -117,6 +118,7 @@ export class AttribFC extends CommonFC {
                     supportsLimit: (sData.currentVersion || 1) >= 10.1,
                     serviceUrl: this.serviceUrl,
                     oidField: this.oidField,
+                    batchSize: -1,
                     attribs: '*' // NOTE we set to * here for generic case. loader may override later once config settings are applied
                 };
                 this.attLoader = new ArcServerAttributeLoader(this.parentLayer.$iApi, loadData);
@@ -487,15 +489,15 @@ export class AttribFC extends CommonFC {
             const webFeat = await this.parentLayer.$iApi.geo.utils.attributes.loadSingleFeature(serviceParams);
             if (needWebGeom) {
                 // save our result in the cache
-                this.quickCache.setGeom(objectId, webFeat.geometry, scale);
+                this.quickCache.setGeom(objectId, <BaseGeometry>webFeat.geometry, scale);
                 resultFeat.geometry = webFeat.geometry;
             }
 
-            if (needWebAttr || typeof this.quickCache.getAttribs(objectId) !== 'undefined') {
+            if (needWebAttr || typeof this.quickCache.getAttribs(objectId) === 'undefined') {
                 // extra check in the if is for efficiency. attributes get downloaded in the request
                 // regardless if we wanted them. if we didn't want them, but didn't have them cached,
                 // will cache them anyways to save another hit later.
-                this.quickCache.setAttribs(objectId, webFeat.attributes);
+                this.quickCache.setAttribs(objectId, <Attributes>webFeat.attributes);
 
                 if (needWebAttr) {
                     // only put attribs on the result if requester asked for them
