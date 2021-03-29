@@ -8,7 +8,7 @@ import { EsriTileLayer } from '../../esri';
 
 class TileLayer extends CommonLayer {
 
-    esriLayer: __esri.TileLayer | undefined;
+    esriLayer: EsriTileLayer | undefined;
 
     constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);

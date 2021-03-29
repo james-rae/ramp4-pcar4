@@ -6,12 +6,17 @@ import { CoreFilter, Extent } from '../internal';
 export class Filter {
     // handles state and result caches for data filters on feature classes
 
-    private sql: object;
-    private cache: object;
-    private extent: Extent;
+    private sql: {[key: string]: string}; // object mapping string to string
+    private cache: {[key: string]: Promise<Array<number>>}; // object mapping string to promise of array of ints
+    private extent: Extent | undefined;
 
     constructor () {
-        this.clearAll();
+        // typescript too dumb to figure out this initizlizes vars. thanks typescript.
+        // this.clearAll();
+
+        this.sql = {};
+        this.extent = undefined;
+        this.cache = {};
     }
 
     /**
@@ -188,7 +193,7 @@ export class Filter {
         // e.g. 'plugin' would also match 'plugin1' in an indexOf call, but '$plugin$' won't match '$plugin1$'
         this.cacheActiveKeys().forEach(c => {
             if (c.indexOf(`$${filterName}$`) > -1) {
-                this.cache[c] = undefined;
+                delete this.cache[c];
             }
         });
     }

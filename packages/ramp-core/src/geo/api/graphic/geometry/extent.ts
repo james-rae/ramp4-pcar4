@@ -87,7 +87,7 @@ export class Extent extends BaseGeometry {
         return new Extent(id, [xmin, ymin], [xmax, ymax], sr);
     }
 
-    isEqual(e: Extent): boolean {
+    isEqual(e: Extent | undefined): boolean {
         // TODO consider relaxing input type? so it can accept config extent, esri extent, etc.
         //      alternative is caller is forced to cast first then compare
         if (!e) {

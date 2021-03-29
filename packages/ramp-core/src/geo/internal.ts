@@ -36,6 +36,7 @@ export * from './layer/common-fc';
 export * from './layer/common-layer';
 export * from './layer/attrib-fc';
 export * from './layer/attrib-layer';
+export * from './layer/esriFeature/feature-fc';
 
 export * from './utils/attribute';
 export * from './utils/geometry';

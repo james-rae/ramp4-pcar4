@@ -3,18 +3,19 @@
 
 // TODO add proper comments
 
-import { APIScope, InstanceAPI } from '../../api/internal';
-import { ArcServerAttributeLoader, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseRenderer,
+import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseGeometry, BaseRenderer,
     CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
     LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '../internal';
 
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '../esri';
 
 import deepmerge from 'deepmerge';
-import { BaseGeometry } from '../api/graphic/geometry/base-geometry';
 
 export class AttribFC extends CommonFC {
 
+    // property does get initialized in the super. typescript just being grousy
+    // @ts-ignore
+    protected parentLayer: AttribLayer;
     geomType: string;
     oidField: string;
     fields: Array<EsriField>;
@@ -28,7 +29,7 @@ export class AttribFC extends CommonFC {
     protected quickCache: QuickCache | undefined;
     protected filter: Filter;
 
-    constructor (parent: CommonLayer, layerIdx: number = 0) {
+    constructor (parent: AttribLayer, layerIdx: number = 0) {
         super(parent, layerIdx);
 
         this.geomType = '';
