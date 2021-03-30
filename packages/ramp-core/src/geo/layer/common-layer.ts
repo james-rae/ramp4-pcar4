@@ -41,7 +41,7 @@ export class CommonLayer extends LayerInstance {
     protected sawRefresh: boolean;
     protected name: string; // TODO re-evaluate this. using protected property here to store name until FCs get created. might be smarter way
     protected origRampConfig: RampLayerConfig;
-    protected _layerType: LayerType = LayerType.UNKNOWN;
+    protected _layerType: LayerType = LayerType.UNKNOWN; // TODO change to readonly?
 
     // TODO consider also having a loaded boolean property, allowing a synch check if layer has loaded or not. state can flip around to update, etc.
     //      alternately implement something like function layerLoaded() from old geoApi
@@ -194,7 +194,9 @@ export class CommonLayer extends LayerInstance {
             }
         });
 
+        console.log('HOSS adding handler for view', !!this.esriLayer);
         this.esriLayer.on('layerview-create', (e: __esri.LayerLayerviewCreateEvent) => {
+            console.log('HOSS saw layer view get created', e.layerView);
             this.esriView = e.layerView;
             e.layerView.watch('updating', (newval: boolean) => {
                 this.updateState(newval ? LayerState.REFRESH : LayerState.LOADED );

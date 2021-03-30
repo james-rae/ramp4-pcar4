@@ -43,6 +43,7 @@ function initRAMP() {
                 initialBasemapId: 'esriImagery'
             },
             layers: [
+                /*
                 {
                     id: 'TestTile',
                     layerType: 'esriTile',
@@ -53,6 +54,7 @@ function initRAMP() {
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 }
+                */
                 /*
                 ,
                 {
@@ -93,16 +95,17 @@ function initRAMP() {
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 },
+                */
                 {
                     id: 'CleanAir',
                     layerType: 'esriFeature',
-                    url: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/EcoGeo/EcoGeo/MapServer/9',
+                    url: 'https://section917.canadacentral.cloudapp.azure.com/arcgis/rest/services/MSC150/MapServer/5',
                     state: {
-                        opacity: 0.8,
+                        opacity: 1,
                         visibility: true
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
-                },
+                } /*,
                 {
                     id: 'WFSLayer',
                     layerType: 'ogcWfs',

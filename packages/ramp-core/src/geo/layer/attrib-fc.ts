@@ -104,6 +104,7 @@ export class AttribFC extends CommonFC {
                 // add renderer and legend
                 const sourceRenderer = (options && options.customRenderer && options.customRenderer.type) ?
                     options.customRenderer : sData.drawingInfo.renderer;
+                console.log('CHECK OUT THIS RENDERER UTIL', EsriRendererUtils);
                 this.renderer = this.parentLayer.$iApi.geo.utils.symbology.makeRenderer(EsriRendererUtils.fromJSON(sourceRenderer), this.fields);
 
                 // this array will have a set of promises that resolve when all the legend svg has drawn.
@@ -422,6 +423,8 @@ export class AttribFC extends CommonFC {
                 // value is already cached. use it
                 resultFeat.attributes = aCache;
             } else if (this.attLoader.isLoaded || this.parentLayer.isFile) {
+                // NOTE: the above line has a habit of showing as an error in VSCode. The compiler will not be as dumb.
+
                 // all attributes have been loaded (or is a file and are local). use that store.
                 // since attributes come from a promise, reset the wait promise to the attribute promise
                 const atSet = await this.attLoader.getAttribs();

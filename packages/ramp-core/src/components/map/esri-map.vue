@@ -64,11 +64,13 @@ export default class EsriMap extends Vue {
                     //      see if layers are going to expose an "esri layer exists" promise, leverage that if they do
                     layer.initiate().then(() => {
                         // TODO do we need to care about map layer order?
+                        console.log('HOSS about to add layer', layer);
                         this.map.addLayer(layer);
                     });
 
                     // add layer to layer store
-                    this.$iApi.$vApp.$store.set(LayerStore.addLayers, [layer]);
+                    // TODO temp commenting this out SZ TESTING
+                    // this.$iApi.$vApp.$store.set(LayerStore.addLayers, [layer]);
                 });
             });
 

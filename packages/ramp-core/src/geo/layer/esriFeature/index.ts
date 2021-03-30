@@ -11,8 +11,8 @@ class FeatureLayer extends AttribLayer {
 
     constructor (rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);
-        this.supportsIdentify = false;
-        this._layerType = LayerType.TILE;
+        this.supportsIdentify = true;
+        this._layerType = LayerType.FEATURE;
     }
 
     async initiate(): Promise<void> {
@@ -167,6 +167,8 @@ class FeatureLayer extends AttribLayer {
 
         // TODO add back in promises
         loadPromises.push(pLD, pFC); // , pLS
+
+        console.log('HOSS these are the load promises', loadPromises);
 
         return loadPromises;
     }

@@ -12,7 +12,7 @@ import EsriPoint from '@arcgis/core/geometry/Point';
 import EsriPolygon from '@arcgis/core/geometry/Polygon';
 import EsriPolyline from '@arcgis/core/geometry/Polyline';
 import EsriSpatialReference from '@arcgis/core/geometry/SpatialReference';
-import EsriGeometryJsonUtils from '@arcgis/core/geometry/support/jsonUtils';
+import * as EsriGeometryJsonUtils from '@arcgis/core/geometry/support/jsonUtils';
 import EsriGraphic from '@arcgis/core/Graphic';
 import EsriFeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import EsriGraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
@@ -31,7 +31,7 @@ import EsriRenderer from '@arcgis/core/renderers/Renderer';
 import EsriSimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
 import EsriUniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import EsriClassBreakInfo from '@arcgis/core/renderers/support/ClassBreakInfo';
-import EsriRendererUtils from '@arcgis/core/renderers/support/jsonUtils';
+import * as EsriRendererUtils from '@arcgis/core/renderers/support/jsonUtils';
 import EsriUniqueValueInfo from '@arcgis/core/renderers/support/UniqueValueInfo';
 import EsriRequest from '@arcgis/core/request';
 import EsriPictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
@@ -39,7 +39,7 @@ import EsriSimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import EsriSimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 import EsriSimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import EsriSymbol from '@arcgis/core/symbols/Symbol';
-//import EsriSymbolJsonUtils from '@arcgis/core/symbols/support/jsonUtils';
+import * as EsriSymbolJsonUtils from '@arcgis/core/symbols/support/jsonUtils';
 import EsriGeometryService from '@arcgis/core/tasks/GeometryService';
 import EsriIdentifyTask from '@arcgis/core/tasks/IdentifyTask';
 import EsriPrintTask from '@arcgis/core/tasks/PrintTask';
@@ -98,7 +98,7 @@ export {
     EsriSpatialReference,
     EsriSymbol,
     EsriSublayer,
-    // EsriSymbolJsonUtils,
+    EsriSymbolJsonUtils,
     EsriTileLayer,
     EsriUniqueValueInfo,
     EsriUniqueValueRenderer,
