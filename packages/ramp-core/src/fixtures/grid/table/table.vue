@@ -64,9 +64,8 @@ import { GlobalEvents } from '../../../api/internal';
 import deepmerge from 'deepmerge';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
-type BaseLayer = any;
+import { LayerInstance } from '../../../geo/internal';
+// type BaseLayer = any;
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
@@ -138,7 +137,7 @@ export default class TableComponent extends Vue {
             rowBuffer: 0
         };
 
-        const fancyLayer: BaseLayer | undefined = this.getLayerByUid(this.layerUid);
+        const fancyLayer: LayerInstance | undefined = this.getLayerByUid(this.layerUid);
         if (fancyLayer === undefined) {
             // this really shouldn't happen unless the wrong API call is made, but maybe we should
             // do something else here anyway.
@@ -347,8 +346,6 @@ export default class TableComponent extends Vue {
     setUpSymbolsAndInteractive(col: any, colDef: any) {
         // Set up the interactive column that contains the zoom and details button.
         // TODO: add details functionality.
-        // BAAH
-        /*
         if (col.field === 'rvInteractive') {
             let detailsDef = {
                 sortable: false,
@@ -396,7 +393,7 @@ export default class TableComponent extends Vue {
                     };
                 },
                 onCellClicked: (cell: any) => {
-                    const layer: BaseLayer | undefined = this.getLayerByUid(this.layerUid);
+                    const layer: LayerInstance | undefined = this.getLayerByUid(this.layerUid);
                     if (layer === undefined) return;
                     const oid = cell.data[this.oidField];
                     const opts = { getGeom: true };
@@ -404,7 +401,7 @@ export default class TableComponent extends Vue {
                         if (g.geometry === undefined) {
                             console.error(`Could not find graphic for objectid ${oid}`);
                         } else {
-                            this.$iApi.map.zoomMapTo(g.geometry, 50000);
+                            this.$iApi.geo.map.zoomMapTo(g.geometry, 50000);
                         }
                     });
                 }
@@ -421,7 +418,7 @@ export default class TableComponent extends Vue {
                 isStatic: true,
                 width: 82,
                 cellRenderer: (cell: any) => {
-                    const layer: BaseLayer | undefined = this.getLayerByUid(this.layerUid);
+                    const layer: LayerInstance | undefined = this.getLayerByUid(this.layerUid);
                     if (layer === undefined) return;
                     const iconContainer = document.createElement('span');
                     const oid = cell.data[this.oidField];
@@ -440,7 +437,6 @@ export default class TableComponent extends Vue {
 
             colDef.push(iconDef);
         }
-        */
     }
 
     clearColumnFilters() {

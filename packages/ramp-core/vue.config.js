@@ -59,6 +59,10 @@ module.exports = {
 
         // copy over external fixture samples
         // copy over esri api required assets
+        // NOTE if we ever need to put the esri assets in a folder other than 'assets', our startup code
+        //      will need to inform the api of the change. code:
+        //          import esriConfig from '@arcgis/core/config.js';
+        //          esriConfig.assetsPath = './new_path';
         // TODO esri assets folder is around 25mb. consider making a more targeted copy routine to only transfer things we actually need.
         config
             .plugin('webpack-copy-plugin')

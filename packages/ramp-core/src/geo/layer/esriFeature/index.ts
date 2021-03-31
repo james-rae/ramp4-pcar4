@@ -168,8 +168,6 @@ class FeatureLayer extends AttribLayer {
         // TODO add back in promises
         loadPromises.push(pLD, pFC); // , pLS
 
-        console.log('HOSS these are the load promises', loadPromises);
-
         return loadPromises;
     }
 

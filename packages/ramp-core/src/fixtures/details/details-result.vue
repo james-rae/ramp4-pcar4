@@ -31,17 +31,15 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore } from './store';
 
 import { PanelInstance } from '@/api';
-// BAAH
-// import { IdentifyResult } from 'rampgeoapi';
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+import { IdentifyResult, LayerInstance } from '../../geo/internal';
 
 @Component({})
 export default class DetailsResultV extends Vue {
     @Prop() panel!: PanelInstance;
     @Prop() layerIndex!: number;
 
-    @Get(DetailsStore.payload) payload!: any[]; // IdentifyResult[]; // BAAH
-    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => any; // BaseLayer | undefined; // BAAH
+    @Get(DetailsStore.payload) payload!: IdentifyResult[];
+    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => LayerInstance | undefined;
 
     icon: string[] = [];
 
@@ -59,17 +57,14 @@ export default class DetailsResultV extends Vue {
      * @param {number} idx index of item in identifyResult.items
      */
     itemIcon(data: any, idx: number) {
-        // BAAH
-        /*
         const uid = this.identifyResult.uid;
-        const layer: BaseLayer | undefined = this.getLayerByUid(uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(uid);
         if (layer === undefined) {
             console.warn(`could not find layer for uid ${uid} during icon lookup`);
             return;
         }
         const oidField = layer.getOidField(uid);
         layer.getIcon(data[oidField], uid).then(value => {if (this.icon[idx] !== value) this.$set(this.icon, idx, value)});
-        */
     }
 
     /**
@@ -83,14 +78,10 @@ export default class DetailsResultV extends Vue {
      * Returns the name field for the layer specified by layerIndex.
      */
     get nameField() {
-        return 'baah';
-        // BAAH
-        /*
         const layerInfo = this.payload[this.layerIndex];
         const uid = layerInfo?.uid;
-        const layer: BaseLayer | undefined = this.getLayerByUid(uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(uid);
         return layer?.getNameField(uid);
-        */
     }
 }
 </script>

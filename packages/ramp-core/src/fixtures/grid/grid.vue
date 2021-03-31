@@ -57,8 +57,7 @@ import { PanelInstance } from '@/api';
 import TableComponent from '@/fixtures/grid/table/table.vue';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+import { LayerInstance } from '../../geo/internal';
 
 @Component({
     components: {
@@ -69,7 +68,7 @@ export default class Screen1 extends Vue {
     @Prop() panel!: PanelInstance;
     @Prop() header!: String;
 
-    @Get(LayerStore.layers) layers!: any[]; // BaseLayer[]; // BAAH
+    @Get(LayerStore.layers) layers!: LayerInstance[];
     @Get('grid/currentUid') currentUid: any;
 
     quicksearch: String = '';

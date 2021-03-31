@@ -35,13 +35,12 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { LegendItem } from '../store/legend-defs';
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+import { LayerInstance } from '../../../geo/internal';
 
 @Component
 export default class SymbologyStack extends Vue {
     @Prop() visible!: boolean;
-    @Prop() layer!: any; // BaseLayer; // BAAH
+    @Prop() layer!: LayerInstance;
     @Prop() uid!: string;
 
     stack: any = [];
@@ -50,6 +49,7 @@ export default class SymbologyStack extends Vue {
         // When the layer is loaded, get the icon.
         if (this.layer.state !== 'rv-loaded') {
             this.layer.stateChanged.listen(() => {
+                // TODO this should probably check the state, and then remove the listener once it gets the stack
                 this.getSymbologyStack();
             });
         } else {

@@ -1,6 +1,5 @@
 import { FixtureInstance } from '@/api';
-// BAAH
-// import { IdentifyResult, IdentifyItem } from 'rampgeoapi';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '../../../geo/internal';
 import { DetailsConfig, DetailsItemSet, DetailsItemInstance } from '../store';
 
 export class DetailsAPI extends FixtureInstance {
@@ -14,10 +13,8 @@ export class DetailsAPI extends FixtureInstance {
      * @param {IdentifyResult[]} payload
      * @memberof DetailsAPI
      */
-    openDetails(payload: any[]): void { // IdentifyResult[]): void { // BAAH
+    openDetails(payload: IdentifyResult[]): void {
         // Save the provided identify result in the store.
-        // BAAH
-        /*
         this.$vApp.$store.set('details/setPayload!', payload);
 
         let panel = this.$iApi.panel.get('details-panel');
@@ -28,7 +25,6 @@ export class DetailsAPI extends FixtureInstance {
         } else {
             panel.show('details-screen-layers');
         }
-        */
     }
 
     /**
@@ -38,10 +34,8 @@ export class DetailsAPI extends FixtureInstance {
      * @param {string} uid
      * @memberof DetailsAPI
      */
-    openFeature(identifyItem: any, uid: string) { // IdentifyItem, uid: string) { // BAAH
+    openFeature(identifyItem: IdentifyItem, uid: string) {
         // Save the provided identify result in the store.
-        // BAAH
-        /*
         this.$vApp.$store.set('details/setPayload!', identifyItem);
         // Open the details panel.
         const panel = this.$iApi.panel.get('details-panel');
@@ -49,7 +43,6 @@ export class DetailsAPI extends FixtureInstance {
             this.$iApi.panel.close(panel);
         }
         this.$iApi.panel.open({ id: 'details-panel', screen: 'details-screen-item', props: { isFeature: true, uid: uid } });
-        */
     }
 
     /**

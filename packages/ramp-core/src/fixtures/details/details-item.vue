@@ -30,9 +30,7 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore, DetailsItemInstance } from './store';
 
 import { PanelInstance } from '@/api';
-// BAAH
-// import { IdentifyResult, IdentifyResultSet, IdentifyItem, IdentifyResultFormat } from 'rampgeoapi';
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance } from '../../geo/internal';
 
 import ESRIDefaultV from './templates/esri-default.vue';
 
@@ -55,10 +53,10 @@ export default class DetailsItemV extends Vue {
     @Prop() uid!: string;
 
     // retrieve the identify payload from the store
-    @Get(DetailsStore.payload) payload!: any; // IdentifyResult[]; // BAAH
-    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => any; // BaseLayer | undefined; // BAAH
+    @Get(DetailsStore.payload) payload!: IdentifyResult[];
+    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => LayerInstance | undefined;
 
-    identifyTypes: any; // = IdentifyResultFormat; // BAAH
+    identifyTypes: IdentifyResultFormat = IdentifyResultFormat.UNKNOWN;
     icon: string = '';
 
     mounted() {
@@ -74,57 +72,43 @@ export default class DetailsItemV extends Vue {
     }
 
     get itemName() {
-        // BAAH
-        /*
         const layerInfo = this.payload[this.layerIndex];
         const uid = layerInfo?.uid || this.uid;
-        const layer: BaseLayer | undefined = this.getLayerByUid(uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(uid);
         const nameField = layer?.getNameField(uid);
         return nameField ? this.identifyItem.data[nameField] : 'Details';
-        */
-       return 'Details';
     }
 
     get itemIcon() {
-        return Promise.resolve(); // BAAH
-
-        // BAAH
-        /*
         const layerInfo = this.payload[this.layerIndex];
         const uid = layerInfo?.uid || this.uid;
-        const layer: BaseLayer | undefined = this.getLayerByUid(uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(uid);
         if (layer === undefined) {
             console.warn(`could not find layer for uid ${uid} during icon lookup`);
             return '';
         }
         const oidField = layer.getOidField(uid);
         return layer.getIcon(this.identifyItem.data[oidField], uid).then(value => this.icon = value);
-        */
     }
 
     get detailsTemplate() {
-        // BAAH
-        /*
         const layerInfo = this.payload[this.layerIndex];
-        const layer: BaseLayer | undefined = this.getLayerByUid(layerInfo?.uid || this.uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(layerInfo?.uid || this.uid);
 
         // If there is a custom template binding for this layer in the store, then
         // return its name.
         if (layer && this.templateBindings[layer.id] && this.templateBindings[layer.id].componentId) {
             return this.templateBindings[layer.id].componentId;
         }
-        */
 
         // If nothing is found, use a default template.
         return 'esri-default';
     }
 
     zoomToFeature() {
-        // BAAH
-        /*
         const layerInfo = this.payload[this.layerIndex];
         const uid = layerInfo?.uid || this.uid;
-        const layer: BaseLayer | undefined = this.getLayerByUid(uid);
+        const layer: LayerInstance | undefined = this.getLayerByUid(uid);
         if (layer === undefined) {
             console.warn(`Could not find layer for uid ${uid} during zoom geometry lookup`);
             return;
@@ -135,10 +119,9 @@ export default class DetailsItemV extends Vue {
             if (g.geometry === undefined) {
                 console.error(`Could not find graphic for objectid ${oid}`);
             } else {
-                this.$iApi.map.zoomMapTo(g.geometry, 50000);
+                this.$iApi.geo.map.zoomMapTo(g.geometry, 50000);
             }
         });
-        */
     }
 }
 </script>

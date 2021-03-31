@@ -132,7 +132,7 @@ function initRAMP() {
                     reorderable: true,
                     root: {
                         children: [
-                            {
+                           /* {
                                 name: 'Visibility Set',
                                 exclusiveVisibility: [
                                     {
@@ -153,10 +153,10 @@ function initRAMP() {
                                         ]
                                     }
                                 ]
-                            },
+                            },*/
                             {
-                                layerId: 'WFSLayer',
-                                name: 'WFSLayer'
+                                layerId: 'CleanAir',
+                                name: 'Dogs'
                             }
                         ]
                     }

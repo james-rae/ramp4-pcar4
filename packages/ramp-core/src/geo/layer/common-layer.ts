@@ -194,9 +194,7 @@ export class CommonLayer extends LayerInstance {
             }
         });
 
-        console.log('HOSS adding handler for view', !!this.esriLayer);
         this.esriLayer.on('layerview-create', (e: __esri.LayerLayerviewCreateEvent) => {
-            console.log('HOSS saw layer view get created', e.layerView);
             this.esriView = e.layerView;
             e.layerView.watch('updating', (newval: boolean) => {
                 this.updateState(newval ? LayerState.REFRESH : LayerState.LOADED );

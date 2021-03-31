@@ -1,7 +1,4 @@
 import Vue from 'vue';
-// BAAH
-// import GapiLoader, { GeoApi, ApiBundle as GeoApiBundle } from 'rampgeoapi';
-
 import { InstanceAPI, AppVersion } from './internal';
 import { GeoCommonAPI } from '../geo/internal';
 import mixin from './mixin';

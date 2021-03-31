@@ -104,7 +104,6 @@ export class AttribFC extends CommonFC {
                 // add renderer and legend
                 const sourceRenderer = (options && options.customRenderer && options.customRenderer.type) ?
                     options.customRenderer : sData.drawingInfo.renderer;
-                console.log('CHECK OUT THIS RENDERER UTIL', EsriRendererUtils);
                 this.renderer = this.parentLayer.$iApi.geo.utils.symbology.makeRenderer(EsriRendererUtils.fromJSON(sourceRenderer), this.fields);
 
                 // this array will have a set of promises that resolve when all the legend svg has drawn.

@@ -28,7 +28,6 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop, Inject } from 'vue-property-decorator';
 import { debounce } from 'debounce';
-// BAAH
 import { MapMove } from '../../geo/internal';
 import { GlobalEvents } from '@/api';
 

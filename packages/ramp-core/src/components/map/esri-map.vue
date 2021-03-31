@@ -5,11 +5,8 @@
 <script lang="ts">
 import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-// BAAH
-// import GapiLoader, { RampMap, GeoApi, RampMapConfig, MapClick, MapMove, FilterEventParam, CoreFilterKey, ApiBundle as GeoApiBundle } from 'rampgeoapi';
 import { LayerInstance, MapAPI, RampLayerConfig, RampMapConfig } from '../../geo/internal';
 import { GlobalEvents } from '../../api/internal';
-import { APIInterface /*, RampGeo // BAAH */ } from '../../api';
 // import { window } from '@/main';
 
 import { ConfigStore } from '@/store/modules/config';
@@ -31,7 +28,7 @@ export default class EsriMap extends Vue {
     }
 
     @Watch('layerConfigs')
-    onLayerConfigArrayChange(newValue: RampLayerConfig[], oldValue: RampLayerConfig[]) { // BAAH
+    onLayerConfigArrayChange(newValue: RampLayerConfig[], oldValue: RampLayerConfig[]) {
 
         console.log('Saw layer config change', oldValue, newValue, !!this.map);
 
@@ -64,13 +61,13 @@ export default class EsriMap extends Vue {
                     //      see if layers are going to expose an "esri layer exists" promise, leverage that if they do
                     layer.initiate().then(() => {
                         // TODO do we need to care about map layer order?
-                        console.log('HOSS about to add layer', layer);
                         this.map.addLayer(layer);
                     });
 
                     // add layer to layer store
-                    // TODO temp commenting this out SZ TESTING
-                    // this.$iApi.$vApp.$store.set(LayerStore.addLayers, [layer]);
+                    // TODO need to revisit https://github.com/ramp4-pcar4/ramp4-pcar4/discussions/328
+                    //      as we may be causing lots of problems putting these objects in vuex store.
+                    this.$iApi.$vApp.$store.set(LayerStore.addLayers, [layer]);
                 });
             });
 

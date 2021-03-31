@@ -160,7 +160,6 @@ export class MapAPI extends CommonMapAPI {
         // await layer.isReadyForMap();
         if (layer.esriLayer) {
             this.esriMap.add(layer.esriLayer);
-            console.log('HOSS layer has been added', layer);
         } else {
             // TODO maybe we should call layer.initiate() and block? Could be a nice shortcut. But also might have unintended effects.
             console.error('Layer added to map without an esri layer. Likely layer.initiate() was not called or had not finished.');

@@ -1,6 +1,5 @@
 import { PanelConfig } from '@/store/modules/panel';
-// BAAH
-// import { IdentifyResult, IdentifyItem, IdentifyResultFormat, IdentifyResultSet } from 'rampgeoapi';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '../../../geo/internal';
 
 export type DetailsItemSet = { [name: string]: DetailsItemInstance };
 
@@ -47,5 +46,4 @@ export class DetailsState {
      * @memberof DetailsState
      */
 
-    payload: any; // IdentifyResult[] | IdentifyItem = []; // BAAH
-}
+    payload: IdentifyResult[] | IdentifyItem = [];

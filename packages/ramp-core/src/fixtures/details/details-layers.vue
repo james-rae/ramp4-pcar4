@@ -30,15 +30,13 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore } from './store';
 
 import { PanelInstance } from '@/api';
-// BAAH
-// import { IdentifyResult } from 'rampgeoapi';
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
+import { IdentifyResult, LayerInstance } from '../../geo/internal';
 
 @Component({})
 export default class DetailsLayersV extends Vue {
     @Prop() panel!: PanelInstance;
-    @Get(DetailsStore.payload) payload!: any; // IdentifyResult[];// BAAH
-    @Get('layer/layers') layers!: any[]; // BaseLayer[];// BAAH
+    @Get(DetailsStore.payload) payload!: IdentifyResult[];
+    @Get('layer/layers') layers!: LayerInstance[];
 
     /**
      * Switches the panel screen to display the data for a given result.
@@ -48,14 +46,10 @@ export default class DetailsLayersV extends Vue {
     }
 
     layerInfo(idx: number) {
-        return 'baah';
-
-        // BAAH
-        /*
         const layerInfo = this.payload[idx];
 
         // Check to see if there is a custom template defined for the selected layer.
-        let item: BaseLayer | undefined = this.layers
+        let item: LayerInstance | undefined = this.layers
             .map(layer => {
                 let layerNode = layer.getLayerTree();
 
@@ -71,17 +65,13 @@ export default class DetailsLayersV extends Vue {
         if (!item) return;
 
         return item.getName() ? item.getName() : item.id;
-        */
     }
 
     /**
      * Calculates the total number of results received by identify.
      */
     get payloadResults(): number {
-        return 0;
-
-        // BAAH
-        // return this.payload.map(r => r.items.length).reduce((a, b) => a + b, 0);
+       return this.payload.map(r => r.items.length).reduce((a, b) => a + b, 0);
     }
 }
 </script>
