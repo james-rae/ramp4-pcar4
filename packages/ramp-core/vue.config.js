@@ -58,9 +58,14 @@ module.exports = {
             .loader('raw-loader');
 
         // copy over external fixture samples
+        // copy over esri api required assets
+        // TODO esri assets folder is around 25mb. consider making a more targeted copy routine to only transfer things we actually need.
         config
             .plugin('webpack-copy-plugin')
-            .use(CopyPlugin, [[{ from: 'node_modules/ramp-sample-fixtures/dist/', to: 'sample-fixtures' }]]);
+            .use(CopyPlugin, [[
+                    { from: 'node_modules/ramp-sample-fixtures/dist/', to: 'sample-fixtures' },
+                    { from: 'node_modules/@arcgis/core/assets/', to: 'assets' }
+            ]]);
 
         // DEV-specific configuration
         config.when(process.env.NODE_ENV === 'development', config => {
