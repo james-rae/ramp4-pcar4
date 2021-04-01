@@ -1,7 +1,7 @@
 // layers api and other public, general layer things.
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { LayerBase, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
@@ -242,7 +242,8 @@ export class LayerAPI extends APIScope {
  * A base class for Layer subclasses. It provides some utility functions to Layer and also gives access to `$iApi` and `$vApp` globals.
  * Mostly it exposes stub methods on LayerBase; this is because layer subclasses can be wildly different, so we don't
  * have a pile of common things to put here. The stubs will help debugging as they will alert devs when they have not
- * implemented something.
+ * implemented something. The stubs also allow us to get intellisense / typescript happiness when dealing with common
+ * layer variables typed as LayerInstance.
  *
  * @export
  * @class LayerInstance
@@ -269,6 +270,8 @@ export class LayerInstance extends APIScope implements LayerBase {
      */
     static updateBaseToInstance(value: LayerBase, config: any, $iApi: InstanceAPI): LayerInstance {
         const instance = new LayerInstance(config, $iApi);
+
+        // TODO add all the properties and methods required
 
         Object.defineProperties(value, {
             config: { value: config },
@@ -346,8 +349,262 @@ export class LayerInstance extends APIScope implements LayerBase {
         return Promise.resolve();
     }
 
+    /**
+     * Provides a promise that resolves when the layer has finished loading. If accessing layer properties that
+     * depend on the layer being loaded, wait on this promise before accessing them.
+     *
+     * @method isLayerLoaded
+     * @returns {Promise} resolves when the layer has finished loading
+     */
+    isLayerLoaded(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    /**
+     * Provides a tree structure describing the layer and any sublayers,
+     * including uid values. Should only be called after isLayerLoaded resolves.
+     *
+     * @method getLayerTree
+     * @returns {TreeNode} the root of the layer tree
+     */
     getLayerTree(): TreeNode {
         return new TreeNode(0, 'Fake tree', 'getLayerTree() was not implemented in layer');
+    }
+
+    /**
+     * Indicates if the layer is in a state that is makes sense to interact with.
+     * I.e. False if layer has not done it's initial load, or is in error state.
+     *
+     * @method isValidState
+     * @returns {Boolean} true if layer is in an interactive state
+     */
+    isValidState(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns the name of the layer/sublayer.
+     *
+     * @function getName
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name for. Uses first/only if omitted.
+     * @returns {String} name of the layer/sublayer
+     */
+    getName(layerIdx: number | string | undefined = undefined): string {
+        return 'error';
+    }
+
+    /**
+     * Returns the visibility of the layer/sublayer.
+     *
+     * @function getVisibility
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
+     * @returns {Boolean} visibility of the layer/sublayer
+     */
+    getVisibility (layerIdx: number | string | undefined = undefined): boolean {
+        return false;
+    }
+
+    /**
+     * Applies visibility to feature class.
+     *
+     * @function setVisibility
+     * @param {Boolean} value the new visibility setting
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
+     */
+    setVisibility (value: boolean, layerIdx: number | string | undefined = undefined): void {
+    }
+
+    /**
+     * Returns the opacity of the layer/sublayer.
+     *
+     * @function getOpacity
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
+     * @returns {Boolean} opacity of the layer/sublayer
+     */
+    getOpacity (layerIdx: number | string | undefined = undefined): number {
+        return 0;
+    }
+
+    /**
+     * Applies opacity to feature class.
+     *
+     * @function setOpacity
+     * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
+     */
+    setOpacity (value: number, layerIdx: number | string | undefined = undefined): void {
+    }
+
+    /**
+     * Returns the scale set (min and max visible scale) of the layer/sublayer.
+     *
+     * @function getScaleSet
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the scale set for. Uses first/only if omitted.
+     * @returns {ScaleSet} scale set of the layer/sublayer
+     */
+    getScaleSet (layerIdx: number | string | undefined = undefined): ScaleSet {
+        return new ScaleSet();
+    }
+
+    /**
+     * Indicates if the layer/sublayer is not in a visible scale range.
+     *
+     * @function isOffscale
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to check offscale status for. Uses first/only if omitted.
+     * @param {Integer} [testScale] optional scale to test against. if not provided, current map scale is used.
+     * @returns {Boolean} true if the layer/sublayer is outside of a visible scale range
+     */
+    isOffscale (layerIdx: number | string | undefined = undefined, testScale: number | undefined = undefined): boolean {
+        return false;
+    }
+
+    /**
+     * Cause the map to zoom to a scale level where the layer is visible.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to check offscale status for. Uses first/only if omitted.
+     * @returns {Promise} resolves when map has finished zooming
+     */
+    zoomToVisibleScale (layerIdx: number | string | undefined = undefined): Promise<void> {
+        return Promise.resolve();
+    }
+
+    /**
+     * Indicates if a feature class supports features (false would be an image/raster/etc)
+     *
+     * @function supportsFeatures
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
+     * @returns {Boolean} if the layer/sublayer supports features
+     */
+    supportsFeatures (layerIdx: number | string | undefined = undefined): boolean {
+        return false;
+    }
+
+    getLegend (layerIdx: number | string | undefined = undefined): Array<LegendSymbology> {
+        return [];
+    }
+
+    /**
+     * Gets information on a graphic in the most efficient way possible. Options object properties:
+     * - getGeom ; a boolean to indicate if the result should include graphic geometry
+     * - getAttribs ; a boolean to indicate if the result should include graphic attributes
+     *
+     * @param {Integer} objectId the object id of the graphic to find
+     * @param {Object} options options object for the request, see above
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to find the graphic in. Uses first/only if omitted.
+     * @returns {Promise} resolves with a fake graphic containing the requested information
+     */
+    getGraphic (objectId: number, options: GetGraphicParams, layerIdx: number | string | undefined = undefined): Promise<GetGraphicResult> {
+        return Promise.resolve({});
+    }
+
+    /**
+     * Gets the icon for a specific feature, as an SVG string.
+     *
+     * @param {Integer} objectId the object id of the feature to find
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to find the icon in. Uses first/only if omitted.
+     * @returns {Promise} resolves with an svg string encoding of the icon
+     */
+    getIcon (objectId: number, layerIdx: number | string | undefined = undefined): Promise<string> {
+        return Promise.resolve('');
+    }
+
+    /**
+     * Invokes the process to get the full set of attribute values for the given sublayer.
+     * Repeat calls will re-use the downloaded values unless the values have been explicitly cleared.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get attributes for. Uses first/only if omitted.
+     * @returns {Promise} resolves with set of attribute values
+     */
+     getAttributes (layerIdx: number | string | undefined = undefined): Promise<AttributeSet> {
+        return Promise.resolve({
+            features: [],
+            oidIndex: {}
+        });
+    }
+
+    /**
+     * Returns an array of field definitions about the given sublayer's fields. Raster layers will have empty arrays.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get fields for. Uses first/only if omitted.
+     * @returns {Array} list of field definitions
+     */
+    getFields (layerIdx: number | string | undefined = undefined): Array<FieldDefinition> {
+        return [];
+    }
+
+    /**
+     * Returns the geometry type of the given sublayer.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the geometry type of. Uses first/only if omitted.
+     * @returns {Array} list of field definitions
+     */
+    getGeomType (layerIdx: number | string | undefined = undefined): string {
+        return 'error';
+    }
+
+    /**
+     * Returns the name field of the given sublayer.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name field of. Uses first/only if omitted.
+     * @returns {string} name field
+     */
+    getNameField (layerIdx: number | string | undefined = undefined): string {
+        return 'error';
+    }
+
+    /**
+     * Returns the OID field of the given sublayer.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the OID field of. Uses first/only if omitted.
+     * @returns {string} OID field
+     */
+    getOidField (layerIdx: number | string | undefined = undefined): string {
+        return 'error';
+    }
+
+    /**
+     * Requests that an attribute load request be aborted. Useful when encountering a massive dataset or a runaway process.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to stop loading attributes for. Uses first/only if omitted.
+     */
+    abortAttributeLoad (layerIdx: number | string | undefined = undefined): void {
+    }
+
+    /**
+     * Requests that any downloaded attribute sets be removed from memory. The next getAttributes request will pull from the server again.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to detroy attributes for. Uses first/only if omitted.
+     */
+    destroyAttributes (layerIdx: number | string | undefined = undefined): void {
+    }
+
+    // formerly known as getFormattedAttributes
+    /**
+     * Invokes the process to get the full set of attribute values for the given sublayer,
+     * formatted in a tabular format. Additional data properties are also included.
+     * Repeat calls will re-use the downloaded values unless the values have been explicitly cleared.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get tabular attributes for. Uses first/only if omitted.
+     * @returns {Promise} resolves with set of tabular attribute values
+     */
+    getTabularAttributes (layerIdx: number | string | undefined = undefined): Promise<TabularAttributeSet> {
+        return Promise.resolve({
+            columns: [],
+            rows: [],
+            fields: [],
+            oidField: 'error',
+            oidIndex: 0 // TODO determine if we need this anymore
+        });
+    }
+
+    /**
+     * Get the feature count for the given sublayer.
+     *
+     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the feature count for. Uses first/only if omitted.
+     * @returns {Integer} number of features in the sublayer
+     */
+    getFeatureCount (layerIdx: number | string | undefined = undefined): number {
+        return -1;
     }
 
     /**

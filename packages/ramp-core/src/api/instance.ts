@@ -1,6 +1,4 @@
 import Vue, { VueConstructor } from 'vue';
-// BAAH
-// import { RampMap } from 'rampgeoapi';
 import { RampConfigs } from '@/types';
 import { Store } from 'vuex';
 import { i18n } from '@/lang';

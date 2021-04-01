@@ -2,8 +2,8 @@
 // TODO add proper comments
 
 import { GlobalEvents, InstanceAPI } from '../../api/internal';
-import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode, LayerInstance, RampMapConfig, MapClick,
-    MapMove, Point, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
+import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode,IdentifyParameters, IdentifyResult, IdentifyResultSet, LayerInstance, MapClick,
+    MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
 import { EsriLOD, EsriMapView } from '../esri';
 import { LayerStore } from '@/store/modules/layer';
 
@@ -140,9 +140,7 @@ export class MapAPI extends CommonMapAPI {
         if (this._rampSR.isEqual(geom.sr)) {
             return Promise.resolve(geom);
         } else {
-            return Promise.resolve(geom); // fake to shut up compiler
-            // BAAH
-            // return this.$iApi.geo.utils.proj.projectGeometry(this._rampSR, geom);
+            return this.$iApi.geo.utils.proj.projectGeometry(this._rampSR, geom);
         }
     }
 
@@ -439,15 +437,13 @@ export class MapAPI extends CommonMapAPI {
      */
 
     identify(payload: MapClick | Point) {
-        // BAAH
-        /*
-        let layers: BaseLayer[] | undefined = this.$vApp.$store.get(LayerStore.layers);
+        let layers: LayerInstance[] | undefined = this.$vApp.$store.get(LayerStore.layers);
 
         // Don't perform an identify request if the layers array hasn't been established yet.
         if (layers === undefined) return;
 
         let p: IdentifyParameters = {
-            geometry: payload instanceof ApiBundle.Point ? payload : payload.mapPoint
+            geometry: payload instanceof Point ? payload : payload.mapPoint
         };
 
         // Perform an identify request on each layer. Does not perform the request on layers that do not have an identify function (layers that do not support identify).
@@ -461,7 +457,7 @@ export class MapAPI extends CommonMapAPI {
         const identifyResults: IdentifyResult[] = ([] as IdentifyResult[]).concat(...identifyInstances.map(({ results }) => results));
 
         let mapClick: MapClick;
-        if (payload instanceof ApiBundle.Point) {
+        if (payload instanceof Point) {
             // construct MapClick if only point is given
             const screenPoint = this.mapPointToScreenPoint(payload);
             mapClick = {
@@ -477,7 +473,7 @@ export class MapAPI extends CommonMapAPI {
 
         // TODO make the event payload an interface? should there be a public area with all event payload interfaces?
         this.$iApi.event.emit(GlobalEvents.MAP_IDENTIFY, { results: identifyResults, click: mapClick });
-        */
+
     }
 
 

@@ -7,8 +7,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { PanelInstance } from '@/api';
-// BAAH (no one is using this import)
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 // Import control templates.
 import SliderControl from './templates/slider-control.vue';

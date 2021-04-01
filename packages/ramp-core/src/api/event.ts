@@ -3,9 +3,7 @@ import { APIScope, InstanceAPI } from './internal';
 import { DetailsAPI } from '@/fixtures/details/api/details';
 import { SettingsAPI} from '@/fixtures/settings/api/settings'
 import { HelpAPI } from '@/fixtures/help/api/help'
-
-// BAAH
-// import { IdentifyResult, IdentifyResultSet, MapClick } from 'rampgeoapi';
+import { MapClick } from '../geo/internal';
 
 export enum GlobalEvents {
     /**
@@ -315,16 +313,14 @@ export class EventAPI extends APIScope {
 
         switch (handlerName) {
             case DefEH.MAP_IDENTIFY:
-                // BAAH
+
                 // when map clicks, run the identify action
-                /*
                 zeHandler = (clickParam: MapClick) => {
                     if (clickParam.button === 0) {
-                        this.$iApi.mapActions.identify(clickParam);
+                        this.$iApi.geo.map.identify(clickParam);
                     }
                 };
                 this.on(GlobalEvents.MAP_CLICK, zeHandler, handlerName);
-                */
                 break;
             case DefEH.IDENTIFY_DETAILS:
                 // when identify runs, open details fixture and show the results

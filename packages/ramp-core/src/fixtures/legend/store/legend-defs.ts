@@ -1,6 +1,4 @@
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
-// import TreeNode from 'rampgeoapi/dist/layer/TreeNode';
+import { LayerInstance, TreeNode } from '../../../geo/internal';
 
 /**
  * Function definitions for legend item wrapper objects.
@@ -103,10 +101,10 @@ export class LegendItem {
  */
 export class LegendEntry extends LegendItem {
     _uid: string | undefined;
-    _layer: any; // BaseLayer | undefined; // BAAH
+    _layer: LayerInstance | undefined;
     _layerIndex: number | undefined;
-    _layerTree: any; // TreeNode | undefined; // BAAH
-    _isLoaded: boolean = false; // BAAH (i added the = false)
+    _layerTree: TreeNode | undefined;
+    _isLoaded: boolean;
     _symbologyStack: any;
 
     /**
@@ -118,10 +116,8 @@ export class LegendEntry extends LegendItem {
         this._type = legendEntry.type !== undefined ? legendEntry.type : LegendTypes.Entry;
         this._parent = parent;
 
-        // BAAH
-        /*
         // find matching BaseLayer in layer store to the layerId in config
-        this._layer = legendEntry.layers.find((layer: BaseLayer) => layer.id === this._id);
+        this._layer = legendEntry.layers.find((layer: LayerInstance) => layer.id === this._id);
         this._layerIndex = legendEntry.entryIndex;
 
         this._isLoaded = this._layer !== undefined ? this._layer.isValidState() : true;
@@ -133,7 +129,6 @@ export class LegendEntry extends LegendItem {
 
         // initialize more layer properties after layer loads
         this._waitLayerLoad();
-        */
     }
 
     /**
@@ -164,12 +159,12 @@ export class LegendEntry extends LegendItem {
     }
 
     /** Returns BaseLayer associated with legend entry. */
-    get layer(): any { // BaseLayer | undefined { // BAAH
+    get layer(): LayerInstance | undefined {
         return this._layer;
     }
 
     /** Returns layer tree associated with legend entry. */
-    get layerTree(): any { // TreeNode | undefined { // BAAH
+    get layerTree(): TreeNode | undefined {
         return this._layerTree;
     }
 
