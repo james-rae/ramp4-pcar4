@@ -1,7 +1,7 @@
 // layers api and other public, general layer things.
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, FileUtils, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
@@ -54,6 +54,13 @@ export class LayerAPI extends APIScope {
     // NOTE probably want to change this from LayerBase to ILayerBase.
     //      we want to store constructors, not instances of layers.
     _layerDefStore: {[key: string]: LayerDef} = {};
+
+    files: FileUtils;
+
+    constructor (iApi: InstanceAPI) {
+        super(iApi);
+        this.files = new FileUtils(iApi);
+    }
 
     // NOTE also might want to store the Promises that get generated when creating these definitions.
     //      when we request a new layer, would be good to be able to see if a definition request

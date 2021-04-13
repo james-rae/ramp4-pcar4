@@ -30,7 +30,7 @@ class ImageryLayer extends CommonLayer {
      */
     protected makeEsriLayerConfig(rampLayerConfig: RampLayerConfig): __esri.ImageryLayerProperties {
         // TODO flush out
-        const esriConfig: __esri.TileLayerProperties = super.makeEsriLayerConfig(rampLayerConfig);
+        const esriConfig: __esri.ImageryLayerProperties = super.makeEsriLayerConfig(rampLayerConfig);
 
         return esriConfig;
     }
