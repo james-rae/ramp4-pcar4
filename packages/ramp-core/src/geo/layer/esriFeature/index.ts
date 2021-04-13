@@ -207,7 +207,7 @@ class FeatureLayer extends AttribLayer {
             includeGeometry: false
         };
 
-        if (myFC.geomType !== 'polygon' && options.geometry.type === GeometryType.POINT) {
+        if (myFC.geomType !== GeometryType.POLYGON && options.geometry.type === GeometryType.POINT) {
             // if our layer is not polygon, and our identify input is a point, make a point buffer
             qOpts.filterGeometry = this.$iApi.geo.utils.query.makeClickBuffer(<Point>options.geometry, options.tolerance);
         } else {

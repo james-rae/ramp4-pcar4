@@ -4,7 +4,7 @@
 // TODO add proper comments
 
 import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseGeometry, BaseRenderer,
-    CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
+    CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
     LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '../internal';
 
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '../esri';
@@ -16,7 +16,7 @@ export class AttribFC extends CommonFC {
     // property does get initialized in the super. typescript just being grousy
     // @ts-ignore
     protected parentLayer: AttribLayer;
-    geomType: string;
+    geomType: GeometryType;
     oidField: string;
     fields: Array<EsriField>;
     fieldList: string; // list of field names, useful for numerous esri api calls
@@ -32,7 +32,7 @@ export class AttribFC extends CommonFC {
     constructor (parent: AttribLayer, layerIdx: number = 0) {
         super(parent, layerIdx);
 
-        this.geomType = '';
+        this.geomType = GeometryType.UNKNOWN;
         this.oidField = '';
         this.nameField = '';
         this.serviceUrl = '';
@@ -70,7 +70,7 @@ export class AttribFC extends CommonFC {
             // properties for all endpoints
 
             // TODO need to decide what propert default is. Raster Layer has null gt.
-            this.geomType = this.parentLayer.$iApi.geo.utils.shared.serverGeomTypeToClientGeomType(sData.geometryType) || 'none';
+            this.geomType = this.parentLayer.$iApi.geo.utils.geom.serverGeomTypeToClientGeomType(sData.geometryType);
             this.quickCache = new QuickCache(this.geomType);
             this.scaleSet.minScale = sData.effectiveMinScale || sData.minScale;
             this.scaleSet.maxScale = sData.effectiveMaxScale || sData.maxScale;

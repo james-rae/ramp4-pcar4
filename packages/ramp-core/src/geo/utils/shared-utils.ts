@@ -1,4 +1,5 @@
-import { ArcGisServerUrl } from '../internal';
+import { G } from 'svg.js';
+import { ArcGisServerUrl, GeometryType } from '../internal';
 
 export class SharedUtilsAPI {
 
@@ -118,28 +119,6 @@ export class SharedUtilsAPI {
         }
 
         return result;
-    }
-
-    serverGeomTypeToClientGeomType(serverType: string): string {
-        if (!serverType) {
-            // falsy case, pass it on thru
-            return serverType;
-        }
-        switch (serverType) {
-            case 'esriGeometryPolygon':
-                return 'polygon';
-            case 'esriGeometryPolyline':
-                return 'polyline';
-            case 'esriGeometryPoint':
-                return 'point';
-            case 'esriGeometryMultipoint':
-                return 'multipoint';
-            case 'esriGeometryEnvelope':
-                return 'extent';
-            default:
-                console.warn(`Unrecognized server geometry type encountered: ${serverType}`);
-                return serverType;
-        }
     }
 
 }

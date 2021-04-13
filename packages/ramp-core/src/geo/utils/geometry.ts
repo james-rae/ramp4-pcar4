@@ -198,6 +198,29 @@ export class GeometryAPI {
         return g;
     }
 
+    // converts an arcgis server geometry type to ramp geometry type
+    serverGeomTypeToClientGeomType(serverType: string): GeometryType {
+        if (!serverType) {
+            // falsy case, pass it on thru
+            return GeometryType.NONE;
+        }
+        switch (serverType) {
+            case 'esriGeometryPolygon':
+                return GeometryType.POLYGON;
+            case 'esriGeometryPolyline':
+                return GeometryType.LINESTRING;
+            case 'esriGeometryPoint':
+                return GeometryType.POINT;
+            case 'esriGeometryMultipoint':
+                return GeometryType.MULTIPOINT;
+            case 'esriGeometryEnvelope':
+                return GeometryType.EXTENT;
+            default:
+                console.error(`Unrecognized server geometry type encountered: ${serverType}`);
+                return GeometryType.UNKNOWN;
+        }
+    }
+
     // everything below is worker functions for the main hawggies above.
     // they can be used by outside callers, but in most cases, use the standard things ^
 

@@ -44,6 +44,7 @@ export enum GeometryType {
     MULTIPOLYGON = 'MultiPolygon',
     LINEARRING = 'LinearRing',
     EXTENT = 'Extent',
+    NONE = 'None', // useful for raster sublayers who need to populate a geom type field.
     UNKNOWN = 'Unknown'
 }
 
