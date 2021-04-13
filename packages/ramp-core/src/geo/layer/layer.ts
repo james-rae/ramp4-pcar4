@@ -1,7 +1,7 @@
 // layers api and other public, general layer things.
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
@@ -303,6 +303,12 @@ export class LayerInstance extends APIScope implements LayerBase {
      */
     id: string;
 
+    uid: string;
+
+    supportsIdentify: boolean;
+
+    state: LayerState;
+
     /**
      * Creates an instance of LayerInstance.
      *
@@ -313,6 +319,9 @@ export class LayerInstance extends APIScope implements LayerBase {
     constructor(config: any, iApi: InstanceAPI) {
         super(iApi);
         this.id = ''; // take from config here?
+        this.uid = ''; // shutting up typescript. will get set somewhere else. // TODO verify setting, move here if that is smarter.
+        this.supportsIdentify = false; // this is updated by subclasses as they will know the real deal.
+        this.state = LayerState.NEW;
         this.config = config;
     }
 
@@ -482,6 +491,21 @@ export class LayerInstance extends APIScope implements LayerBase {
     getLegend (layerIdx: number | string | undefined = undefined): Array<LegendSymbology> {
         return [];
     }
+
+    /**
+     * Baseline identify function for layers that do not support identify.
+     * Will return an empty result. Layers that support identify should override this method.
+     *
+     * @param options not used, present for nice signature of overrided function
+     * @returns {IdentifyResultSet} an empty result set
+     */
+     identify(options: IdentifyParameters): IdentifyResultSet {
+        return {
+            results: [],
+            done: Promise.resolve(),
+            parentUid: this.uid
+        };
+     }
 
     /**
      * Gets information on a graphic in the most efficient way possible. Options object properties:

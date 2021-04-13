@@ -46,15 +46,12 @@ export default class SymbologyStack extends Vue {
     stack: any = [];
 
     mounted() {
+        // TODO ramp2 would create a placeholder stack if the layer wasn't loaded. Icon would be first letter of layer
+        //      see if we should be doing that here as well, or if we are fine with empty icons.
         // When the layer is loaded, get the icon.
-        if (this.layer.state !== 'rv-loaded') {
-            this.layer.stateChanged.listen(() => {
-                // TODO this should probably check the state, and then remove the listener once it gets the stack
-                this.getSymbologyStack();
-            });
-        } else {
+        this.layer.isLayerLoaded().then(() => {
             this.getSymbologyStack();
-        }
+        });
     }
 
     /**

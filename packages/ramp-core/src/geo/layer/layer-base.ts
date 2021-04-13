@@ -9,15 +9,18 @@
 // they probably won't have access to "class" LayerInstance when using compiled RAMP (raw javascript).
 // this pattern is stolen from the fixture class model.
 
-import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO consider making a number of these things optional with ? markup.
 // TODO add all the stuff from layer instance
 export interface LayerBase {
 
     id: string;
+    uid: string;
 
     layerType: string;
+    supportsIdentify: boolean;
+    state: LayerState;
     // isReadyForMap(): Promise<void>;
 
     esriLayer: __esri.Layer | undefined;
@@ -40,6 +43,7 @@ export interface LayerBase {
     isOffscale(layerIdx: number | string | undefined, testScale: number | undefined): boolean;
     supportsFeatures(layerIdx: number | string | undefined): boolean;
     getLegend(layerIdx: number | string | undefined): Array<LegendSymbology>;
+    identify(options: IdentifyParameters): IdentifyResultSet;
 
     // attribute layer props. layers that do not support attributes can just return dummy values
     // TODO make these ? optional, so implementer doesn't need to write garbage? ensure the .updateBaseToInstance()

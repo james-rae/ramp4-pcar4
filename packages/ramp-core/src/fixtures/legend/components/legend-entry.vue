@@ -45,6 +45,7 @@
 </template>
 
 <script lang="ts">
+import { GlobalEvents } from '@/api';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
@@ -68,8 +69,15 @@ export default class LegendEntryV extends Vue {
     visibility: boolean | undefined = this.legendItem.visibility;
 
     mounted(): void {
-        this.legendItem.layer!.visibilityChanged.listen((visibility: boolean) => {
-            this.visibility = this.legendItem.visibility;
+        // TODO figure out a strong type for the payload?
+        const visHandler = this.$iApi.event.on(GlobalEvents.LAYER_VISIBILITYCHANGE, (payload: any) => {
+            if (this.legendItem.layer && this.legendItem.layer.getLayerTree().findChildByUid(payload.uid)) {
+                // the event is related to this layer.
+                // TODO likely need to refine logic for child layers. see comments in common-layer initiate().
+                //      we could have case where layer turns on but child remains off. in this case additional logic needed.
+                // TODO verify we still use logic below, and not payload.visibility
+                this.visibility = this.legendItem.visibility;
+            }
         });
     }
 

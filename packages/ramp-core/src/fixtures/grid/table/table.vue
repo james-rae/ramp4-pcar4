@@ -65,7 +65,6 @@ import deepmerge from 'deepmerge';
 
 import { LayerStore, layer } from '@/store/modules/layer';
 import { LayerInstance } from '../../../geo/internal';
-// type BaseLayer = any;
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
@@ -99,7 +98,7 @@ const TEXT_TYPE: string = 'string';
 })
 export default class TableComponent extends Vue {
     @Prop() layerUid!: string;
-    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => BaseLayer | undefined;
+    @Get('layer/getLayerByUid') getLayerByUid!: (uid: string) => LayerInstance | undefined;
     @Sync('grid/grids') grids!: { [uid: string]: GridConfig };
 
     columnApi: any = null;
