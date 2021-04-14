@@ -199,7 +199,7 @@ export class GeometryAPI {
     }
 
     // converts an arcgis server geometry type to ramp geometry type
-    serverGeomTypeToClientGeomType(serverType: string): GeometryType {
+    serverGeomTypeToRampGeomType(serverType: string): GeometryType {
         if (!serverType) {
             // falsy case, pass it on thru
             return GeometryType.NONE;
@@ -217,6 +217,28 @@ export class GeometryAPI {
                 return GeometryType.EXTENT;
             default:
                 console.error(`Unrecognized server geometry type encountered: ${serverType}`);
+                return GeometryType.UNKNOWN;
+        }
+    }
+
+    // converts an esri client geometry type to ramp geometry type
+    clientGeomTypeToRampGeomType(clientType: string): GeometryType {
+        if (!clientType) {
+            // falsy case, pass it on thru
+            return GeometryType.NONE;
+        }
+        switch (clientType) {
+            case 'polygon':
+                return GeometryType.POLYGON;
+            case 'polyline':
+                return GeometryType.LINESTRING;
+            case 'point':
+                return GeometryType.POINT;
+            case 'multipoint':
+                return GeometryType.MULTIPOINT;
+            default:
+                // "multipatch" and "mesh" are valid values but we have no equivalent currently
+                console.error(`Unrecognized client geometry type encountered: ${clientType}`);
                 return GeometryType.UNKNOWN;
         }
     }

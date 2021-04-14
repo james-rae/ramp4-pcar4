@@ -3,7 +3,7 @@
 
 import { APIScope, InstanceAPI } from '../../api/internal';
 import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, GetGraphicResult, LinearRing, LineString, MapAPI, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, QueryFeaturesArcServerParams, QueryFeaturesGeoJsonParams, SpatialReference } from '../internal';
+    MultiPolygon, Point, Polygon, QueryFeaturesArcServerParams, QueryFeaturesFileParams, SpatialReference } from '../internal';
 import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriQuery, EsriQueryTask, EsriRequest, EsriSpatialReference } from '../esri';
 
 export class QueryAPI extends APIScope {
@@ -44,7 +44,7 @@ export class QueryAPI extends APIScope {
      * @param options contains properties that define the query and specificy request particulars.
      * @returns resolves with array of graphic result objects.
      */
-    async geoJsonQuery(options: QueryFeaturesGeoJsonParams): Promise<Array<GetGraphicResult>> {
+    async geoJsonQuery(options: QueryFeaturesFileParams): Promise<Array<GetGraphicResult>> {
 
         const query = new EsriQuery();
         query.returnGeometry = !!options.includeGeometry;

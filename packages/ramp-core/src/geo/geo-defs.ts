@@ -3,7 +3,7 @@
 // NOTE attempt to avoid importing any classes that depend on the Instance.
 //      we want types here to be available before the instance is generated,
 //      so don't want some weird dependency loop.
-import { BaseGeometry, BaseRenderer, CommonLayer, Extent, Point, SpatialReference } from './internal';
+import { BaseGeometry, BaseRenderer, CommonLayer, Extent, FileLayer, Point, SpatialReference } from './internal';
 
 // NOTE: some values have changed since RAMP2.
 //       this is due to esri api 4 using different constants, and working exclusively in the
@@ -308,8 +308,8 @@ export interface QueryFeaturesArcServerParams extends QueryFeaturesParams {
     url: string;
 }
 
-export interface QueryFeaturesGeoJsonParams extends QueryFeaturesParams {
-    layer: CommonLayer; // BAAH // GeoJsonLayer <-- this still needs to be updated, do not settle for the commonlayer;
+export interface QueryFeaturesFileParams extends QueryFeaturesParams {
+    layer: FileLayer;
 }
 
 export interface IdentifyParameters {

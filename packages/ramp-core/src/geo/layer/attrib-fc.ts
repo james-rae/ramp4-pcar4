@@ -70,7 +70,7 @@ export class AttribFC extends CommonFC {
             // properties for all endpoints
 
             // TODO need to decide what propert default is. Raster Layer has null gt.
-            this.geomType = this.parentLayer.$iApi.geo.utils.geom.serverGeomTypeToClientGeomType(sData.geometryType);
+            this.geomType = this.parentLayer.$iApi.geo.utils.geom.serverGeomTypeToRampGeomType(sData.geometryType);
             this.quickCache = new QuickCache(this.geomType);
             this.scaleSet.minScale = sData.effectiveMinScale || sData.minScale;
             this.scaleSet.maxScale = sData.effectiveMaxScale || sData.maxScale;

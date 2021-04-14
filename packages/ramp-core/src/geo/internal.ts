@@ -37,6 +37,11 @@ export * from './layer/common-fc';
 export * from './layer/common-layer';
 export * from './layer/attrib-fc';
 export * from './layer/attrib-layer';
+export * from './layer/file-fc';
+export * from './layer/file-layer';
+
+// NOTE having these here might cause layer classes to pre-load, even if they are not being used.
+//      we might want to have references to these classes be direct-linked from the layers that use them.
 export * from './layer/esriFeature/feature-fc';
 export * from './layer/esriMapImage/map-image-fc';
 

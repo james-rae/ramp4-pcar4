@@ -230,7 +230,7 @@ class MapImageLayer extends AttribLayer {
         // that makes the client happy
         const processSublayer = (subLayer: __esri.Sublayer, parentTreeNode: TreeNode): void => {
             const sid: number = subLayer.id;
-            const subC: RampLayerMapImageLayerEntryConfig = subConfigs[sid];
+            const subC = subConfigs[sid];
 
             if (subLayer.sublayers && subLayer.sublayers.length > 0) {
                 // group sublayer. set up our tree for the client, then crawl children.
@@ -270,7 +270,7 @@ class MapImageLayer extends AttribLayer {
         (<Array<RampLayerMapImageLayerEntryConfig>>this.origRampConfig.layerEntries).forEach(le => {
             if (!le.stateOnly) {
                 // TODO add a check instead of 0 default on the index?
-                const rootSub: __esri.Sublayer = findSublayer(le.index || 0);
+                const rootSub = findSublayer(le.index || 0);
 
                 // TODO would need to validate layer tree every loop to shut up typescript. shutting it up with comment instead.
                 // @ts-ignore
@@ -287,7 +287,7 @@ class MapImageLayer extends AttribLayer {
             // TODO check if we have custom renderer, add to options parameter here
             const pLMD: Promise<void> = mlFC.loadLayerMetadata().then(() => {
                 // apply any updates that were in the configuration snippets
-                const subC: RampLayerMapImageLayerEntryConfig = subConfigs[mlFC.layerIdx];
+                const subC = subConfigs[mlFC.layerIdx];
                 if (subC) {
                     mlFC.setVisibility(!!subC.state?.visibility); // TODO do we need an init flag? perhaps the layer will already be invisible while this is getting set
                     if (!(typeof subC.state?.opacity === 'undefined')) {
