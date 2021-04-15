@@ -3,6 +3,9 @@ import esri = __esri;
 import { APIScope, InstanceAPI } from '../../api/internal';
 import defaultRenderers from './defaultRenderers.json';
 import ArcGIS from 'terraformer-arcgis-parser';
+// @ts-ignore
+import { csv2geojson, dsv } from 'csv2geojson';
+
 import { EsriColour, EsriExtent, EsriField, EsriRendererUtils, EsriRequest, EsriSimpleRenderer, EsriSpatialReference } from '../esri';
 
 /**
@@ -274,5 +277,76 @@ export class FileUtils extends APIScope {
         return configPackage;
 
     }
+
+    // TODO make strong types for option parameter
+    // converts csv file in string format to geojson object
+    // options
+    //     - latfield: a string identifying the field containing latitude values ('Lat' by default)
+    //     - lonfield: a string identifying the field containing longitude values ('Long' by default)
+    //     - delimiter: a string defining the delimiter character of the file (',' by default)
+    async csvToGeoJson(csvData: string, opts: any): Promise<any> {
+        const csvOpts = { // default values
+            latfield: 'Lat',
+            lonfield: 'Long',
+            delimiter: ','
+        };
+
+        // user options if
+        if (opts) {
+            if (opts.latfield) {
+                csvOpts.latfield = opts.latfield;
+            }
+
+            if (opts.lonfield) {
+                csvOpts.lonfield = opts.lonfield;
+            }
+
+            if (opts.delimiter) {
+                csvOpts.delimiter = opts.delimiter;
+            }
+        }
+
+        return new Promise((resolve, reject) => {
+            csv2geojson.csv2geojson(csvData, csvOpts, (err: any, data: any) => {
+                if (err) {
+                    console.error('csv conversion error');
+                    console.error(err);
+                    reject(err);
+                } else {
+                    // data is geojson object
+
+                    // csv2geojson will not include the lat and long in the feature
+                    data.features.map((feature: any) => {
+                        // add new property Long and Lat before layer is generated
+                        feature.properties[csvOpts.lonfield] = feature.geometry.coordinates[0];
+                        feature.properties[csvOpts.latfield] = feature.geometry.coordinates[1];
+                    });
+
+                    resolve(data);
+                }
+
+            });
+        });
+    }
+
+    /**
+     * Converts Shapefile data to geojson.
+     * @param {ArrayBuffer} shapeData an ArrayBuffer of the Shapefile in zip format
+     * @returns {Promise} a promise resolving with geojson
+     */
+    async shapefileToGeoJson(shapeData: any): Promise<any> {
+
+        // TODO need to fix our shapefile library as it wont work in our current rush build
+        // package.json entry:
+        // "shpjs": "github:fgpv-vpgf/shapefile-js#v3.6.0",
+
+        // suggest we make a new repo in the ramp4 organization, so we don't end up breaking ramp2
+
+        // turn shape into geojson
+        // import shp from 'shpjs';  // <-- top of file
+        // return shp(shapeData);
+
+        return 'error not implemented';
+    };
 
 }

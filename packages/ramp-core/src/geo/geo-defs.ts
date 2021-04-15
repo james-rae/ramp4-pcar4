@@ -414,7 +414,6 @@ export interface RampLayerWmsLayerEntryConfig {
 export interface RampLayerConfig {
     id: string;
     layerType: string;
-    fileType?: string;
     url: string;
     name?: string;
     state?: RampLayerStateConfig;
@@ -426,6 +425,9 @@ export interface RampLayerConfig {
     tooltipField?: string;
     featureInfoMimeType?: string;
     layerEntries?: Array<RampLayerMapImageLayerEntryConfig> | Array<RampLayerWmsLayerEntryConfig>;
+    rawData?: any; // used for static data, like geojson string, shapefile guts
+    latField?: string; // csv coord field
+    longField?: string; // csv coord field
 }
 
 export interface RampExtentConfig {

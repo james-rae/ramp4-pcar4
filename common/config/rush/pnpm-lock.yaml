@@ -30,6 +30,7 @@ dependencies:
   axios: 0.19.2
   cross-env: 7.0.3
   css-loader: 3.6.0_webpack@4.41.3
+  csv2geojson: 5.1.1
   d3-dsv: 1.2.0
   debounce: 1.2.0
   deepmerge: 4.2.2
@@ -47,6 +48,7 @@ dependencies:
   sass: 1.32.5
   sass-loader: 8.0.2_sass@1.32.5+webpack@4.41.3
   screenfull: 5.0.2
+  shpjs: github.com/fgpv-vpgf/shapefile-js/dd6b31899dee1d70f106b3725430f2eb5f0b350c
   svg.js: 2.7.1
   tailwindcss: 1.9.6
   terraformer: 1.0.9
@@ -1281,6 +1283,13 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-XKK7ze1apu5JWQ5eZjHITP66AX+QsLlbaJRBGYr8pNzwcAE2JVkwnf0yqjHTsDRcjR0mujy/NmZMXw5kl+kGBw==
+  /@mapbox/sexagesimal/1.2.0:
+    dev: false
+    engines:
+      node: '>=8.0.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-+C3+Azc4ObH2qmDYvg9MC+vvlGVfwB1BZNX8jt4XehJjfDGXwlElqJ6PS9BtgLHSjdinEoZTNanTG/WTc+dpRA==
   /@mrmlnc/readdir-enhanced/2.2.1:
     dependencies:
       call-me-maybe: 1.0.1
@@ -3827,6 +3836,16 @@ packages:
     dev: false
     resolution:
       integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
+  /concat-stream/1.5.2:
+    dependencies:
+      inherits: 2.0.4
+      readable-stream: 2.0.6
+      typedarray: 0.0.6
+    dev: false
+    engines:
+      '0': node >= 0.8
+    resolution:
+      integrity: sha1-cIl4Yk2FavQaWnQd790mHadSwmY=
   /concat-stream/1.6.2:
     dependencies:
       buffer-from: 1.1.1
@@ -4283,6 +4302,18 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
+  /csv2geojson/5.1.1:
+    dependencies:
+      '@mapbox/sexagesimal': 1.2.0
+      concat-stream: 1.5.2
+      d3-dsv: 1.0.1
+      optimist: 0.6.1
+    dev: false
+    engines:
+      node: '>=6'
+    hasBin: true
+    resolution:
+      integrity: sha512-0YpeQ1UOZ0hb6qSf9n/lzBKQMoct4VBc7ZLrSDeBYm90OuWRsZ6laixrfXISuLNqlFWyxRAdcNxEQR9O6nzIGQ==
   /cyclist/1.0.1:
     dev: false
     resolution:
@@ -4329,6 +4360,13 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-I9L/d+ilTPPA4vq3NC1OPKmw7jJIpMKNdyfR8t1EXYzYCjyqbc59migOm1YSse/VRbISLJ+QGb5k4Y3bz2lkYw==
+  /d3-dsv/1.0.1:
+    dependencies:
+      rw: 1.3.3
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha1-1JU0fATLHg0mVXu9xHdcTRGiReo=
   /d3-dsv/1.2.0:
     dependencies:
       commander: 2.20.3
@@ -6568,6 +6606,10 @@ packages:
       node: '>= 4'
     resolution:
       integrity: sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
+  /immediate/3.0.6:
+    dev: false
+    resolution:
+      integrity: sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=
   /import-cwd/2.1.0:
     dependencies:
       import-from: 2.1.0
@@ -8280,6 +8322,12 @@ packages:
       '0': node >=0.6.0
     resolution:
       integrity: sha1-MT5mvB5cwG5Di8G3SZwuXFastqI=
+  /jszip/2.6.1:
+    dependencies:
+      pako: 1.0.11
+    dev: false
+    resolution:
+      integrity: sha1-uI86ey5noqBIFSmCx6N1bZxIKPA=
   /killable/1.0.1:
     dev: false
     resolution:
@@ -8378,6 +8426,12 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha1-OwmSTt+fCDwEkP3UwLxEIeBHZO4=
+  /lie/3.3.0:
+    dependencies:
+      immediate: 3.0.6
+    dev: false
+    resolution:
+      integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==
   /lines-and-columns/1.1.6:
     dev: false
     resolution:
@@ -8622,6 +8676,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-miyr0bno4K6ZOkv31YdcOcQujqw=
+  /lru-cache/2.7.3:
+    dev: false
+    resolution:
+      integrity: sha1-bUUk6LlV+V1PW1iFHOId1y+06VI=
   /lru-cache/4.1.5:
     dependencies:
       pseudomap: 1.0.2
@@ -9501,6 +9559,13 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-PqHpggC9bLV0VeWcdKhkpxY+3JTzetLSqTCWL/z/tFIbI6G8JCjondXklT1JinczLz2Xib62sSp0T/gKT4KksA==
+  /optimist/0.6.1:
+    dependencies:
+      minimist: 0.0.8
+      wordwrap: 0.0.3
+    dev: false
+    resolution:
+      integrity: sha1-2j6nRob6IaGaERwybpDrFaAZZoY=
   /optionator/0.8.3:
     dependencies:
       deep-is: 0.1.3
@@ -9785,6 +9850,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==
+  /parsedbf/1.1.1:
+    dependencies:
+      iconv-lite: 0.4.24
+      text-encoding-polyfill: 0.6.7
+    dev: false
+    resolution:
+      integrity: sha512-jndFmhcrzSAGCMccM4za+3bIRxqV6L2doQjYN8Xgz0kZUpyBT5I8Gs6Y6hL5GcO2rih9OBkPcLlx2uBoLi8R8Q==
   /parseurl/1.3.3:
     dev: false
     engines:
@@ -10496,6 +10568,10 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
+  /process-nextick-args/1.0.7:
+    dev: false
+    resolution:
+      integrity: sha1-FQ4gt1ZZCtP5EJPyWk8q2L/zC6M=
   /process-nextick-args/2.0.1:
     dev: false
     resolution:
@@ -10782,6 +10858,17 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-Ug69mNOpfvKDAc2Q8DRpMjjzdtrnv9HcSMX+4VsZxD1aZ6ZzrIE7rlzXBtWTyhULSMKg076AW6WR5iZpD0JiOg==
+  /readable-stream/2.0.6:
+    dependencies:
+      core-util-is: 1.0.2
+      inherits: 2.0.4
+      isarray: 1.0.0
+      process-nextick-args: 1.0.7
+      string_decoder: 0.10.31
+      util-deprecate: 1.0.2
+    dev: false
+    resolution:
+      integrity: sha1-j5A0HmilPMySh4jaz80Rs265t44=
   /readable-stream/2.3.7:
     dependencies:
       core-util-is: 1.0.2
@@ -11941,6 +12028,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-oBIBUy5lea5tt0ovtOFiEQaBkoBBkyJhZXzJYrSmDo5IUUqbOPvVezuRs/agBIdZ2p2Eo1FD6bD9USyBLfl3xg==
+  /string_decoder/0.10.31:
+    dev: false
+    resolution:
+      integrity: sha1-YuIDvEF2bGwoyfyEMB2rHFMQ+pQ=
   /string_decoder/1.1.1:
     dependencies:
       safe-buffer: 5.1.2
@@ -12246,6 +12337,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-M+oxtseCFO3EDtAaGH7iiej3CBkzXqFMbzqYAACdzKui4eZA+pq3tZEwChvOdNfa7xxy8BfbmgJSIr43cC/+2g==
+  /text-encoding-polyfill/0.6.7:
+    dev: false
+    resolution:
+      integrity: sha512-/DZ1XJqhbqRkCop6s9ZFu8JrFRwmVuHg4quIRm+ziFkR3N3ec6ck6yBvJ1GYeEQZhLVwRW0rZE+C3SSJpy0RTg==
   /text-table/0.2.0:
     dev: false
     resolution:
@@ -13390,6 +13485,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==
+  /wordwrap/0.0.3:
+    dev: false
+    engines:
+      node: '>=0.4.0'
+    resolution:
+      integrity: sha1-o9XabNXAvAAI03I0u68b7WMFkQc=
   /wordwrap/1.0.0:
     dev: false
     resolution:
@@ -13689,6 +13790,7 @@ packages:
       await-to-js: 2.1.1
       axios: 0.19.2
       cross-env: 7.0.3
+      csv2geojson: 5.1.1
       debounce: 1.2.0
       deepmerge: 4.2.2
       eslint: 5.16.0
@@ -13703,6 +13805,7 @@ packages:
       sass: 1.32.5
       sass-loader: 8.0.2_sass@1.32.5+webpack@4.41.3
       screenfull: 5.0.2
+      shpjs: github.com/fgpv-vpgf/shapefile-js/dd6b31899dee1d70f106b3725430f2eb5f0b350c
       svg.js: 2.7.1
       tailwindcss: 1.9.6
       terraformer: 1.0.9
@@ -13725,7 +13828,7 @@ packages:
     peerDependencies:
       webpack: '*'
     resolution:
-      integrity: sha512-Hyg6QdMHeXCKtY/xf8URsDaIFwFZ8uYW7qkEbDV/DVu5hCpXgOw6PKpkbHOCrzzRpUPYpGtuEIU1rLHWu3taRw==
+      integrity: sha512-NO7IpAVSMCZU1PcqJOF5Un0bt+Re3m7Gnc70WiCqaHZnXDg/HPAMMINgikuy28Ln8YcvX4Coc9Djtvs6SPVzFw==
       tarball: 'file:projects/ramp-core.tgz'
     version: 0.0.0
   'file:projects/ramp-locale-loader.tgz':
@@ -13767,6 +13870,18 @@ packages:
       integrity: sha512-OguwqMo1M+GWZfRLFMArIJ5GpRgZgpZlCyFD0Tonv6Wi+ttEB0KFoCCeVgweGn8Tnil0lIfjgfKgtap2oMr8nw==
       tarball: 'file:projects/ramp-sample-fixtures.tgz'
     version: 0.0.0
+  github.com/fgpv-vpgf/shapefile-js/dd6b31899dee1d70f106b3725430f2eb5f0b350c:
+    dependencies:
+      jszip: 2.6.1
+      lie: 3.3.0
+      lru-cache: 2.7.3
+      parsedbf: 1.1.1
+      proj4: 2.6.0
+    dev: false
+    name: shpjs
+    resolution:
+      tarball: 'https://codeload.github.com/fgpv-vpgf/shapefile-js/tar.gz/dd6b31899dee1d70f106b3725430f2eb5f0b350c'
+    version: 3.6.0
 registry: ''
 specifiers:
   '@arcgis/core': 4.18.1
@@ -13800,6 +13915,7 @@ specifiers:
   axios: 0.19.2
   cross-env: ^7.0.2
   css-loader: ^3.5.2
+  csv2geojson: 5.1.1
   d3-dsv: ^1.2.0
   debounce: ^1.2.0
   deepmerge: ~4.2.2
@@ -13817,6 +13933,7 @@ specifiers:
   sass: ^1.23.7
   sass-loader: ^8.0.0
   screenfull: ~5.0.2
+  shpjs: 'github:fgpv-vpgf/shapefile-js#v3.6.0'
   svg.js: 2.7.1
   tailwindcss: ^1.1.4
   terraformer: 1.0.9
