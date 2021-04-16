@@ -9,7 +9,8 @@
 // they probably won't have access to "class" LayerInstance when using compiled RAMP (raw javascript).
 // this pattern is stolen from the fixture class model.
 
-import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet,
+    LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO consider making a number of these things optional with ? markup.
 // TODO add all the stuff from layer instance
@@ -47,7 +48,7 @@ export interface LayerBase {
 
     // attribute layer props. layers that do not support attributes can just return dummy values
     // TODO make these ? optional, so implementer doesn't need to write garbage? ensure the .updateBaseToInstance()
-    //      can still work with them missing on the incoming layer. LayerInstace will have dummy value stubs.
+    //      can still work with them missing on the incoming layer. LayerInstance will have dummy value stubs.
     getFeatureCount(layerIdx: number | string | undefined): number;
     getGraphic(objectId: number, options: GetGraphicParams, layerIdx: number | string | undefined): Promise<GetGraphicResult>;
     getIcon(objectId: number, layerIdx: number | string | undefined): Promise<string>;

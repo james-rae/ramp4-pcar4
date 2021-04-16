@@ -1,5 +1,6 @@
 import { G } from 'svg.js';
 import { ArcGisServerUrl, GeometryType } from '../internal';
+import deepmerge from 'deepmerge';
 
 export class SharedUtilsAPI {
 
@@ -121,4 +122,70 @@ export class SharedUtilsAPI {
         return result;
     }
 
+}
+
+type QueryMap = { [name: string]: string };
+
+/**
+ * This is a helper class to handle getting and setting query parameters on a url easy.
+ *
+ * @class UrlWrapper
+ */
+export class UrlWrapper {
+    _url: string;
+    _base: string;
+    _query: string;
+    _queryMap: QueryMap = {};
+
+    constructor(url: string) {
+        this._url = url;
+        // split the base and query
+        [this._base, this._query] = url.split('?').concat('');
+
+        // convert the query part into a mapped object
+        this._queryMap = this._query.split('&').reduce((map: QueryMap, parameter: string) => {
+            const [key, value] = parameter.split('=');
+            map[key] = value;
+            return map;
+        }, {});
+    }
+
+    get query(): string {
+        return this._query;
+    }
+
+    get base(): string {
+        return this._base;
+    }
+
+    get queryMap(): QueryMap {
+        return this._queryMap;
+    }
+
+    /**
+     * Updates the query part of the url with passed in values.
+     *
+     * For example:
+     *  - orginal url: http://example?flag=red&demohell=true
+     *  - queryMapUpdate: {
+     *     flag: undefined,
+     *     demohell: false,
+     *     acid: cat
+     * }
+     * - resulting url: http://example?demohell=false&acid=cat
+     *
+     *
+     * @param {QueryMap} queryMapUpdate an object of values to be added or replaced on the query of the url; if any values are undefined, their corresponding keys will be removed from the query.
+     * @returns {string} updated url
+     * @memberof UrlWrapper
+     */
+    updateQuery(queryMapUpdate: QueryMap): string {
+        const requestQueryMap: QueryMap = <QueryMap>deepmerge.all([{}, this.queryMap, queryMapUpdate]);
+        const requestUrl = `${this.base}${Object.entries(requestQueryMap)
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value], index) => `${index === 0 ? '?' : ''}${key}=${value}`)
+            .join('&')}`;
+
+        return requestUrl;
+    }
 }

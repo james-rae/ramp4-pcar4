@@ -275,7 +275,7 @@ export interface GetGraphicParams {
     getGeom?: boolean;
     getAttribs?: boolean;
     // I don't think we need this anymore. The map is now effectively a singleton on the instance API. no more layers holding pointers to the map they live in.
-    // unboundMap?: MapAPI; // BAAH // TODO still need this, or just reference ramp api? // RampMap; // this allows a reference map to be provided. useful for getting graphics from a layer that is not on a map. only required if layer has not been added to the map and geometry is requested
+    // unboundMap?: MapAPI;
 }
 
 export interface GetGraphicServiceDetails {
@@ -301,7 +301,7 @@ export interface QueryFeaturesParams {
     sourceSR?: SpatialReference; // the spatial reference of the web service. providing helps avoid some reprojection issues
 
     // don't think we need this anymore. map is now a singleton on the instance api
-    // map?: any; // BAAH // RampMap; // needed if querying geometry against a web service
+    // map?: RampMap; // needed if querying geometry against a web service
 }
 
 export interface QueryFeaturesArcServerParams extends QueryFeaturesParams {

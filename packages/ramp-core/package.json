@@ -15,7 +15,7 @@
         "ag-grid-community": "^22.1.1",
         "ag-grid-vue": "^22.1.1",
         "animejs": "~3.2.0",
-        "await-to-js": "^2.1.1",
+        "await-to-js": "^3.0.0",
         "axios": "0.19.2",
         "csv2geojson": "5.1.1",
         "debounce": "^1.2.0",

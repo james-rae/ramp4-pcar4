@@ -1,66 +1,23 @@
 // handles static geojson (e.g. from a user file or hardcoded in a config) or a geojson file hosted on a web server
 
-import { FileLayer } from '../../internal';
+import { FileLayer, UrlWrapper } from '../../internal';
 
-class GeoJsonLayer extends FileLayer {
+class WFSLayer extends FileLayer {
 
     async initiate(): Promise<void> {
 
-        // TODO check if .sourceGeoJson is already populated?
-        //      if this initiate is a reload, do we want to re-use it, or re-download? decide.
+        const wrapper = new UrlWrapper(this.config.url);
 
-        // get geojson from appropriate source and set to special property.
-        // then initiate the FileLayer
+        // get start index and limit set on the url
+        const { startindex, limit } = wrapper.queryMap;
 
-        if (this.origRampConfig.rawData) {
-            // geojson has been passed in as static string
-            // TODO validation? check that type is string?
-            this.sourceGeoJson = this.origRampConfig.rawData;
-        } else if (this.origRampConfig.url) {
-            // make web call to download geojson file
+        this.sourceGeoJson = await this.$iApi.geo.layer.ogc.loadWfsData(this.config.url, -1,
+            parseInt(startindex) || 0, parseInt(limit) || 1000, undefined, this.config.xyInAttribs);
 
-            // this is RAMP2 code. untested, needs conversion from angular libs to vue libs.
-            // steps will be
-            //   1. await web response of this.origRampConfig.url
-            //   2. any parsing required to get web result into Json string or Json object
-            //   3. store parsed result on this.sourceGeoJson
-
-            /*
-            const [error, response] = await to<any>($http.get(this.config.url, {
-                responseType: 'blob'
-            }));
-
-            if (!response) {
-                console.error(`File data failed to load for "${this.config.id}"`, error);
-                return Promise.reject(error);
-            }
-
-            const reader = new FileReader();
-
-            return $q((resolve: any, reject: any) => {
-                reader.onerror = error => {
-                    console.error(`File data failed to load for "${this.config.id}"`, error);
-                    reject({ reason: 'error', message: 'Failed to read file' });
-                };
-                reader.onload = () =>
-                    resolve(reader.result);
-
-                reader.readAsArrayBuffer(response.data);
-            });
-            */
-            // temp line to warn people
-            this.sourceGeoJson = 'error remote file geojson loader not yet implemented';
-
-        } else {
-            throw new Error('GeoJson layer config contains no raw data or url');
-        }
+        // TODO error handling? set layer state to error if above call fails?
 
         await super.initiate();
     }
-
-
-
-
 }
 
-export default GeoJsonLayer;
+export default WFSLayer;

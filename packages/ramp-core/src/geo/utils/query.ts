@@ -62,13 +62,17 @@ export class QueryAPI extends APIScope {
         // TODO check strong typing of this line (after GeoJSON layers are implemented)
         await options.layer.isLayerLoaded();
 
+        if (!options.layer.esriLayer) {
+            throw new Error('file layer being queried contains no ESRI layer');
+        }
+
         // NOTE: for this to work, the outfields need to be set on the geojson layer when it is created.
         //       anything not in the outfields will not be available for the .where filter and will give
         //       an empty result.
         // NOTE: using ._innerView appears to be somewhat flawed. The query tends to only respect items that
         //       are in the visible view of the map. The layer query appears to be working now with local data
         //       (was not in earlier versions of ESRI API)
-        const featSet = await (<__esri.FeatureLayer>options.layer.esriLayer).queryFeatures(query); // BAAH remove the cast
+        const featSet = await options.layer.esriLayer.queryFeatures(query);
 
         // convert to our type. seems a bit wasteful, but we already want to convert to ramp geoms so do it
         return featSet.features.map((f, i) => {

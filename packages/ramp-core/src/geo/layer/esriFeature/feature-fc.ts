@@ -1,10 +1,6 @@
 // TODO add proper comments
 
-import { ArcServerAttributeLoader, AttribFC, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseGeometry, BaseRenderer,
-    CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
-    LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '../../internal';
-
-import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '../../esri';
+import { AttribFC, DataFormat } from '../../internal';
 
 import FeatureLayer from './index';
 

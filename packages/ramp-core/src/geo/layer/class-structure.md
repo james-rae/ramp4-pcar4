@@ -7,24 +7,24 @@ LayerInstance: RAMP's internal "base class" for layers. Implements `LayerBase`. 
 
 - - CommonLayer: The generic class for layers that are implemented inside RAMP core.
 
-- - - TileLayer: Handles ArcGIS Server Tile layers
+- - - TileLayer: Handles ArcGIS Server Tile layers.
 
-- - - ImageryLayer: Handles ArcGIS Server Imagery layers
+- - - ImageryLayer: Handles ArcGIS Server Imagery layers.
 
-- - - WMSLayer: Handles WMS layers
+- - - WMSLayer: Handles WMS layers.
 
 - - - AttributeLayer: The generic class for layers that deal with attributes / features.
 
-- - - - FeatureLayer: Handles ArcGIS Server Feature layers
+- - - - FeatureLayer: Handles ArcGIS Server Feature layers.
 
-- - - - MapImageLayer: Handles ArcGIS Server Map Image layers (formerly Dynamic layers)
+- - - - MapImageLayer: Handles ArcGIS Server Map Image layers (formerly Dynamic layers).
 
-- - - - FileLayer: The generic class for layers that front-load all their feature data (no server refreshes)
+- - - - FileLayer: The generic class for layers that front-load all their feature data (no server refreshes).
 
-- - - - - csv
+- - - - - CsvLayer: Handles layers populated by a CSV file.
 
-- - - - - geojson
+- - - - - GeoJsonLayer: Handles layers populated by a GeoJson object.
 
-- - - - - wfs
+- - - - - WfsLayer: Handles layers populated by a WFS service.
 
-- - - - - shape
+- - - - - ShapefileLayer: Handles layers populated by a zipped shapefile.

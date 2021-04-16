@@ -49,6 +49,7 @@ export class AttributeAPI extends APIScope {
         };
 
         // TODO possibly put a .catch on the end of the esri request? see commented error handler at bottom
+        //      consider using   import to from 'await-to-js';
         const serviceResult = await EsriRequest(details.serviceUrl + '/query', params);
 
         if (serviceResult.data && serviceResult.data.features) {
@@ -169,6 +170,8 @@ export class AttributeAPI extends APIScope {
         //      could add this to the tile schema object of our config. if missing we omit, but allow
         //      author to define a precision for better performance. could we apply that elsewhere? (e.g. featurelayers?)
 
+        // TODO error handling?
+        //      consider using   import to from 'await-to-js';
         const serviceResult = await EsriRequest(details.serviceUrl + '/query', params);
 
         if (serviceResult.data && serviceResult.data.features) {

@@ -332,6 +332,8 @@ class MapImageLayer extends AttribLayer {
         });
 
         // get mapName of the legend entry from the service to use as the name if not provided in config
+        // TODO error handling on request?
+        //      consider using   import to from 'await-to-js';
         if (!this.name) {
             const serviceRequest = EsriRequest(this.esriLayer.url, {
                 query: {

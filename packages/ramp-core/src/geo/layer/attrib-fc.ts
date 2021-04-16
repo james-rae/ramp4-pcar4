@@ -62,6 +62,7 @@ export class AttribFC extends CommonFC {
         // extract info for this service
         // TODO revisit error handling. might need a try-catch? could also try then().error() to clean up.
         //      see commented code block at bottom of this function.
+        //      consider using   import to from 'await-to-js';
         const serviceResult = await EsriRequest(this.serviceUrl, { query: { f: 'json' } });
 
         if (serviceResult.data) {
@@ -222,6 +223,7 @@ export class AttribFC extends CommonFC {
         const serviceResult = await EsriRequest(`${this.serviceUrl}/query`, restParam);
 
         // TODO revisit error handling. might need a try-catch?
+        //      consider using   import to from 'await-to-js';
         // TODO have discussion about error case. app shouldnt bomb without count. but how to handle? ignore? show error? console error? special error count val e.g. -2
 
         if (serviceResult.data) {

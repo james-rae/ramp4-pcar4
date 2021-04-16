@@ -704,6 +704,7 @@ export class SymbologyAPI extends APIScope {
      */
     private getMapServerLegend(layerUrl: string): Promise<any> {
         // TODO make async? handle error properly if so.
+        //      consider using   import to from 'await-to-js';
 
         // standard json request with error checking
         const reqParams: __esri.RequestOptions = {

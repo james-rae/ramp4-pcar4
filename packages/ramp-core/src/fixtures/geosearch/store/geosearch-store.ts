@@ -124,17 +124,18 @@ const actions = {
      * Toggle map extent filter.
      *
      * @function setMapExtent
-     * @param   {any}    mapExtent   current map extent info
+     * @param   {any}    mapExtent   current map extent info // TODO what is this? add strong types
      */
     setMapExtent: function(context: GeosearchContext, mapExtent: any): void {
-        // BAAH
-        /*
         // if results should be filtered by current map view
         if (mapExtent.visible !== undefined) {
             context.commit('SET_RESULTS_VISIBLE', mapExtent.visible);
         }
         // re-project current extent object with lat/lon WKID number
-        RAMP.geoapi.utils.proj.projectExtent(4326, mapExtent.extent).then((projExtent: any) => {
+
+        // TODO how to get instance from inside store?
+        /* BAAH
+        this.$iApi.geo.utils.proj.projectExtent(4326, mapExtent.extent).then((projExtent: any) => {
             context.commit('SET_EXTENT', projExtent);
             // run query after toggling map extent filters
             context.dispatch('runQuery');

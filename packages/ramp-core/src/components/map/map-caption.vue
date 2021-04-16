@@ -28,7 +28,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop, Inject } from 'vue-property-decorator';
 import { debounce } from 'debounce';
-import { MapMove } from '../../geo/internal';
+import { MapMove, Point } from '../../geo/internal';
 import { GlobalEvents } from '@/api';
 
 @Component
@@ -139,19 +139,16 @@ export default class MapCaptionV extends Vue {
      * @param screenY pixel position in y-axis
      */
     private updateCursorPoint(screenX: number, screenY: number): void {
-        // BAAH
-        /*
         // get map point from cursor location
-        const mapCursorPoint = this.$iApi.map.screenPointToMapPoint(screenX, screenY);
+        const mapCursorPoint = this.$iApi.geo.map.screenPointToMapPoint(screenX, screenY);
 
         // project from map co-ords to lat long.
-        RAMP.geoapi.utils.proj.projectGeometry(4326, mapCursorPoint).then((llPoint: any) => {
+        this.$iApi.geo.utils.proj.projectGeometry(4326, mapCursorPoint).then((llPoint: any) => {
             // update our private property
-            const castPoint: ApiBundle.Point = llPoint;
+            const castPoint: Point = llPoint;
             this.latLongCursor.lat = castPoint.y;
             this.latLongCursor.long = castPoint.x;
         });
-        */
     }
 
     /**

@@ -83,8 +83,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { PanelInstance } from '@/api';
-// BAAH
-// import BaseLayer from 'rampgeoapi/dist/layer/BaseLayer';
 
 import SettingsComponent from './SettingsComponentV.vue';
 import { LayerInstance } from '@/geo/internal';

@@ -1,7 +1,8 @@
 // layers api and other public, general layer things.
 
 import { APIScope, InstanceAPI } from '../../api/internal';
-import { AttributeSet, FieldDefinition, FileUtils, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet, LayerBase, LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+import { AttributeSet, FieldDefinition, FileUtils, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet,
+    LayerBase, LayerState, LegendSymbology, OgcUtils, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**
@@ -56,10 +57,12 @@ export class LayerAPI extends APIScope {
     _layerDefStore: {[key: string]: LayerDef} = {};
 
     files: FileUtils;
+    ogc: OgcUtils;
 
     constructor (iApi: InstanceAPI) {
         super(iApi);
         this.files = new FileUtils(iApi);
+        this.ogc = new OgcUtils(iApi);
     }
 
     // NOTE also might want to store the Promises that get generated when creating these definitions.
