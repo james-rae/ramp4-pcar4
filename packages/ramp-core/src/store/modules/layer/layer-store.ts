@@ -4,7 +4,7 @@ import { make } from 'vuex-pathify';
 import { LayerState } from './layer-state';
 import { RootState } from '@/store';
 
-import { LayerInstance, RampLayerConfig } from '../../../geo/internal';
+import { LayerInstance, RampLayerConfig } from '@/geo/internal';
 
 import api from '@/api'; // this is the external ramp api, not the instance api
 

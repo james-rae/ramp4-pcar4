@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { GeometryType, SpatialReference, SrDef, IdDef } from '../../../internal';
+import { GeometryType, SpatialReference, SrDef, IdDef } from '@/geo/internal';
 
 // TODO since this class is often used as a parameter type (i.e. something that accepts any of our geometries),
 //      maybe pick a different name, like Geometry, AnyGeometry, RampGeometry

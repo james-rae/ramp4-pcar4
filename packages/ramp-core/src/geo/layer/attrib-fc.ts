@@ -5,9 +5,9 @@
 
 import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseGeometry, BaseRenderer,
     CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
-    LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '../internal';
+    LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '@/geo/internal';
 
-import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '../esri';
+import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';
 
 import deepmerge from 'deepmerge';
 

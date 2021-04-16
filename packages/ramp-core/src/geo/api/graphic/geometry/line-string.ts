@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { GeometryType, MultiPoint, Point, SrDef, IdDef } from '../../../internal';
+import { GeometryType, MultiPoint, Point, SrDef, IdDef } from '@/geo/internal';
 
 export class LineString extends MultiPoint {
 

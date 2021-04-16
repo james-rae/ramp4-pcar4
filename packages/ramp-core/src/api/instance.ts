@@ -9,7 +9,7 @@ import { createStore, RootState } from '@/store';
 import { ConfigStore } from '@/store/modules/config';
 
 import { FixtureAPI, PanelAPI, GlobalEvents, EventAPI } from './internal';
-import { GeoAPI } from '../geo/internal';
+import { GeoAPI } from '@/geo/internal';
 
 interface RampOptions {
     loadDefaultFixtures?: boolean;

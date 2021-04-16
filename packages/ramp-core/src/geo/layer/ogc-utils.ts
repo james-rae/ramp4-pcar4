@@ -1,5 +1,5 @@
-import { APIScope, InstanceAPI } from '../../api/internal';
-import { UrlWrapper } from '../internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
+import { UrlWrapper } from '@/geo/internal';
 
 // TODO check if we actually need this library. Does vue have its own internal web request library?
 import axios from 'axios';

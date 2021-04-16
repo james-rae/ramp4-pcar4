@@ -1,10 +1,10 @@
 // TODO add proper comments
 // TODO change all the 'any' in this file to more strict types if possible
 
-import { APIScope, InstanceAPI } from '../../api/internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
 import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, GetGraphicResult, LinearRing, LineString, MapAPI, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, QueryFeaturesArcServerParams, QueryFeaturesFileParams, SpatialReference } from '../internal';
-import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriQuery, EsriQueryTask, EsriRequest, EsriSpatialReference } from '../esri';
+    MultiPolygon, Point, Polygon, QueryFeaturesArcServerParams, QueryFeaturesFileParams, SpatialReference } from '@/geo/internal';
+import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriQuery, EsriQueryTask, EsriRequest, EsriSpatialReference } from '@/geo/esri';
 
 export class QueryAPI extends APIScope {
 

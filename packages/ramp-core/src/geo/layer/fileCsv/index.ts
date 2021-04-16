@@ -1,6 +1,6 @@
 // handles static geojson (e.g. from a user file or hardcoded in a config) or a geojson file hosted on a web server
 
-import { FileLayer } from '../../internal';
+import { FileLayer } from '@/geo/internal';
 
 // NOTE this is currently 100% untested
 

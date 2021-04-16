@@ -5,9 +5,9 @@
 
 // TODO add proper comments
 
-import { APIScope, InstanceAPI } from '../../api/internal';
-import { EsriMap } from '../esri';
-import { Basemap, RampMapConfig } from '../internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
+import { EsriMap } from '@/geo/esri';
+import { Basemap, RampMapConfig } from '@/geo/internal';
 
 // Would ideally call this BaseMap, but that would get confused with Basemap.
 // We also use "Base" for our vuex state classes so want to avoid naming overlaps.

@@ -10,7 +10,7 @@
 // this pattern is stolen from the fixture class model.
 
 import { AttributeSet, FieldDefinition, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet,
-    LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+    LayerState, LegendSymbology, ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
 
 // TODO consider making a number of these things optional with ? markup.
 // TODO add all the stuff from layer instance

@@ -2,10 +2,10 @@
 
 // TODO add proper comments
 
-import { APIScope, InstanceAPI } from '../../api/internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
 import { Attributes, AttributeSet, BaseGeometry, Extent, GeometryType, GetGraphicResult, GetGraphicServiceDetails, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
-import { EsriExtent, EsriGeometryJsonUtils, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
+    MultiPolygon, Point, Polygon, SpatialReference } from '@/geo/internal';
+import { EsriExtent, EsriGeometryJsonUtils, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '@/geo/esri';
 
 // TODO this feels like it should be an interface. it is never new'd
 export interface AttributeLoaderDetails {

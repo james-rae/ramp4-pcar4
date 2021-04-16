@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { BaseGeometry, GeometryType, Point, Polygon, SrDef, IdDef } from '../../../internal';
+import { BaseGeometry, GeometryType, Point, Polygon, SrDef, IdDef } from '@/geo/internal';
 
 export class Extent extends BaseGeometry {
 

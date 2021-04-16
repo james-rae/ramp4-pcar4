@@ -1,4 +1,4 @@
-import { LayerInstance, TreeNode } from '../../../geo/internal';
+import { LayerInstance, TreeNode } from '@/geo/internal';
 
 /**
  * Function definitions for legend item wrapper objects.

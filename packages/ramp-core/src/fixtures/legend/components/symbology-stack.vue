@@ -35,7 +35,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { LegendItem } from '../store/legend-defs';
-import { LayerInstance } from '../../../geo/internal';
+import { LayerInstance } from '@/geo/internal';
 
 @Component
 export default class SymbologyStack extends Vue {

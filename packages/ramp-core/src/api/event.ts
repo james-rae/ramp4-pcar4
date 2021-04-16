@@ -3,7 +3,7 @@ import { APIScope, InstanceAPI } from './internal';
 import { DetailsAPI } from '@/fixtures/details/api/details';
 import { SettingsAPI} from '@/fixtures/settings/api/settings'
 import { HelpAPI } from '@/fixtures/help/api/help'
-import { MapClick } from '../geo/internal';
+import { MapClick } from '@/geo/internal';
 
 export enum GlobalEvents {
     /**

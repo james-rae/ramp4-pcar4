@@ -2,8 +2,8 @@
 
 import GeoJson from 'geojson';
 import { Graphic, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, SpatialReference } from '../internal';
-import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriSpatialReference } from '../esri';
+    MultiPolygon, Point, Polygon, SpatialReference } from '@/geo/internal';
+import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriSpatialReference } from '@/geo/esri';
 
 // import * as RampAPI from '../api/api';
 // import BaseGeometry from '../api/geometry/BaseGeometry'; // this is a bit wonky. could expose on RampAPI, but dont want clients using the baseclass

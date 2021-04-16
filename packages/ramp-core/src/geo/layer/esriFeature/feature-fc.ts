@@ -1,6 +1,6 @@
 // TODO add proper comments
 
-import { AttribFC, DataFormat } from '../../internal';
+import { AttribFC, DataFormat } from '@/geo/internal';
 
 import FeatureLayer from './index';
 

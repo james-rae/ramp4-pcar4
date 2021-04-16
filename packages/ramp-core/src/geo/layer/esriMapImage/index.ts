@@ -1,8 +1,8 @@
-import { APIScope, GlobalEvents, InstanceAPI } from '../../../api/internal';
+import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
 import { ArcGisServerUrl, AttribLayer, AttributeSet, CommonFC, CommonLayer, DataFormat, DefPromise, Extent, FieldDefinition, GeometryType, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, MapImageFC, Point, QueryFeaturesParams, RampLayerConfig,
-    RampLayerMapImageLayerEntryConfig, ScaleSet, TabularAttributeSet, TreeNode } from '../../internal';
-import { EsriMapImageLayer, EsriRequest } from '../../esri';
+    RampLayerMapImageLayerEntryConfig, ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { EsriMapImageLayer, EsriRequest } from '@/geo/esri';
 
 // Formerly known as DynamicLayer
 class MapImageLayer extends AttribLayer {

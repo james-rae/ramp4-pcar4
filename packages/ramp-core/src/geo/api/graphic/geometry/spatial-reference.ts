@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { SrDef } from '../../../internal';
+import { SrDef } from '@/geo/internal';
 
 /**
  * Represents a geographical spatial reference.

@@ -6,7 +6,7 @@ import ArcGIS from 'terraformer-arcgis-parser';
 // @ts-ignore
 import { csv2geojson, dsv } from 'csv2geojson';
 
-import { EsriColour, EsriExtent, EsriField, EsriRendererUtils, EsriRequest, EsriSimpleRenderer, EsriSpatialReference } from '../esri';
+import { EsriColour, EsriExtent, EsriField, EsriRendererUtils, EsriRequest, EsriSimpleRenderer, EsriSpatialReference } from '@/geo/esri';
 
 /**
  * Maps GeoJSON geometry types to a set of default renders defined in GlobalStorage.DefaultRenders

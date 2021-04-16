@@ -1,5 +1,5 @@
 import { FixtureInstance } from '@/api';
-import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '../../../geo/internal';
+import { IdentifyItem, IdentifyResult } from '@/geo/internal';
 import { DetailsConfig, DetailsItemSet, DetailsItemInstance } from '../store';
 
 export class DetailsAPI extends FixtureInstance {

@@ -1,7 +1,7 @@
 // these are for actual basemap objects in the map
 
-import { LayerType, RampBasemapConfig } from '../internal';
-import { EsriBasemap, EsriMapImageLayer, EsriTileLayer } from '../esri';
+import { LayerType, RampBasemapConfig } from '@/geo/internal';
+import { EsriBasemap, EsriMapImageLayer, EsriTileLayer } from '@/geo/esri';
 
 export class Basemap {
 

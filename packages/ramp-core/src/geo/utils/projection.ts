@@ -1,9 +1,9 @@
 import { Tools } from 'terraformer';
 import GeoJson from 'geojson';
-import { APIScope, InstanceAPI } from '../../api/internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
 import { Graphic, BaseGeometry, EpsgLookup, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, SpatialReference, SrDef } from '../internal';
-import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '../esri';
+    MultiPolygon, Point, Polygon, SpatialReference, SrDef } from '@/geo/internal';
+import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriRequest, EsriSpatialReference } from '@/geo/esri';
 
 // since ProjectionService is now a class instead a stateless service, it appears that the proj4 library is maintaining it's state
 // (i.e. if we add defs in one function, they remain available in other functions).

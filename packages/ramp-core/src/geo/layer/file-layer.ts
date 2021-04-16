@@ -3,11 +3,11 @@
 // most of the implementations will only change the initiate() code, which will have whatever
 // custom pre-processing of data to massage it into geojson for this class to process.
 
-import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
+import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
 import { ArcGisServerUrl, AttribLayer, AttributeSet, CommonFC, CommonLayer, DataFormat, DefPromise, Extent, FeatureFC, FieldDefinition, FileFC, GeometryType, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, Point, QueryFeaturesParams, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
-import { EsriFeatureLayer, EsriField } from '../esri';
+    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { EsriFeatureLayer, EsriField } from '@/geo/esri';
 
 
 // util function to manage trickery. file layer can have field names that are bad keys.

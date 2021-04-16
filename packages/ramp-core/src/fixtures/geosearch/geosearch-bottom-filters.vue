@@ -16,8 +16,8 @@
 <script lang="ts">
 import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import { GlobalEvents } from '../../api/internal';
-import { Extent } from '../../geo/internal';
+import { GlobalEvents } from '@/api/internal';
+import { Extent } from '@/geo/internal';
 import { GeosearchStore } from './store';
 import { debounce } from 'debounce';
 

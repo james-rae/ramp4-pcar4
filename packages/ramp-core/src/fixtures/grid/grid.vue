@@ -57,7 +57,7 @@ import { PanelInstance } from '@/api';
 import TableComponent from '@/fixtures/grid/table/table.vue';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import { LayerInstance } from '../../geo/internal';
+import { LayerInstance } from '@/geo/internal';
 
 @Component({
     components: {

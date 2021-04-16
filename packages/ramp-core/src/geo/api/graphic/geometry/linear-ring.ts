@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { GeometryType, LineString, MultiPoint, Point, SrDef, IdDef } from '../../../internal';
+import { GeometryType, LineString, MultiPoint, Point, SrDef, IdDef } from '@/geo/internal';
 
 export class LinearRing extends LineString {
 

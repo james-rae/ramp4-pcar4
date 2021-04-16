@@ -30,7 +30,7 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore, DetailsItemInstance } from './store';
 
 import { PanelInstance } from '@/api';
-import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance } from '../../geo/internal';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance } from '@/geo/internal';
 
 import ESRIDefaultV from './templates/esri-default.vue';
 

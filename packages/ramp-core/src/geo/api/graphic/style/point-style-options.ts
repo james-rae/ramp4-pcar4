@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { PointStyle, PointStyleParams, StyleOptions } from '../../../internal';
+import { PointStyle, PointStyleParams, StyleOptions } from '@/geo/internal';
 
 export class PointStyleOptions extends StyleOptions {
 

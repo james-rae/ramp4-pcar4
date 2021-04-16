@@ -3,8 +3,8 @@
 
 // TODO add proper comments
 
-import { APIScope, GlobalEvents, InstanceAPI } from '../../api/internal';
-import { CommonLayer, DataFormat, LayerBase, LegendSymbology, ScaleSet } from '../internal';
+import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
+import { CommonLayer, DataFormat, LayerBase, LegendSymbology, ScaleSet } from '@/geo/internal';
 
 // TODO decide if this needs APIScope base or not. Since we have reference to parent layer, could grab via that.
 export class CommonFC {

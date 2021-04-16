@@ -1,8 +1,8 @@
 // layers api and other public, general layer things.
 
-import { APIScope, InstanceAPI } from '../../api/internal';
+import { APIScope, InstanceAPI } from '@/api/internal';
 import { AttributeSet, FieldDefinition, FileUtils, GetGraphicParams, GetGraphicResult, IdentifyParameters, IdentifyResultSet,
-    LayerBase, LayerState, LegendSymbology, OgcUtils, ScaleSet, TabularAttributeSet, TreeNode } from '../internal';
+    LayerBase, LayerState, LegendSymbology, OgcUtils, ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
 
 // TODO strongly type the config param? might be pointless, as we want custom layers to have any config they like
 /**

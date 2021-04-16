@@ -1,10 +1,10 @@
 // wraps and represents a 2D esri map
 // TODO add proper comments
 
-import { GlobalEvents, InstanceAPI } from '../../api/internal';
+import { GlobalEvents, InstanceAPI } from '@/api/internal';
 import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode,IdentifyParameters, IdentifyResult, IdentifyResultSet, LayerInstance, MapClick,
-    MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet, SpatialReference } from '../internal';
-import { EsriLOD, EsriMapView } from '../esri';
+    MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet, SpatialReference } from '@/geo/internal';
+import { EsriLOD, EsriMapView } from '@/geo/esri';
 import { LayerStore } from '@/store/modules/layer';
 
 // TODO bring in the map actions code

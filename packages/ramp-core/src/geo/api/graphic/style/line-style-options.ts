@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { LineStyle, LineStyleParams, StyleOptions } from '../../../internal';
+import { LineStyle, LineStyleParams, StyleOptions } from '@/geo/internal';
 
 export class LineStyleOptions extends StyleOptions {
 

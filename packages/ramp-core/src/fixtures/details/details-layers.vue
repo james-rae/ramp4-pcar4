@@ -30,7 +30,7 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore } from './store';
 
 import { PanelInstance } from '@/api';
-import { IdentifyResult, LayerInstance } from '../../geo/internal';
+import { IdentifyResult, LayerInstance } from '@/geo/internal';
 
 @Component({})
 export default class DetailsLayersV extends Vue {

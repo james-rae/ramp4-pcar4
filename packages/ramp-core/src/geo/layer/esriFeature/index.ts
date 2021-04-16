@@ -1,8 +1,8 @@
-import { APIScope, GlobalEvents, InstanceAPI } from '../../../api/internal';
+import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
 import { ArcGisServerUrl, AttribLayer, AttributeSet, CommonFC, CommonLayer, DataFormat, DefPromise, Extent, FeatureFC, FieldDefinition, GeometryType, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, Point, QueryFeaturesParams, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '../../internal';
-import { EsriFeatureLayer } from '../../esri';
+    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { EsriFeatureLayer } from '@/geo/esri';
 
 
 class FeatureLayer extends AttribLayer {

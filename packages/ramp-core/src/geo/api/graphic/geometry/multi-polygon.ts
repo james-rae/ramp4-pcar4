@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { BaseGeometry, GeometryType, LinearRing, LineString, MultiLineString, MultiPoint, Point, Polygon, SrDef, IdDef } from '../../../internal';
+import { BaseGeometry, GeometryType, LinearRing, LineString, MultiLineString, MultiPoint, Point, Polygon, SrDef, IdDef } from '@/geo/internal';
 
 export class MultiPolygon extends BaseGeometry {
 

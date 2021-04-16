@@ -1,4 +1,4 @@
-import { CoreFilter, Extent } from '../internal';
+import { CoreFilter, Extent } from '@/geo/internal';
 
 /**
  * @class Filter
