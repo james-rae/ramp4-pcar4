@@ -314,7 +314,7 @@ export interface QueryFeaturesFileParams extends QueryFeaturesParams {
 
 export interface IdentifyParameters {
     geometry: BaseGeometry;
-    unboundMap?: any; // BAAH // TODO do we still need this? if map is part of api, we can just direct reference it from anywhere? // RampMap; // this allows a reference map to be provided. useful for identifying on a layer that is not on a map. not required if layer has been added to the map
+    // unboundMap?: any; TODO do we still need this? if map is part of api, we can just direct reference it from anywhere?
     tolerance?: number;
     returnGeometry?: boolean; // TODO revisit this. might make more sense to offload geom to a followup request. if we keep, we may need to add property to IdentifyItem for the geom to live in
     // TODO think about adding more options to facilitate more flexible identification.
@@ -407,6 +407,7 @@ export interface RampLayerWmsLayerEntryConfig {
     // following items need to be flushed out
     controls?:  any;
     currentStyle?: string;
+    styleToURL?: string; // are we migrating this functionality?
     // more...
 }
 

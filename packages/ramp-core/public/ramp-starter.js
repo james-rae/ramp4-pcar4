@@ -77,6 +77,7 @@ function initRAMP() {
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 },
                 */
+               /*
                 {
                     id: 'WaterQuality',
                     layerType: 'esriMapImage',
@@ -96,7 +97,7 @@ function initRAMP() {
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 },
-
+*/
                /*
                 {
                     id: 'CleanAir',
@@ -109,7 +110,7 @@ function initRAMP() {
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 }
                 */
-                 /*,
+
                 {
                     id: 'WFSLayer',
                     layerType: 'ogcWfs',
@@ -118,7 +119,7 @@ function initRAMP() {
                         visibility: true
                     },
                     customRenderer: {}
-                },
+                } /*,
                 {
                     id: 'Happy',
                     layerType: 'esriFeature',
@@ -159,7 +160,7 @@ function initRAMP() {
                                 ]
                             },*/
                             {
-                                layerId: 'WaterQuality',
+                                layerId: 'WFSLayer',
                                 name: 'Dogs'
                             }
                         ]

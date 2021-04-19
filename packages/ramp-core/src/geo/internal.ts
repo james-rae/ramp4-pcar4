@@ -45,6 +45,7 @@ export * from './layer/file-layer';
 //      we might want to have references to these classes be direct-linked from the layers that use them.
 export * from './layer/esriFeature/feature-fc';
 export * from './layer/esriMapImage/map-image-fc';
+export * from './layer/ogcWms/wms-fc';
 
 export * from './utils/attribute';
 export * from './utils/geometry';
