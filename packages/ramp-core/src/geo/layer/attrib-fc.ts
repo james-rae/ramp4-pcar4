@@ -3,9 +3,11 @@
 
 // TODO add proper comments
 
-import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, AttributeSet, BaseGeometry, BaseRenderer,
-    CommonFC, CommonLayer, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, LayerBase,
-    LegendSymbology, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig, ScaleSet, TabularAttributeSet } from '@/geo/internal';
+import { GlobalEvents } from '@/api';
+import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, BaseGeometry, BaseRenderer,
+    CommonFC, CoreFilterKey, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult,
+    GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig,
+    TabularAttributeSet } from '@/geo/internal';
 
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';
 
@@ -655,14 +657,10 @@ export class AttribFC extends CommonFC {
 
         this.filter.setSql(filterKey, whereClause);
 
-        // BAAH
-        // wire in events api here once things are humming along
-        /*
-        this.parentLayer.filterChanged.fireEvent({
+        this.parentLayer.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
             uid: this.uid,
             filterKey
         });
-        */
 
         // updating the filter on the layer can smash the server if multiple changes occur at once.
         // this will delay applying changes if more changes arrive shortly after this one.

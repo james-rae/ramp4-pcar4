@@ -2,10 +2,9 @@
 // used for layer types defined by Core RAMP.
 // TODO add proper comments
 
-import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
-import { AttribFC, AttributeSet, CommonLayer, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    GeometryType, IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { InstanceAPI } from '@/api/internal';
+import { AttribFC, AttributeSet, CommonLayer, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
+    GeometryType, RampLayerConfig, TabularAttributeSet, TreeNode } from '@/geo/internal';
 
 export class AttribLayer extends CommonLayer {
 

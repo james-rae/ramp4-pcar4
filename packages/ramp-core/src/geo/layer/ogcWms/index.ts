@@ -1,9 +1,7 @@
-import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
+import { InstanceAPI } from '@/api/internal';
 import { CommonLayer, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerType,
-    LegendSymbology, Point, RampLayerConfig, RampLayerWmsLayerEntryConfig, TreeNode, WmsFC } from '@/geo/internal';
+    Point, RampLayerConfig, RampLayerWmsLayerEntryConfig, TreeNode, WmsFC } from '@/geo/internal';
 import { EsriRequest, EsriWMSLayer } from '@/geo/esri';
-import { threadId } from 'worker_threads';
-
 
 export default class WmsLayer extends CommonLayer {
 

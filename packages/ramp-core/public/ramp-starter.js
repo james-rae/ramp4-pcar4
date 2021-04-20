@@ -55,8 +55,8 @@ function initRAMP() {
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 }
                 */
-                /*
-                ,
+
+
                 {
                     id: 'WaterQuantity',
                     layerType: 'esriMapImage',
@@ -75,8 +75,8 @@ function initRAMP() {
                         visibility: true
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
-                },
-                */
+                }
+
                /*
                 {
                     id: 'WaterQuality',
@@ -110,7 +110,7 @@ function initRAMP() {
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
                 }
                 */
-
+                /*
                 {
                     id: 'WFSLayer',
                     layerType: 'ogcWfs',
@@ -119,7 +119,7 @@ function initRAMP() {
                         visibility: true
                     },
                     customRenderer: {}
-                } /*,
+                }*/ /*,
                 {
                     id: 'Happy',
                     layerType: 'esriFeature',
@@ -129,6 +129,20 @@ function initRAMP() {
                         visibility: true
                     },
                     customRenderer: {} // just to chill things out. real ramp will have all properties defaulted and filled in
+                }
+                */
+               /*
+                {
+                    "id": "CanGRID_tmean_MAM_en",
+                    "layerType": "ogcWms",
+                    "url": "https://geo.weather.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0",
+                    "name": "Total precipitation",
+                    "state": {
+                        "opacity": 0.85,
+                        "visibility": true
+                    },
+                    "layerEntries": [{"id": "CANGRD.TREND.TM_SPRING" }],
+                    "featureInfoMimeType": "application/json"
                 }
                 */
             ],
@@ -160,7 +174,7 @@ function initRAMP() {
                                 ]
                             },*/
                             {
-                                layerId: 'WFSLayer',
+                                layerId: 'WaterQuantity',
                                 name: 'Dogs'
                             }
                         ]

@@ -1,5 +1,5 @@
-import { APIScope, InstanceAPI } from '@/api/internal';
-import { Point, UrlWrapper } from '@/geo/internal';
+import { APIScope } from '@/api/internal';
+import { UrlWrapper } from '@/geo/internal';
 import yxList from './reversedAxis.json';
 import { EsriRequest } from '@/geo/esri';
 

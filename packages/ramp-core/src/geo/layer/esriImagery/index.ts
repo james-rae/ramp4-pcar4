@@ -1,9 +1,7 @@
 // TODO add proper comments
 
-import { APIScope, GlobalEvents, InstanceAPI } from '@/api/internal';
-import { AttributeSet, CommonFC, CommonLayer, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { InstanceAPI } from '@/api/internal';
+import { CommonFC, CommonLayer, LayerType, RampLayerConfig, TreeNode } from '@/geo/internal';
 import { EsriImageryLayer } from '@/geo/esri';
 
 class ImageryLayer extends CommonLayer {

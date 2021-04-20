@@ -1,7 +1,6 @@
 // TODO add proper comments
 
 import { CommonFC, DataFormat } from '@/geo/internal';
-import { EsriWMSLayer } from '@/geo/esri';
 
 import WmsLayer from './index';
 

@@ -4,7 +4,8 @@
 // we can add more classes to support more renderer types if we need to
 
 import { Attributes } from '@/geo/internal';
-import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleMarkerSymbol, EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '@/geo/esri';
+import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleMarkerSymbol,
+    EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '@/geo/esri';
 
 /*
 import EsriClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';

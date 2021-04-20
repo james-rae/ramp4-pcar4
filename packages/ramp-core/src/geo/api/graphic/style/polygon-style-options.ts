@@ -1,6 +1,5 @@
 // TODO add proper documentation
 
-
 import { FillStyle, LineStyleOptions, LineStyleParams, PolygonStyleParams, StyleOptions } from '@/geo/internal';
 
 export class PolygonStyleOptions extends StyleOptions {

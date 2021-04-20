@@ -73,14 +73,6 @@ export default class EsriMap extends Vue {
 
             // a bit dangerous but ideally https://github.com/ramp4-pcar4/ramp4-pcar4/issues/126 and https://github.com/ramp4-pcar4/ramp4-pcar4/issues/173
             // will make this more seamless and not need to worry about having multiple listeners.
-
-            // BAAH
-            // TODO verify layer object is tapped into the event API, then delete this.
-            /*
-            layer.filterChanged.listen((payload: FilterEventParam) => {
-                this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, payload);
-            });
-            */
         });
     }
 

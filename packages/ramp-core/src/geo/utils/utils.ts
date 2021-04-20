@@ -20,16 +20,6 @@ export class UtilsAPI extends APIScope {
     shared: SharedUtilsAPI;
     symbology: SymbologyAPI;
 
-    /*
-    attributes: AttributeService; // TODO do we want shorter name "attribs" or "attributes"
-    shared: SharedUtils;
-    query: QueryService;
-    highlight: HighlightService;
-    proj: ProjectionService;
-    symbology: SymbologyService;
-    ogc: OgcService;
-    */
-
     constructor (iApi: InstanceAPI, epsgFunction: EpsgLookup | undefined = undefined) {
         super(iApi);
 
@@ -41,9 +31,7 @@ export class UtilsAPI extends APIScope {
         this.symbology = new SymbologyAPI(iApi);
 
         /*
-
         this.highlight = new HighlightService(infoBundle);
-        this.ogc = new OgcService(infoBundle);
         */
     }
 
