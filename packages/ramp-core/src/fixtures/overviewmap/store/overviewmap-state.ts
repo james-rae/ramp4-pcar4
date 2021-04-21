@@ -1,20 +1,15 @@
-// BAAH
-// import { RampMapConfig, RampLodConfig, RampBasemapConfig, RampSpatialReference } from 'rampgeoapi'
+import { RampMapConfig, RampLodConfig, RampBasemapConfig, RampSpatialReference } from '@/geo/internal';
 
 export class OverviewmapState {
-    mapConfig: any = undefined; // RampMapConfig | undefined = undefined; // BAAH
+    mapConfig: RampMapConfig | undefined = undefined;
     startMinimized: boolean = true;
 }
 
 export interface OverviewmapConfig {
-    // BAAH
-    map: any,
-    /*
     map: {
         lods: RampLodConfig;
         basemap: RampBasemapConfig;
         spatialReference: RampSpatialReference;
     },
-    */
     startMinimized: boolean;
 }

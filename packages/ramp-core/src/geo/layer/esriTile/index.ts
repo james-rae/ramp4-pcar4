@@ -49,14 +49,12 @@ class TileLayer extends CommonLayer {
         // TODO see if we need to re-synch the parent name
         // this.layerTree.name = this.name;
 
-        // BAAH
-        /*
         const legendPromise = this.$iApi.geo.utils.symbology.mapServerToLocalLegend(this.origRampConfig.url).then(legArray => {
             tileFC.legend = legArray;
         });
 
         loadPromises.push(legendPromise);
-        */
+
         // TODO once decided, might want to set a value on layer count that indicates nothing to count
 
         // TODO check out whats going on with layer extent. is it set and donethanks?

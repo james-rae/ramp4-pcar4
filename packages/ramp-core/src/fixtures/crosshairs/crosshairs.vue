@@ -25,15 +25,10 @@ export default class CrosshairsV extends Vue {
     visible: boolean = false;
 
     mounted() {
-        // TODO change this to avoid private variable access. since the map is now created on the fly, need a way to check it's existence first
-        //      possibly have a .viewPromise on the map like we have on layers.
-        // BAAH
-        /*
-        this.$iApi.geo.map.esriView.when(() => {
+        this.$iApi.geo.map.viewPromise.getPromise().then(() => {
             this.left = (this.$iApi.geo.map.getPixelWidth() - this.$el.getBoundingClientRect().width) / 2;
             this.top = (this.$iApi.geo.map.getPixelHeight() - this.$el.getBoundingClientRect().height) / 2;
         });
-        */
 
         this.$iApi.event.on(GlobalEvents.MAP_EXTENTCHANGE, () => {
             // display crosshairs if pan/zoom keys are active

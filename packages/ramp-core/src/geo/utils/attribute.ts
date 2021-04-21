@@ -37,7 +37,7 @@ export class AttributeAPI extends APIScope {
             return [];
         }
 
-        // make a web call that downloads a chunk of attributes.
+        // make a web call that downloads a chonk of attributes.
         const params: __esri.RequestOptions = {
             query: {
                 where: `${details.oidField}>${details.maxId}`,

@@ -44,19 +44,33 @@ export default class GeosearchBottomFilters extends Vue {
         this.$iApi.event.off('geosearch_map_extent');
     }
 
+    async latLongExtent(ext: Extent): Promise<Extent> {
+        if (ext.sr.wkid === 4326) {
+            return ext;
+        } else {
+            // var needed to get around casting complaints with async syntax
+            const pExt = await this.$iApi.geo.utils.proj.projectGeometry(4326, ext);
+            return pExt as Extent;
+        }
+    }
+
     // update geosearch results to match those in current view if visible is checked
     updateMapExtent(visible: boolean): void {
-        this.setMapExtent({
-            extent: this.$iApi.geo.map.getExtent(),
-            visible: visible
+        this.latLongExtent(this.$iApi.geo.map.getExtent()).then(e => {
+            this.setMapExtent({
+                extent: e,
+                visible: visible
+            });
         });
     }
 
     // update store map extent and geosearch results on map view change with debounce
     onMapExtentChange = debounce((newExtent: Extent) => {
-        this.setMapExtent({
-            extent: newExtent,
-            visible: this.resultsVisible
+        this.latLongExtent(newExtent).then(e => {
+            this.setMapExtent({
+                extent: e,
+                visible: this.resultsVisible
+            });
         });
     }, 300);
 }

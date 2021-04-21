@@ -2,8 +2,9 @@
 // TODO add proper comments
 
 import { GlobalEvents, InstanceAPI } from '@/api/internal';
-import { BaseGeometry, CommonMapAPI, CoreFilterKey, Extent, GeometryType, IdentifyMode,IdentifyParameters, IdentifyResult, IdentifyResultSet, LayerInstance, MapClick,
-    MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet, SpatialReference } from '@/geo/internal';
+import { BaseGeometry, CommonMapAPI, CoreFilterKey, DefPromise, Extent, GeometryType, IdentifyMode,IdentifyParameters,
+    IdentifyResult, IdentifyResultSet, LayerInstance, MapClick, MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet,
+    SpatialReference } from '@/geo/internal';
 import { EsriLOD, EsriMapView } from '@/geo/esri';
 import { LayerStore } from '@/store/modules/layer';
 
@@ -22,6 +23,7 @@ export class MapAPI extends CommonMapAPI {
      * @private
      */
     esriView: __esri.MapView | undefined;
+    viewPromise: DefPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     /**
      * The map spatial reference in RAMP API Spatial Reference format.
@@ -37,7 +39,7 @@ export class MapAPI extends CommonMapAPI {
     constructor (iApi: InstanceAPI) {
         super(iApi);
 
-        // TODO get rid of this definition if there are no additional lines of code needed.
+        this.viewPromise = new DefPromise();
     }
 
     /**
@@ -124,6 +126,8 @@ export class MapAPI extends CommonMapAPI {
             e.preventDefault();
         });
 
+        this.viewPromise.resolveMe();
+
      }
 
     /**
@@ -169,7 +173,7 @@ export class MapAPI extends CommonMapAPI {
      *
      * @param {HighlightLayer} highlightLayer the highlight
      */
-    // BAAH
+    // TODO make a decision to re-add or remove after we figure out what highlight layers are dong
     /*
     addHighlightLayer (highlightLayer: HighlightLayer): void {
         this.esriMap.add(highlightLayer.esriLayer);
