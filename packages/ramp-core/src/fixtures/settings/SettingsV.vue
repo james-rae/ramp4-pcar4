@@ -85,7 +85,7 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { PanelInstance } from '@/api';
 
 import SettingsComponent from './SettingsComponentV.vue';
-import { LayerInstance } from '@/geo/internal';
+import { LayerInstance } from '@/api/internal';
 
 @Component({
     components: {

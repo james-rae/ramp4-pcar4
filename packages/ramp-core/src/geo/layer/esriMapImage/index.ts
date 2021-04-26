@@ -1,8 +1,9 @@
 import { GlobalEvents, InstanceAPI } from '@/api/internal';
 import { AttribLayer, Extent, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
-    LayerType, MapImageFC, Point, QueryFeaturesParams, RampLayerConfig, RampLayerMapImageLayerEntryConfig,
-    TreeNode } from '@/geo/internal';
+    LayerType, Point, QueryFeaturesParams, RampLayerConfig, RampLayerMapImageLayerEntryConfig,
+    TreeNode } from '@/api/internal';
 import { EsriMapImageLayer, EsriRequest } from '@/geo/esri';
+import { MapImageFC } from './map-image-fc';
 
 // Formerly known as DynamicLayer
 class MapImageLayer extends AttribLayer {

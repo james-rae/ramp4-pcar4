@@ -18,3 +18,4 @@ export * from './graphic/style/point-style-options';
 export * from './graphic/style/line-style-options';
 export * from './graphic/style/polygon-style-options';
 export * from './api-defs';
+export * from './geo-common';

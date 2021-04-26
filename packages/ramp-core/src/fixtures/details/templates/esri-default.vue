@@ -13,7 +13,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { PanelInstance } from '@/api';
-import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '@/geo/internal';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '@/api/internal';
 
 @Component({})
 export default class ESRIDefaultV extends Vue {

@@ -1,5 +1,5 @@
 import { FixtureInstance } from '@/api';
-import { LayerInstance } from '@/geo/internal';
+import { LayerInstance } from '@/api/internal';
 
 export class SettingsAPI extends FixtureInstance {
     /**

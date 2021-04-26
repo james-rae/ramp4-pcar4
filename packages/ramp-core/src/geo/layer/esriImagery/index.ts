@@ -1,7 +1,7 @@
 // TODO add proper comments
 
 import { InstanceAPI } from '@/api/internal';
-import { CommonFC, CommonLayer, LayerType, RampLayerConfig, TreeNode } from '@/geo/internal';
+import { CommonFC, CommonLayer, LayerType, RampLayerConfig, TreeNode } from '@/api/internal';
 import { EsriImageryLayer } from '@/geo/esri';
 
 class ImageryLayer extends CommonLayer {

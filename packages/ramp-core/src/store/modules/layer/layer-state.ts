@@ -1,4 +1,5 @@
-import { LayerInstance, RampLayerConfig } from '@/geo/internal';
+import { LayerInstance } from '@/api/internal';
+import { RampLayerConfig } from '@/api/internal';
 
 export class LayerState {
     layers: LayerInstance[];

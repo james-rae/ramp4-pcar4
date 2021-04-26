@@ -3,7 +3,7 @@ import { LegendConfig } from '../store';
 import { LegendStore } from '../store';
 import { LegendItem, LegendEntry, LegendGroup, LegendSet } from '../store/legend-defs';
 import { LayerStore } from '@/store/modules/layer';
-import { LayerInstance } from '@/geo/internal';
+import { LayerInstance } from '@/api/internal';
 
 export class LegendAPI extends FixtureInstance {
     /**

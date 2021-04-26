@@ -1,6 +1,6 @@
 // TODO add proper comments
 
-import { AttribFC, DataFormat } from '@/geo/internal';
+import { AttribFC, DataFormat } from '@/api/internal';
 
 import MapImageLayer from './index';
 

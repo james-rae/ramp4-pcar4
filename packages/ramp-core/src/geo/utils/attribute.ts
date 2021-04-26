@@ -3,7 +3,7 @@
 // TODO add proper comments
 
 import { APIScope, InstanceAPI } from '@/api/internal';
-import { Attributes, AttributeSet, BaseGeometry, GetGraphicResult, GetGraphicServiceDetails } from '@/geo/internal';
+import { Attributes, AttributeSet, BaseGeometry, GetGraphicResult, GetGraphicServiceDetails } from '@/api/internal';
 import { EsriGeometryJsonUtils, EsriRequest } from '@/geo/esri';
 
 // TODO this feels like it should be an interface. it is never new'd

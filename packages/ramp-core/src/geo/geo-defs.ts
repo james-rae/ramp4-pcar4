@@ -3,7 +3,7 @@
 // NOTE attempt to avoid importing any classes that depend on the Instance.
 //      we want types here to be available before the instance is generated,
 //      so don't want some weird dependency loop.
-import {  Attributes, BaseGeometry, Extent, FileLayer, Point, RampLodConfig, SpatialReference } from './internal';
+import {  Attributes, BaseGeometry, Extent, FileLayer, Point, RampLodConfig, SpatialReference } from '@/api/internal';
 
 // NOTE: some values have changed since RAMP2.
 //       this is due to esri api 4 using different constants, and working exclusively in the

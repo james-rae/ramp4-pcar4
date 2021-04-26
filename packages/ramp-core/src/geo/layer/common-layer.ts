@@ -5,10 +5,10 @@
 // import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
 //    FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
 
-import { GlobalEvents, InstanceAPI } from '@/api/internal';
+import { GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
 import { AttributeSet, CommonFC, DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    IdentifyParameters, IdentifyResultSet, LayerInstance, LayerState, LayerType, LegendSymbology, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/internal';
+    IdentifyParameters, IdentifyResultSet, LayerState, LayerType, LegendSymbology, RampLayerConfig,
+    ScaleSet, TabularAttributeSet, TreeNode } from '@/api/internal';
 
 export class CommonLayer extends LayerInstance {
 

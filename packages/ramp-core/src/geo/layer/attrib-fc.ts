@@ -3,11 +3,11 @@
 
 // TODO add proper comments
 
-import { GlobalEvents } from '@/api';
-import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, BaseGeometry, BaseRenderer,
+import { ArcServerAttributeLoader, AttributeLoaderBase, AttributeLoaderDetails, GlobalEvents, QuickCache } from '@/api';
+import {  AttribLayer, Attributes, BaseGeometry, BaseRenderer,
     CommonFC, CoreFilterKey, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult,
-    GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig,
-    TabularAttributeSet } from '@/geo/internal';
+    GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams, RampLayerFieldMetadataConfig,
+    TabularAttributeSet } from '@/api/internal';
 
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';
 

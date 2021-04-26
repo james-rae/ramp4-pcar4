@@ -61,11 +61,10 @@
 <script lang="ts">
 import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import { GlobalEvents } from '@/api/internal';
+import { GlobalEvents, LayerInstance } from '@/api/internal';
 import deepmerge from 'deepmerge';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import { LayerInstance } from '@/geo/internal';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';

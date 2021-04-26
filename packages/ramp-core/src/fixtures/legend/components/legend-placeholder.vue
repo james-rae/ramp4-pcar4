@@ -31,7 +31,7 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import { LayerInstance } from '@/geo/internal';
+import { LayerInstance } from '@/api/internal';
 
 import { LegendStore } from '../store';
 import { LegendEntry, LegendTypes } from '../store/legend-defs';

@@ -3,7 +3,7 @@
 
 import { APIScope, InstanceAPI } from '@/api/internal';
 import { BaseGeometry, Extent, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
-    QueryFeaturesFileParams, SpatialReference } from '@/geo/internal';
+    QueryFeaturesFileParams, SpatialReference } from '@/api/internal';
 import { EsriQuery, EsriQueryTask } from '@/geo/esri';
 
 export class QueryAPI extends APIScope {

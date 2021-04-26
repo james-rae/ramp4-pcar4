@@ -1,8 +1,7 @@
 // circular reference solver
 
 // if we run into problems, consider merging this with the 'internal' in the api folder. One internal to rule them all.
-
-export * from './api/geo-common';
+/*
 export * from './api/api-internal';
 
 export * from './geo';
@@ -26,12 +25,6 @@ export * from './layer/attrib-layer';
 export * from './layer/file-fc';
 export * from './layer/file-layer';
 
-// NOTE having these here might cause layer classes to pre-load, even if they are not being used.
-//      we might want to have references to these classes be direct-linked from the layers that use them.
-export * from './layer/esriFeature/feature-fc';
-export * from './layer/esriMapImage/map-image-fc';
-export * from './layer/ogcWms/wms-fc';
-
 export * from './utils/attribute';
 export * from './utils/geometry';
 export * from './utils/renderer';
@@ -41,3 +34,4 @@ export * from './utils/shared-utils';
 export * from './utils/projection';
 export * from './utils/promise';
 export * from './utils/utils';
+*/

@@ -1,7 +1,8 @@
 // TODO add proper comments
 
-import { AttribFC, AttributeLoaderDetails, DataFormat, FileLayer, FileLayerAttributeLoader, GetGraphicParams, GetGraphicResult,
-    QueryFeaturesFileParams, QueryFeaturesParams, QuickCache } from '@/geo/internal';
+import { AttributeLoaderDetails, FileLayerAttributeLoader, QuickCache } from '@/api/internal';
+import { AttribFC,  DataFormat, FileLayer, GetGraphicParams, GetGraphicResult,
+    QueryFeaturesFileParams, QueryFeaturesParams } from '@/api/internal';
 
 import { EsriFeatureFilter } from '@/geo/esri';
 

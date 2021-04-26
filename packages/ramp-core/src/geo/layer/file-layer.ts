@@ -5,7 +5,7 @@
 
 import { InstanceAPI } from '@/api/internal';
 import { AttribLayer, FileFC, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
-    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/internal';
+    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/api/internal';
 import { EsriFeatureLayer, EsriField } from '@/geo/esri';
 
 
