@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { InstanceAPI, AppVersion } from './internal';
-import { GeoCommonAPI } from '@/geo/internal';
+import { GeoCommonAPI } from '@/geo/api/geo-common';
 import mixin from './mixin';
 
 export * from './internal';
