@@ -8,8 +8,7 @@ import App from '@/app.vue';
 import { createStore, RootState } from '@/store';
 import { ConfigStore } from '@/store/modules/config';
 
-import { FixtureAPI, PanelAPI, GlobalEvents, EventAPI } from './internal';
-import { GeoAPI } from '@/geo/internal';
+import { EventAPI, FixtureAPI, GeoAPI, GlobalEvents, PanelAPI } from './internal';
 
 interface RampOptions {
     loadDefaultFixtures?: boolean;

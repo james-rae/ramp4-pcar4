@@ -6,3 +6,4 @@ export * from './fixture';
 export * from './instance';
 export * from './panel';
 export * from './panel-instance';
+export * from '../geo/geo'; // trickery to force Geo to load after the instance.
