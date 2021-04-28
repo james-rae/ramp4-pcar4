@@ -1,5 +1,3 @@
-import esri = __esri;
-
 import { APIScope } from '@/api/internal';
 import defaultRenderers from './defaultRenderers.json';
 import ArcGIS from 'terraformer-arcgis-parser';
@@ -108,7 +106,7 @@ function extractFields(geoJson: any) {
  * @param {Object} geoJson           layer data in geoJson format
  * @param {Object} layerDefinition   layer definition of feature layer not yet created
  */
-function cleanUpFields(geoJson: any, configPackage: esri.FeatureLayerProperties) {
+function cleanUpFields(geoJson: any, configPackage: __esri.FeatureLayerProperties) {
     const badField = (name: string) => {
         // basic for now. check for spaces.
         return name.indexOf(' ') > -1;
@@ -147,12 +145,12 @@ function cleanUpFields(geoJson: any, configPackage: esri.FeatureLayerProperties)
 export class FileUtils extends APIScope {
 
     // TODO general type cleanup. just trying to make it work for now
-    async geoJsonToEsriJson(geoJson: any, options: any): Promise<esri.FeatureLayerProperties> {
+    async geoJsonToEsriJson(geoJson: any, options: any): Promise<__esri.FeatureLayerProperties> {
 
         let targetSR: any;
         let srcProj = 'EPSG:4326'; // 4326 is the default for GeoJSON with no projection defined
         let layerId: string;
-        const configPackage: esri.FeatureLayerProperties = {
+        const configPackage: __esri.FeatureLayerProperties = {
             objectIdField: 'OBJECTID',
             fields: [
                 {

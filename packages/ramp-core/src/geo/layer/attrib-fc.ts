@@ -4,8 +4,8 @@
 // TODO add proper comments
 
 import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, BaseRenderer,
-    CommonFC, GlobalEvents, Filter, QuickCache } from '@/api/internal';
-import {  Attributes, BaseGeometry, CoreFilterKey, DataFormat, Extent, FieldDefinition, GeometryType,
+    CommonFC, GlobalEvents, QuickCache } from '@/api/internal';
+import {  Attributes, BaseGeometry, CoreFilterKey, DataFormat, Extent, FieldDefinition, Filter, GeometryType,
     GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams,
     RampLayerFieldMetadataConfig, TabularAttributeSet } from '@/geo/api/api-internal';
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';

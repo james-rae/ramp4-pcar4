@@ -68,6 +68,13 @@ export enum GeometryType {
     UNKNOWN = 'Unknown'
 }
 
+export enum RendererType {
+    Simple = 'simple',
+    Unique = 'uniqueValue',
+    ClassBreaks = 'classBreaks',
+    Unknown = 'unknown'
+}
+
 export interface StyleParams {
     style?: string;
     colour?: Array<number> | string | ColourParams;

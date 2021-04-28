@@ -9,9 +9,6 @@ import { APIScope, Basemap, InstanceAPI } from '@/api/internal';
 import { EsriMap } from '@/geo/esri';
 import { RampMapConfig } from '@/geo/api/api-internal';
 
-console.log('common map start');
-console.trace();
-
 // Would ideally call this BaseMap, but that would get confused with Basemap.
 // We also use "Base" for our vuex state classes so want to avoid naming overlaps.
 export class CommonMapAPI extends APIScope {

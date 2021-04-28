@@ -5,8 +5,8 @@
 // import { InfoBundle, LayerState, RampLayerConfig, LegendSymbology, IdentifyParameters, IdentifyResultSet,
 //    FilterEventParam, AttributeSet, FieldDefinition, TabularAttributeSet, GetGraphicResult, GetGraphicParams } from '../gapiTypes';
 
-import { CommonFC, DefPromise, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
-import { AttributeSet,  DataFormat,  Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
+import { CommonFC, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
+import { AttributeSet,  DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResultSet, LayerState, LayerType, LegendSymbology, RampLayerConfig,
     ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/api/api-internal';
 
@@ -81,6 +81,7 @@ export class CommonLayer extends LayerInstance {
 
     protected noLayerErr(): void {
         console.error('Attempted to manipulate the layer before .initiate() finished');
+        console.trace();
     }
 
     // will give a new uid to use. if appropriate, will recycle same uid from a previous

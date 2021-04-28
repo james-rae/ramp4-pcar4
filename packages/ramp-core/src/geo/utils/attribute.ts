@@ -6,7 +6,9 @@ import { APIScope, InstanceAPI } from '@/api/internal';
 import { Attributes, AttributeSet, BaseGeometry, GetGraphicResult, GetGraphicServiceDetails } from '@/geo/api/api-internal';
 import { EsriGeometryJsonUtils, EsriRequest } from '@/geo/esri';
 
-// TODO this feels like it should be an interface. it is never new'd
+// NOTE has an esri type, which is bad, but this interface lives within the geo section so will permit it.
+//      alternative would be swapping back and fourth between ramp and esri graphics which seems a waste
+//      of cycles.
 export interface AttributeLoaderDetails {
     supportsLimit?: boolean; // indicates if server will return information about what the maximum number of attributes will be downloaded in a single request
     attribs?: string; // comma delimited list of attributes to download. '*' for all

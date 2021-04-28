@@ -3,27 +3,9 @@
 // contains renderer classes that let us decorate and work with ESRI renderer classes.
 // we can add more classes to support more renderer types if we need to
 
-import { Attributes } from '@/geo/api/api-internal';
+import { Attributes, RendererType } from '@/geo/api/api-internal';
 import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleMarkerSymbol,
     EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '@/geo/esri';
-
-/*
-import EsriClassBreaksRenderer from '@arcgis/core/renderers/ClassBreaksRenderer';
-import EsriField from '@arcgis/core/layers/support/Field';
-import EsriRenderer from '@arcgis/core/renderers/Renderer';
-import EsriSimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
-import EsriUniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
-import EsriSymbol from '@arcgis/core/symbols/Symbol';
-import EsriClassBreakInfo from '@arcgis/core/renderers/support/ClassBreakInfo';
-import EsriUniqueValueInfo from '@arcgis/core/renderers/support/UniqueValueInfo';
-*/
-
-export enum RendererType {
-    Simple = 'simple',
-    Unique = 'uniqueValue',
-    ClassBreaks = 'classBreaks',
-    Unknown = 'unknown'
-}
 
 export class BaseRenderer {
 

@@ -1,6 +1,5 @@
 import { FixtureInstance, LayerInstance } from '@/api';
-import { LegendConfig } from '../store';
-import { LegendStore } from '../store';
+import { LegendConfig, LegendStore } from '../store';
 import { LegendItem, LegendEntry, LegendGroup, LegendSet } from '../store/legend-defs';
 import { LayerStore } from '@/store/modules/layer';
 

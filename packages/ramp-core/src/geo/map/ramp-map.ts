@@ -1,8 +1,8 @@
 // wraps and represents a 2D esri map
 // TODO add proper comments
 
-import { CommonMapAPI, DefPromise, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
-import { BaseGeometry, CoreFilterKey, Extent, GeometryType, IdentifyMode,IdentifyParameters,
+import { CommonMapAPI, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
+import { BaseGeometry, CoreFilterKey, DefPromise, Extent, GeometryType, IdentifyMode,IdentifyParameters,
     IdentifyResult, IdentifyResultSet, MapClick, MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet,
     SpatialReference } from '@/geo/api/api-internal';
 import { EsriLOD, EsriMapView } from '@/geo/esri';

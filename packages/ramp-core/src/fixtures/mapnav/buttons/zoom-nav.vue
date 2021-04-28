@@ -34,12 +34,10 @@ import DividerNavV from './divider-nav.vue';
 })
 export default class FullscreenNavV extends Vue {
     zoomIn(): void {
-        // console.log('zoom in');
         this.$iApi.geo.map.zoomIn();
     }
 
     zoomOut(): void {
-        // console.log('zoom out');
         this.$iApi.geo.map.zoomOut();
     }
 }
