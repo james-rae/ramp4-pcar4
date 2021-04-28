@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { LineStyle, LineStyleParams, StyleOptions } from '@/geo/api/api-internal';
+import { LineStyle, LineStyleParams, StyleOptions } from '@/geo/api';
 
 export class LineStyleOptions extends StyleOptions {
 

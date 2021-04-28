@@ -7,7 +7,7 @@
 
 import { APIScope, Basemap, InstanceAPI } from '@/api/internal';
 import { EsriMap } from '@/geo/esri';
-import { RampMapConfig } from '@/geo/api/api-internal';
+import { RampMapConfig } from '@/geo/api';
 
 // Would ideally call this BaseMap, but that would get confused with Basemap.
 // We also use "Base" for our vuex state classes so want to avoid naming overlaps.

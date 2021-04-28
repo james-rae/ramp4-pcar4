@@ -1,5 +1,5 @@
 import { APIScope } from '@/api/internal';
-import { UrlWrapper } from '@/geo/api/api-internal';
+import { UrlWrapper } from '@/geo/api';
 import yxList from './reversedAxis.json';
 import { EsriRequest } from '@/geo/esri';
 

@@ -4,7 +4,7 @@
 import { CommonMapAPI, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
 import { BaseGeometry, CoreFilterKey, DefPromise, Extent, GeometryType, IdentifyMode,IdentifyParameters,
     IdentifyResult, IdentifyResultSet, MapClick, MapMove, Point,RampMapConfig, ScreenPoint, ScaleSet,
-    SpatialReference } from '@/geo/api/api-internal';
+    SpatialReference } from '@/geo/api';
 import { EsriLOD, EsriMapView } from '@/geo/esri';
 import { LayerStore } from '@/store/modules/layer';
 

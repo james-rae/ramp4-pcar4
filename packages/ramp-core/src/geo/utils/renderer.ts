@@ -3,7 +3,7 @@
 // contains renderer classes that let us decorate and work with ESRI renderer classes.
 // we can add more classes to support more renderer types if we need to
 
-import { Attributes, RendererType } from '@/geo/api/api-internal';
+import { Attributes, RendererType } from '@/geo/api';
 import { EsriClassBreakInfo, EsriClassBreaksRenderer, EsriField, EsriRenderer, EsriSimpleMarkerSymbol,
     EsriSimpleRenderer, EsriSymbol, EsriUniqueValueInfo, EsriUniqueValueRenderer } from '@/geo/esri';
 

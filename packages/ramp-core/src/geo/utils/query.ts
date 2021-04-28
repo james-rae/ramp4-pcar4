@@ -3,7 +3,7 @@
 
 import { APIScope, FileLayer, InstanceAPI } from '@/api/internal';
 import { BaseGeometry, Extent, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
-    QueryFeaturesParams, SpatialReference } from '@/geo/api/api-internal';
+    QueryFeaturesParams, SpatialReference } from '@/geo/api';
 import { EsriQuery, EsriQueryTask } from '@/geo/esri';
 
 // this exists here instead of our main definitions file because it uses `FileLayer` type.

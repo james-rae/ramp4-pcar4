@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { BaseGeometry, GeometryType, SrDef, IdDef } from '@/geo/api/api-internal';
+import { BaseGeometry, GeometryType, SrDef, IdDef } from '@/geo/api';
 
 export class Point extends BaseGeometry {
 

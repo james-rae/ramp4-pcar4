@@ -1,7 +1,7 @@
 import { ActionContext, Action } from 'vuex';
 import { make } from 'vuex-pathify';
 import merge from 'deepmerge';
-import { RampMapConfig } from '@/geo/api/api-internal';
+import { RampMapConfig } from '@/geo/api';
 
 import { ConfigState } from './config-state';
 import { RootState } from '@/store';

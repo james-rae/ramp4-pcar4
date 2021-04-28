@@ -5,7 +5,7 @@
 
 import { AttribLayer, FileFC, InstanceAPI } from '@/api/internal';
 import { GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
-    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/api/api-internal';
+    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/api';
 import { EsriFeatureLayer, EsriField } from '@/geo/esri';
 
 // util function to manage trickery. file layer can have field names that are bad keys.

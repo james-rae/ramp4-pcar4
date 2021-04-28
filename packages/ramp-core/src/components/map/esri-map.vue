@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Vue, Watch, Component } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import { RampLayerConfig, RampMapConfig } from '@/geo/api/api-internal';
+import { RampLayerConfig, RampMapConfig } from '@/geo/api';
 import { GlobalEvents, LayerInstance, MapAPI } from '@/api/internal';
 // import { window } from '@/main';
 

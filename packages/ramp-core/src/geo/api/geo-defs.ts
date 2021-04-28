@@ -1,4 +1,4 @@
-import { BaseGeometry, Extent, Point, SpatialReference } from '@/geo/api/api-internal';
+import { BaseGeometry, Extent, Point, SpatialReference } from '@/geo/api';
 
 export interface RampLodConfig {
     level: number;

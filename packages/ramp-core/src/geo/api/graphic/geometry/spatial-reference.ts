@@ -1,6 +1,6 @@
 // TODO add proper documentation
 
-import { SrDef } from '@/geo/api/api-internal';
+import { SrDef } from '@/geo/api';
 
 /**
  * Represents a geographical spatial reference.

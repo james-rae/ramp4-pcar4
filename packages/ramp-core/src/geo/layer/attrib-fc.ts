@@ -7,7 +7,7 @@ import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLo
     CommonFC, GlobalEvents, QuickCache } from '@/api/internal';
 import {  Attributes, BaseGeometry, CoreFilterKey, DataFormat, Extent, FieldDefinition, Filter, GeometryType,
     GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams,
-    RampLayerFieldMetadataConfig, TabularAttributeSet } from '@/geo/api/api-internal';
+    RampLayerFieldMetadataConfig, TabularAttributeSet } from '@/geo/api';
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';
 import deepmerge from 'deepmerge';
 

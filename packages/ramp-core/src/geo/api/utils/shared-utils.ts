@@ -1,5 +1,5 @@
 import { G } from 'svg.js';
-import { ArcGisServerUrl } from '@/geo/api/api-internal';
+import { ArcGisServerUrl } from '@/geo/api';
 import deepmerge from 'deepmerge';
 
 export class SharedUtilsAPI {

@@ -1,6 +1,6 @@
 import { APIScope, BaseRenderer, BaseSymbolUnit, ClassBreaksRenderer, InstanceAPI,
     SimpleRenderer, UniqueValueRenderer } from '@/api/internal';
-import { Attributes, LegendSymbology, LineStyle } from '@/geo/api/api-internal';
+import { Attributes, LegendSymbology, LineStyle } from '@/geo/api';
 import { EsriRendererUtils, EsriRequest } from '@/geo/esri';
 import svgjs from 'svg.js';
 

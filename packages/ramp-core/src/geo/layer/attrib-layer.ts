@@ -4,7 +4,7 @@
 
 import { AttribFC, CommonLayer, InstanceAPI } from '@/api/internal';
 import { AttributeSet, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    GeometryType, RampLayerConfig, TabularAttributeSet, TreeNode } from '@/geo/api/api-internal';
+    GeometryType, RampLayerConfig, TabularAttributeSet, TreeNode } from '@/geo/api';
 
 export class AttribLayer extends CommonLayer {
 

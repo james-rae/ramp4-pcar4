@@ -8,7 +8,7 @@
 import { CommonFC, GlobalEvents, InstanceAPI, LayerInstance } from '@/api/internal';
 import { AttributeSet,  DataFormat, DefPromise, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
     IdentifyParameters, IdentifyResultSet, LayerState, LayerType, LegendSymbology, RampLayerConfig,
-    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/api/api-internal';
+    ScaleSet, TabularAttributeSet, TreeNode } from '@/geo/api';
 
 export class CommonLayer extends LayerInstance {
 

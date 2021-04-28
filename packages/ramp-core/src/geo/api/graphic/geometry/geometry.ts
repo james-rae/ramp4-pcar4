@@ -2,7 +2,7 @@
 
 import GeoJson from 'geojson';
 import { Graphic, BaseGeometry, Extent, GeometryType, LinearRing, LineString, MapClick, MapMove, MultiLineString, MultiPoint,
-    MultiPolygon, Point, Polygon, SpatialReference } from '@/geo/api/api-internal';
+    MultiPolygon, Point, Polygon, SpatialReference } from '@/geo/api';
 import { EsriExtent, EsriMultipoint, EsriPoint, EsriPolygon, EsriPolyline, EsriSpatialReference } from '@/geo/esri';
 
 // import * as RampAPI from '../api/api';

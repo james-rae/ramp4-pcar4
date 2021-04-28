@@ -1,7 +1,7 @@
 // NOTE LayerInstance would be ideal here, but since it inhertis from APIScope it appears
 //      to be causing circular reference bombs being in the store. Using neutral interface
 //      instead.
-import { LayerBase, RampLayerConfig } from '@/geo/api/api-internal';
+import { LayerBase, RampLayerConfig } from '@/geo/api';
 
 export class LayerState {
     layers: LayerBase[];

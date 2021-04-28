@@ -3,7 +3,7 @@
 // TODO add proper comments
 
 import { APIScope, InstanceAPI } from '@/api/internal';
-import { Attributes, AttributeSet, BaseGeometry, GetGraphicResult, GetGraphicServiceDetails } from '@/geo/api/api-internal';
+import { Attributes, AttributeSet, BaseGeometry, GetGraphicResult, GetGraphicServiceDetails } from '@/geo/api';
 import { EsriGeometryJsonUtils, EsriRequest } from '@/geo/esri';
 
 // NOTE has an esri type, which is bad, but this interface lives within the geo section so will permit it.

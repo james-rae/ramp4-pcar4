@@ -1,7 +1,7 @@
 // TODO add proper comments
 
 import { CommonFC } from '@/api/internal';
-import { DataFormat } from '@/geo/api/api-internal';
+import { DataFormat } from '@/geo/api';
 import WmsLayer from './index';
 
 /**

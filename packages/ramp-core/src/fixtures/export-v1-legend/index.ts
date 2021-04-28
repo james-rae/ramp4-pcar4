@@ -1,7 +1,7 @@
 import { FixtureInstance, LayerInstance } from '@/api/internal';
 import { ExportV1SubFixture } from '@/fixtures/export-v1';
 import { fabric } from 'fabric';
-import { LegendSymbology, RampLayerConfig, RampLayerMapImageLayerEntryConfig } from '@/geo/api/api-internal';
+import { LegendSymbology, RampLayerConfig, RampLayerMapImageLayerEntryConfig } from '@/geo/api';
 
 /**
  * Represents a map layer.

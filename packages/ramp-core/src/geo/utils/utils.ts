@@ -4,7 +4,7 @@
 // TODO add proper comments
 
 import { APIScope, AttributeAPI, InstanceAPI, ProjectionAPI, QueryAPI, SymbologyAPI } from '@/api/internal';
-import { EpsgLookup, GeometryAPI, SharedUtilsAPI } from '@/geo/api/api-internal';
+import { EpsgLookup, GeometryAPI, SharedUtilsAPI } from '@/geo/api';
 
 /*
 import HighlightService from './HighlightService';

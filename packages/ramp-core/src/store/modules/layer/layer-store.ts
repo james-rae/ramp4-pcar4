@@ -7,7 +7,7 @@ import { RootState } from '@/store';
 // NOTE LayerInstance would be ideal here, but since it inhertis from APIScope it appears
 //      to be causing circular reference bombs being in the store. Using neutral interface
 //      instead.
-import { LayerBase, RampLayerConfig } from '@/geo/api/api-internal';
+import { LayerBase, RampLayerConfig } from '@/geo/api';
 
 import api from '@/api'; // this is the external ramp api, not the instance api
 
