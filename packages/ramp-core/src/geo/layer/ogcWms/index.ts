@@ -1,7 +1,8 @@
 import { InstanceAPI } from '@/api/internal';
 import { CommonLayer, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerType,
-    Point, RampLayerConfig, RampLayerWmsLayerEntryConfig, TreeNode, WmsFC } from '@/geo/internal';
+    Point, RampLayerConfig, RampLayerWmsLayerEntryConfig, TreeNode } from '@/geo/internal';
 import { EsriRequest, EsriWMSLayer } from '@/geo/esri';
+import { WmsFC } from './wms-fc';
 
 export default class WmsLayer extends CommonLayer {
 

@@ -2,9 +2,15 @@
 // TODO change all the 'any' in this file to more strict types if possible
 
 import { APIScope, InstanceAPI } from '@/api/internal';
-import { BaseGeometry, Extent, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
-    QueryFeaturesFileParams, SpatialReference } from '@/geo/internal';
+import { BaseGeometry, Extent, FileLayer, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
+    QueryFeaturesParams, SpatialReference } from '@/geo/internal';
 import { EsriQuery, EsriQueryTask } from '@/geo/esri';
+
+// this exists here instead of our main definitions file because it uses `FileLayer` type.
+// the layer inherits from APIScope, causing circular references in the public folder
+export interface QueryFeaturesFileParams extends QueryFeaturesParams {
+    layer: FileLayer;
+}
 
 export class QueryAPI extends APIScope {
 

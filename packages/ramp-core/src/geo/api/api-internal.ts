@@ -17,4 +17,7 @@ export * from './graphic/style/style-options';
 export * from './graphic/style/point-style-options';
 export * from './graphic/style/line-style-options';
 export * from './graphic/style/polygon-style-options';
+export * from './layer/tree-node';
+export * from './layer/scale-set';
 export * from './api-defs';
+export * from './layer/layer-base';

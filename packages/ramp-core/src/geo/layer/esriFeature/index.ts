@@ -1,7 +1,8 @@
 import { InstanceAPI } from '@/api/internal';
-import { AttribLayer, FeatureFC, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
+import { AttribLayer, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
     LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/internal';
 import { EsriFeatureLayer } from '@/geo/esri';
+import { FeatureFC } from './feature-fc';
 
 class FeatureLayer extends AttribLayer {
 
