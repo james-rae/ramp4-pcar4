@@ -1,13 +1,11 @@
-// NOTE LayerInstance would be ideal here, but since it inhertis from APIScope it appears
-//      to be causing circular reference bombs being in the store. Using neutral interface
-//      instead.
-import { LayerBase, RampLayerConfig } from '@/geo/api';
+import { RampLayerConfig } from '@/geo/api';
+import { LayerInstance } from '@/api/internal';
 
 export class LayerState {
-    layers: LayerBase[];
+    layers: LayerInstance[];
     layerConfigs: RampLayerConfig[];
 
-    constructor(layers: LayerBase[], configs: RampLayerConfig[]) {
+    constructor(layers: LayerInstance[], configs: RampLayerConfig[]) {
         this.layers = layers;
         this.layerConfigs = configs;
     }

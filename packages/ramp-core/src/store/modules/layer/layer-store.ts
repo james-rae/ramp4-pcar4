@@ -4,10 +4,8 @@ import { make } from 'vuex-pathify';
 import { LayerState } from './layer-state';
 import { RootState } from '@/store';
 
-// NOTE LayerInstance would be ideal here, but since it inhertis from APIScope it appears
-//      to be causing circular reference bombs being in the store. Using neutral interface
-//      instead.
-import { LayerBase, RampLayerConfig } from '@/geo/api';
+import { RampLayerConfig } from '@/geo/api';
+import { LayerInstance } from '@/api/internal';
 
 import api from '@/api'; // this is the external ramp api, not the instance api
 
@@ -33,11 +31,11 @@ import api from '@/api'; // this is the external ramp api, not the instance api
 type LayerContext = ActionContext<LayerState, RootState>;
 
 const getters = {
-    getLayerByUid: (state: LayerState) => (uid: string): LayerBase | undefined => {
-        return state.layers.find((layer: LayerBase) => layer.getLayerTree().findChildByUid(uid) !== undefined);
+    getLayerByUid: (state: LayerState) => (uid: string): LayerInstance | undefined => {
+        return state.layers.find((layer: LayerInstance) => layer.getLayerTree().findChildByUid(uid) !== undefined);
     },
-    getLayerById: (state: LayerState) => (id: string): LayerBase | undefined => {
-        return state.layers.find((layer: LayerBase) => layer.id === id);
+    getLayerById: (state: LayerState) => (id: string): LayerInstance | undefined => {
+        return state.layers.find((layer: LayerInstance) => layer.id === id);
     }
 };
 
@@ -52,7 +50,7 @@ const actions = {
             context.commit('ADD_LAYER_CONFIG', lc);
         });
     },
-    addLayers: (context: LayerContext, layers: LayerBase[]) => {
+    addLayers: (context: LayerContext, layers: LayerInstance[]) => {
         // TODO we are getting frequent errors at startup; something passes in an
         //      undefined layerConfigs. kicking out for now to make demos work.
         //      possibly this is evil in vue state land. if so, then someone figure out
@@ -102,7 +100,7 @@ const mutations = {
         // copy to new array so watchers will have a reference to the old value
         state.layerConfigs = [...state.layerConfigs, value]
     },
-    ADD_LAYER: (state: LayerState, value: LayerBase) => {
+    ADD_LAYER: (state: LayerState, value: LayerInstance) => {
         // copy to new array so watchers will have a reference to the old value
         state.layers = [...state.layers, value]
     }
@@ -110,19 +108,19 @@ const mutations = {
 
 export enum LayerStore {
     /**
-     * (Getter) getLayerByUid: (uid: string) => LayerBase | undefined
+     * (Getter) getLayerByUid: (uid: string) => LayerInstance | undefined
      */
     getLayerByUid = 'layer/getLayerByUid',
     /**
-     * (Getter) getLayerById: (id: string) => LayerBase | undefined
+     * (Getter) getLayerById: (id: string) => LayerInstance | undefined
      */
     getLayerById = 'layer/getLayerById',
     /**
-     * (State) layers: LayerBase[]
+     * (State) layers: LayerInstance[]
      */
     layers = 'layer/layers',
     /**
-     * (Action) addLayers: (layers: LayerBase[])
+     * (Action) addLayers: (layers: LayerInstance[])
      */
     addLayers = 'layer/addLayers!',
     /**
