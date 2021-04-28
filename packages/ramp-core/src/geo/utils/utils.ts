@@ -3,8 +3,8 @@
 // this makes the module that gets exposed on GeoAPI under .util(s)
 // TODO add proper comments
 
-import { APIScope, InstanceAPI } from '@/api/internal';
-import { AttributeAPI, EpsgLookup, GeometryAPI, ProjectionAPI, QueryAPI, SharedUtilsAPI, SymbologyAPI } from '@/geo/internal';
+import { APIScope, AttributeAPI, GeometryAPI, InstanceAPI, ProjectionAPI, QueryAPI, SharedUtilsAPI, SymbologyAPI } from '@/api/internal';
+import { EpsgLookup } from '@/geo/api/api-internal';
 
 /*
 import HighlightService from './HighlightService';

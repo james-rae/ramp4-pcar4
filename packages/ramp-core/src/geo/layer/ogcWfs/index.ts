@@ -1,6 +1,6 @@
 // handles static geojson (e.g. from a user file or hardcoded in a config) or a geojson file hosted on a web server
 
-import { FileLayer, UrlWrapper } from '@/geo/internal';
+import { FileLayer, UrlWrapper } from '@/api/internal';
 
 class WFSLayer extends FileLayer {
 

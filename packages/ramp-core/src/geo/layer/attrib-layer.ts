@@ -2,9 +2,9 @@
 // used for layer types defined by Core RAMP.
 // TODO add proper comments
 
-import { InstanceAPI } from '@/api/internal';
-import { AttribFC, AttributeSet, CommonLayer, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
-    GeometryType, RampLayerConfig, TabularAttributeSet, TreeNode } from '@/geo/internal';
+import { AttribFC, CommonLayer, InstanceAPI } from '@/api/internal';
+import { AttributeSet, Extent, FieldDefinition, GetGraphicResult, GetGraphicParams,
+    GeometryType, RampLayerConfig, TabularAttributeSet, TreeNode } from '@/geo/api/api-internal';
 
 export class AttribLayer extends CommonLayer {
 

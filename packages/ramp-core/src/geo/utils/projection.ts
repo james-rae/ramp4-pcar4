@@ -1,7 +1,7 @@
 import { Tools } from 'terraformer';
 import GeoJson from 'geojson';
 import { APIScope, InstanceAPI } from '@/api/internal';
-import { BaseGeometry, EpsgLookup, Extent, GeometryType, Polygon, SpatialReference, SrDef } from '@/geo/internal';
+import { BaseGeometry, EpsgLookup, Extent, GeometryType, Polygon, SpatialReference, SrDef } from '@/geo/api/api-internal';
 import { EsriRequest } from '@/geo/esri';
 
 // since ProjectionService is now a class instead a stateless service, it appears that the proj4 library is maintaining it's state

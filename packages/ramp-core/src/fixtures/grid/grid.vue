@@ -53,11 +53,10 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 
-import { PanelInstance } from '@/api';
+import { LayerInstance, PanelInstance } from '@/api';
 import TableComponent from '@/fixtures/grid/table/table.vue';
 
 import { LayerStore, layer } from '@/store/modules/layer';
-import { LayerInstance } from '@/geo/internal';
 
 @Component({
     components: {

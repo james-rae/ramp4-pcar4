@@ -9,7 +9,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 import { NortharrowStore } from './store';
 import { GlobalEvents } from '@/api/internal';
-import { Extent, Point } from '@/geo/internal';
+import { Extent, Point } from '@/geo/api/api-internal';
 import flag from './flag.json';
 import { debounce } from 'debounce';
 

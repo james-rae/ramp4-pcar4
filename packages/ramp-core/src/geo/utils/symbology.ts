@@ -1,8 +1,7 @@
-import { APIScope, InstanceAPI } from '@/api/internal';
-import { Attributes, BaseRenderer, BaseSymbolUnit, ClassBreaksRenderer, LegendSymbology, LineStyle,
-    SimpleRenderer, UniqueValueRenderer } from '@/geo/internal';
+import { APIScope, BaseRenderer, BaseSymbolUnit, ClassBreaksRenderer, InstanceAPI,
+    SimpleRenderer, UniqueValueRenderer } from '@/api/internal';
+import { Attributes, LegendSymbology, LineStyle } from '@/geo/api/api-internal';
 import { EsriRendererUtils, EsriRequest } from '@/geo/esri';
-
 import svgjs from 'svg.js';
 
 // Functions for turning ESRI Renderers into images

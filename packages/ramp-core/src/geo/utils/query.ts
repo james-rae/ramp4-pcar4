@@ -1,9 +1,9 @@
 // TODO add proper comments
 // TODO change all the 'any' in this file to more strict types if possible
 
-import { APIScope, InstanceAPI } from '@/api/internal';
-import { BaseGeometry, Extent, FileLayer, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
-    QueryFeaturesParams, SpatialReference } from '@/geo/internal';
+import { APIScope, FileLayer, InstanceAPI } from '@/api/internal';
+import { BaseGeometry, Extent, GeometryType, GetGraphicResult, Point, QueryFeaturesArcServerParams,
+    QueryFeaturesParams, SpatialReference } from '@/geo/api/api-internal';
 import { EsriQuery, EsriQueryTask } from '@/geo/esri';
 
 // this exists here instead of our main definitions file because it uses `FileLayer` type.

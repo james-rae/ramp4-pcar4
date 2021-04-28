@@ -5,9 +5,9 @@
 
 // TODO add proper comments
 
-import { APIScope, InstanceAPI } from '@/api/internal';
+import { APIScope, Basemap, InstanceAPI } from '@/api/internal';
 import { EsriMap } from '@/geo/esri';
-import { Basemap, RampMapConfig } from '@/geo/internal';
+import { RampMapConfig } from '@/geo/api/api-internal';
 
 console.log('common map start');
 console.trace();

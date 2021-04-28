@@ -9,8 +9,8 @@
 //      its also fairly untested.
 
 import defaultSymbols from './../defaulthighlightSymbols.json';
-import { InstanceAPI } from '@/api/internal';
-import { CommonFC, CommonLayer, LayerType, Point, RampLayerConfig, TreeNode } from '@/geo/internal';
+import { CommonFC, CommonLayer, InstanceAPI } from '@/api/internal';
+import { LayerType, Point, RampLayerConfig, TreeNode } from '@/geo/api/api-internal';
 import { EsriGraphic, EsriGraphicsLayer, EsriPictureMarkerSymbol } from '@/geo/esri';
 
 /**

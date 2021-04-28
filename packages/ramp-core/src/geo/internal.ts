@@ -1,16 +1,17 @@
 // circular reference solver
 
 // if we run into problems, consider merging this with the 'internal' in the api folder. One internal to rule them all.
-console.log('looog');
-console.warn('waaaarn');
-console.trace();
+// NOTE ^ doing that now, this file should only be imported by api internal. might rename this file to say private internal or something
+//console.log('starting geo internal');
+//console.trace();
 
+/*
 export * from './api/geo-common';
 export * from './api/api-internal';
+*/
 
-export * from './geo';
 // export * from './geo-defs';
-
+/*
 export * from './map/basemap';
 export * from './map/common-map';
 export * from './map/ramp-map';
@@ -38,3 +39,6 @@ export * from './utils/shared-utils';
 export * from './utils/projection';
 export * from './utils/promise';
 export * from './utils/utils';
+
+export * from './geo';
+*/

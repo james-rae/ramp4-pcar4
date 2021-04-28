@@ -3,11 +3,10 @@
 // most of the implementations will only change the initiate() code, which will have whatever
 // custom pre-processing of data to massage it into geojson for this class to process.
 
-import { InstanceAPI } from '@/api/internal';
-import { AttribLayer, FileFC, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
-    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/internal';
+import { AttribLayer, FileFC, InstanceAPI } from '@/api/internal';
+import { GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
+    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/api/api-internal';
 import { EsriFeatureLayer, EsriField } from '@/geo/esri';
-
 
 // util function to manage trickery. file layer can have field names that are bad keys.
 // our file loader will have corrected them, but ramp layer config .nameField and .tooltipField may

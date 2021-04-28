@@ -30,8 +30,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore, DetailsItemInstance } from './store';
 
-import { PanelInstance } from '@/api';
-import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet, LayerInstance } from '@/geo/internal';
+import { LayerInstance, PanelInstance } from '@/api/internal';
+import { IdentifyItem, IdentifyResult, IdentifyResultFormat, IdentifyResultSet } from '@/geo/api/api-internal';
 
 import ESRIDefaultV from './templates/esri-default.vue';
 import HTMLDefaultV from './templates/html-default.vue';

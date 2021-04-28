@@ -1,7 +1,6 @@
 // the structure of the geo element of the RAMP API
 
-import { APIScope, InstanceAPI } from '@/api/internal';
-import { LayerAPI, MapAPI, UtilsAPI } from '@/geo/internal';
+import { APIScope, InstanceAPI, LayerAPI, MapAPI, UtilsAPI  } from '@/api/internal';
 
 export class GeoAPI extends APIScope {
 

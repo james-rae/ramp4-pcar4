@@ -1,7 +1,7 @@
-import { GlobalEvents, InstanceAPI } from '@/api/internal';
-import { AttribLayer, Extent, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
+import { AttribLayer, GlobalEvents, InstanceAPI } from '@/api/internal';
+import { Extent, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
     LayerType, Point, QueryFeaturesParams, RampLayerConfig, RampLayerMapImageLayerEntryConfig,
-    TreeNode } from '@/geo/internal';
+    TreeNode } from '@/geo/api/api-internal';
 import { EsriMapImageLayer, EsriRequest } from '@/geo/esri';
 import { MapImageFC } from './map-image-fc';
 

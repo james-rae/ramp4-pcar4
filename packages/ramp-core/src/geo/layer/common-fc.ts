@@ -2,7 +2,8 @@
 // used for layer types defined by Core RAMP.
 
 // TODO add proper comments
-import { CommonLayer, DataFormat, LegendSymbology, ScaleSet } from '@/geo/internal';
+import { CommonLayer } from '@/api/internal';
+import { DataFormat, LegendSymbology, ScaleSet } from '@/geo/api/api-internal';
 
 // TODO decide if this needs APIScope base or not. Since we have reference to parent layer, could grab via that.
 export class CommonFC {

@@ -1,6 +1,6 @@
-import { InstanceAPI } from '@/api/internal';
-import { AttribLayer, GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
-    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/internal';
+import { AttribLayer, InstanceAPI } from '@/api/internal';
+import { GeometryType, IdentifyParameters, IdentifyResult, IdentifyResultFormat, IdentifyResultSet,
+    LayerType, Point, QueryFeaturesParams, RampLayerConfig, TreeNode } from '@/geo/api/api-internal';
 import { EsriFeatureLayer } from '@/geo/esri';
 import { FeatureFC } from './feature-fc';
 

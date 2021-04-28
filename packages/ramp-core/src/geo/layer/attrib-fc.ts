@@ -3,14 +3,12 @@
 
 // TODO add proper comments
 
-import { GlobalEvents } from '@/api';
-import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, Attributes, BaseGeometry, BaseRenderer,
-    CommonFC, CoreFilterKey, DataFormat, Extent, FieldDefinition, Filter, GeometryType, GetGraphicParams, GetGraphicResult,
-    GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams, QuickCache, RampLayerFieldMetadataConfig,
-    TabularAttributeSet } from '@/geo/internal';
-
+import { ArcServerAttributeLoader, AttribLayer, AttributeLoaderBase, AttributeLoaderDetails, BaseRenderer,
+    CommonFC, GlobalEvents, Filter, QuickCache } from '@/api/internal';
+import {  Attributes, BaseGeometry, CoreFilterKey, DataFormat, Extent, FieldDefinition, GeometryType,
+    GetGraphicParams, GetGraphicResult, GetGraphicServiceDetails, QueryFeaturesArcServerParams, QueryFeaturesParams,
+    RampLayerFieldMetadataConfig, TabularAttributeSet } from '@/geo/api/api-internal';
 import { EsriExtent, EsriField, EsriRendererUtils, EsriRequest } from '@/geo/esri';
-
 import deepmerge from 'deepmerge';
 
 export class AttribFC extends CommonFC {

@@ -21,7 +21,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
-import { Extent, Graphic, RampMapConfig } from '@/geo/internal';
+import { Extent, Graphic, RampMapConfig } from '@/geo/api/api-internal';
 import { EsriGraphic } from '@/geo/esri'; // TODO bad bad bad! convert to graphic layer or something and avoid this.
 import { ConfigStore } from '@/store/modules/config';
 import { GlobalEvents } from '../../api/internal';

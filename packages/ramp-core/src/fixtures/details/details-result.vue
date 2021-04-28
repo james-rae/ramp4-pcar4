@@ -30,8 +30,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Get, Sync, Call } from 'vuex-pathify';
 import { DetailsStore } from './store';
 
-import { PanelInstance } from '@/api';
-import { IdentifyResult, LayerInstance } from '@/geo/internal';
+import { LayerInstance, PanelInstance } from '@/api';
+import { IdentifyResult } from '@/geo/api/api-internal';
 
 @Component({})
 export default class DetailsResultV extends Vue {
