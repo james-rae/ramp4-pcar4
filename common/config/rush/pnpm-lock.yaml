@@ -7,7 +7,7 @@ importers:
 
   ../../packages/ramp-core:
     specifiers:
-      '@arcgis/core': 4.20.1
+      '@arcgis/core': 4.20.2
       '@braid/vue-formulate': ~2.5.2
       '@tailwindcss/forms': ^0.2.1
       '@tailwindcss/postcss7-compat': ^2.0.2
@@ -88,7 +88,7 @@ importers:
       webpack-dev-server: 3.9.0
       wrapper-webpack-plugin: 2.1.0
     dependencies:
-      '@arcgis/core': 4.20.1
+      '@arcgis/core': 4.20.2
       '@braid/vue-formulate': 2.5.2
       ag-grid-community: 22.1.1
       ag-grid-vue: 22.1.1_4f5a95a77bad3f3a7df09d8e6767e56d
@@ -234,8 +234,8 @@ packages:
     resolution: {integrity: sha512-3JOd6g+BALysWS8LNf0qdB8ltR651H/RCLAvUmfS0LIHwHO579XfjZUIZbURYiAZrcbp1CBAq4QZ2YwKNQZ1hw==}
     dev: false
 
-  /@arcgis/core/4.20.1:
-    resolution: {integrity: sha512-/1l0ZfYsXBT3yH8qr4m2JB14sEUD6sgFdfIWcaR9YgZ9Q00AtH7hw3oOIZxiKERwiRrdQtKkUHrjtAEqNGPc6w==}
+  /@arcgis/core/4.20.2:
+    resolution: {integrity: sha512-LmHNLhJRBri5UpLfmfSFhQ7B3O/lq0B0Qtwkdy3gJUJ1DOZBfo0c5ezpSfqsHjTTDxTxSyMF5fl8Y1H4+UagZQ==}
     dependencies:
       '@esri/arcgis-html-sanitizer': 2.6.1
       '@esri/calcite-colors': 6.0.0
