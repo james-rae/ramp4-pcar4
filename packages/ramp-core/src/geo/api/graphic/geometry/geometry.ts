@@ -54,12 +54,12 @@ export class GeometryAPI {
     /**
      * Convert an ESRI map click event object to a generic RAMPish map click event object
      *
-     * @param {MapViewClickEvent | MapViewDoubleClickEvent} esriMapClick an event param from an esri 2D map click or double-click event
+     * @param {ViewClickEvent | ViewDoubleClickEvent} esriMapClick an event param from an esri 2D map click or double-click event
      * @param {String | Number} [id] optional id for the map point geometry on the result
      * @returns {MapClick} a generic bundle of data matching a subset of the incoming esri data
      */
     esriMapClickToRamp(
-        esriMapClick: __esri.MapViewClickEvent | __esri.MapViewDoubleClickEvent,
+        esriMapClick: __esri.ViewClickEvent | __esri.ViewDoubleClickEvent,
         id?: number | string
     ): MapClick {
         return {
@@ -74,10 +74,10 @@ export class GeometryAPI {
     /**
      * Convert an ESRI map click event object to a generic RAMPish map click event object
      *
-     * @param {MapViewPointerMoveEvent} esriMapMove an event param from an esri 2D map click or double-click event
+     * @param {ViewPointerMoveEvent} esriMapMove an event param from an esri 2D map click or double-click event
      * @returns {MapMove} a generic bundle of data matching a subset of the incoming esri data
      */
-    esriMapMouseToRamp(esriMapMove: __esri.MapViewPointerMoveEvent): MapMove {
+    esriMapMouseToRamp(esriMapMove: __esri.ViewPointerMoveEvent): MapMove {
         return {
             screenX: esriMapMove.x,
             screenY: esriMapMove.y,

@@ -41,9 +41,9 @@ export default class NortharrowV extends Vue {
             this.arrow = `<img width='25' src='${this.arrowIcon}'>`;
         }
         // don't think this condition should be needed but sometimes errors at startup without it
-        if (this.$iApi.geo.map.esriView?.ready) {
+        this.$iApi.geo.map.viewPromise.then(() => {
             this.updateNortharrow(this.$iApi.geo.map.getExtent());
-        }
+        });
         this.$iApi.event.on(
             GlobalEvents.MAP_EXTENTCHANGE,
             debounce(300, this.updateNortharrow)

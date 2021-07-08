@@ -40,43 +40,7 @@ let config = {
                 },
                 layerEntries: [
                     {
-                        id: 'ne:ne'
-                    }
-                ],
-                featureInfoMimeType: 'text/plain'
-            },
-            {
-                id: 'RailwayNetwork',
-                layerType: 'ogcWms',
-                url: 'http://maps.geogratis.gc.ca/wms/railway_en',
-                state: {
-                    visibility: true
-                },
-                layerEntries: [
-                    { id: 'railway' },
-                    { id: 'railway.structure.line' },
-                    { id: 'railway.structure.point' },
-                    { id: 'railway.track' },
-                    { id: 'railway.ferry' },
-                    { id: 'railway.subdivision' },
-                    { id: 'railway.station' },
-                    { id: 'railway.marker_post' },
-                    { id: 'railway.crossing' }
-                ],
-                featureInfoMimeType: 'text/html'
-            },
-            {
-                id: 'GeoMet',
-                layerType: 'ogcWms',
-                url:
-                    'http://geo.weather.gc.ca/geomet/?lang=E&service=WMS&request=GetCapabilities',
-                state: {
-                    visibility: true,
-                    opacity: 0.5
-                },
-                layerEntries: [
-                    {
-                        id: 'GDPS.ETA_NT'
+                        id: 'ne:NE1_HR_LC_SR_W_DR'
                     }
                 ],
                 featureInfoMimeType: 'text/plain'
@@ -88,16 +52,8 @@ let config = {
                 root: {
                     children: [
                         {
-                            layerId: 'RailwayNetwork',
-                            name: 'Railways'
-                        },
-                        {
                             layerId: 'ahocevar',
                             name: 'ahocevar'
-                        },
-                        {
-                            layerId: 'GeoMet',
-                            name: 'Cloud Coverage'
                         }
                     ]
                 }

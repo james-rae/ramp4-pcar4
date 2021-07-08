@@ -20,6 +20,7 @@ declare const rInstance: any;
 // variable and the fixture can add itself to it after the instance is instantiated;
 // this method is more cumbersome since it requires watching a global variable
 
+/*
 const handle = setInterval(() => {
     if (!rInstance) {
         return;
@@ -29,3 +30,5 @@ const handle = setInterval(() => {
 
     clearInterval(handle);
 }, 1000);
+
+*/

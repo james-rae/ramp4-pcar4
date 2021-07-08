@@ -99,7 +99,9 @@ export class MapAPI extends CommonMapAPI {
             spatialReference: this.$iApi.geo.utils.geom._convSrToEsri(
                 this._rampSR
             ), // internal, so we will sneak an internal call
-            extent: config.extent,
+            extent: this.$iApi.geo.utils.geom.geomRampToEsri(
+                Extent.fromConfig('from_config_ext', config.extent)
+            ),
             navigation: {
                 browserTouchPanEnabled: false
             }
@@ -189,13 +191,15 @@ export class MapAPI extends CommonMapAPI {
             e.preventDefault();
         });
 
-        this._viewPromise.resolveMe();
+        this.esriView.when(() => {
+            this._viewPromise.resolveMe();
 
-        // emit basemap changed event
-        this.$iApi.event.emit(
-            GlobalEvents.MAP_BASEMAPCHANGE,
-            config.initialBasemapId
-        );
+            // emit basemap changed event
+            this.$iApi.event.emit(
+                GlobalEvents.MAP_BASEMAPCHANGE,
+                config.initialBasemapId
+            );
+        });
     }
 
     /**
@@ -234,6 +238,11 @@ export class MapAPI extends CommonMapAPI {
         }
         // await layer.isReadyForMap();
         if (layer.esriLayer) {
+            console.log(
+                'About to add layer, this is map view status',
+                this.esriView?.ready,
+                layer.id
+            );
             this.esriMap.add(layer.esriLayer);
         } else {
             // TODO maybe we should call layer.initiate() and block? Could be a nice shortcut. But also might have unintended effects.

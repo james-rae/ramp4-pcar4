@@ -10,7 +10,7 @@ import {
     GetGraphicResult,
     GetGraphicServiceDetails
 } from '@/geo/api';
-import { EsriGeometryJsonUtils, EsriRequest } from '@/geo/esri';
+import { EsriGeometryFromJson, EsriRequest } from '@/geo/esri';
 import to from 'await-to-js';
 
 // NOTE has an esri type, which is bad, but this interface lives within the geo section so will permit it.
@@ -243,9 +243,7 @@ export class AttributeAPI extends APIScope {
                 // server result omits spatial reference
                 feat.geometry.spatialReference =
                     serviceResult.data.spatialReference;
-                const localEsriGeom = EsriGeometryJsonUtils.fromJSON(
-                    feat.geometry
-                );
+                const localEsriGeom = EsriGeometryFromJson(feat.geometry);
                 result.geometry = this.$iApi.geo.utils.geom.geomEsriToRamp(
                     localEsriGeom
                 );

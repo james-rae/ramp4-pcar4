@@ -163,7 +163,12 @@ export default class EsriMapV extends Vue {
             mapViewElement as HTMLDivElement
         );
         this.map = this.$iApi.geo.map;
-        this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
+        this.map.viewPromise.then(() => {
+            this.$iApi.event.emit(GlobalEvents.MAP_CREATED, this.$iApi.geo.map);
+            // TODO see if we still need this. map config should trigger the array watcher due to the store.
+            //      possibly layer config is processed before map config is done creating map?
+            this.onLayerConfigArrayChange(this.layerConfigs, []);
+        });
 
         // Hide hovertip on map creation
         //@ts-ignore
@@ -174,9 +179,6 @@ export default class EsriMapV extends Vue {
             mapViewElement._tippy
         );
 
-        // TODO see if we still need this. map config should trigger the array watcher due to the store.
-        //      possibly layer config is processed before map config is done creating map?
-        this.onLayerConfigArrayChange(this.layerConfigs, []);
     }
 }
 </script>
