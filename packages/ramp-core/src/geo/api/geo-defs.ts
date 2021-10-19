@@ -135,7 +135,9 @@ export enum LayerType {
     WMS = 'ogcWms',
     WFS = 'ogcWfs', // TODO proposing this should not be a part of this enum. WFS = Feature
 
-    UNKNOWN = 'unknown'
+    UNKNOWN = 'unknown',
+
+    SUBLAYER = 'sublayer' // TODO[Layer-Refactor]: general purpose sublayer layer type - is this okay?
 }
 
 // Format indicates what form the spatial data is encoded in.

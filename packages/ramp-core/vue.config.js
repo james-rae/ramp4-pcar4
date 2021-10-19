@@ -46,6 +46,15 @@ module.exports = {
                 minSize: 300000
             },
             minimize: false // to build an unminified production build, uncomment the following
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.mjs$/,
+                    include: /node_modules/,
+                    type: 'javascript/auto'
+                }
+            ]
         }
     },
     chainWebpack: config => {
