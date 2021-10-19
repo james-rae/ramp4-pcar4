@@ -14,28 +14,24 @@ export class CommonFC {
     uid: string;
     scaleSet: ScaleSet;
     supportsFeatures: boolean;
-
     // TODO old ramp stored this in same structure as arcgis server i.e. legend.layer[idx].legend[]
     //      not really seeing a reason to keep the outer structure. if we find we need it, can change back or to something better
     legend: Array<LegendSymbology>;
-
     constructor(parent: CommonLayer, layerIdx: number = 0) {
         this.parentLayer = parent;
         this.layerIdx = layerIdx;
-        this.uid = this.parentLayer.bestUid(layerIdx);
+        this.uid = '';
         this.name = '';
         this.scaleSet = new ScaleSet();
         this.supportsFeatures = false; // default state. featurish layers should set to true when the load
         this.legend = [];
         this.dataFormat = DataFormat.UNKNOWN;
     }
-
     protected noLayerErr(): void {
         console.error(
             'Attempted to manipulate the layer before it was generated'
         );
     }
-
     /**
      * Returns the visibility of the feature class.
      *
@@ -51,7 +47,6 @@ export class CommonFC {
             return false; // default to chill things.
         }
     }
-
     /**
      * Applies visibility to feature class.
      *
@@ -66,7 +61,6 @@ export class CommonFC {
             this.noLayerErr();
         }
     }
-
     /**
      * Returns the opacity of the feature class.
      *
@@ -82,7 +76,6 @@ export class CommonFC {
             return 1; // default to chill things.
         }
     }
-
     /**
      * Applies opacity to feature class.
      *
