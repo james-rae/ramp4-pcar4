@@ -149,11 +149,13 @@ export class LegendEntry extends LegendItem {
             this._isDefault = legendEntry.isDefault;
 
             // find matching BaseLayer in layer store to the layerId in config
+            this._layerIndex = legendEntry.entryIndex;
             this._layer = legendEntry.layers.find(
                 (layer: LayerInstance) => layer.id === this._id
             );
-            this._layerIndex = legendEntry.entryIndex;
-
+            // if (this._layer?.supportsSublayers) {
+            //     this._layer = this._layer.getSublayer(legendEntry.entryIndex);
+            // }
             this._isLoaded =
                 this._layer !== undefined ? this._layer.isValidState() : true;
 
@@ -178,10 +180,7 @@ export class LegendEntry extends LegendItem {
 
         // obtain uid and layer tree structure
         this._layerTree = this._layer?.getLayerTree();
-
-        this._layerUID =
-            this._layerTree?.findChildByIdx(this._layerIndex!)?.uid ||
-            this._layer?.uid;
+        this._layerUID = this._layer?.uid;
     }
 
     /**
@@ -216,9 +215,14 @@ export class LegendEntry extends LegendItem {
         return this._layerUID || this._layer?.uid;
     }
 
+    /** Returns the entry index of the layer */
+    get entryIndex(): number | undefined {
+        return this._layerIndex;
+    }
+
     /** Returns visibility of layer. */
     get visibility(): boolean | undefined {
-        return this._layer?.getVisibility(this.layerUID);
+        return this._layer?.getVisibility();
     }
 
     /** Returns BaseLayer associated with legend entry. */
@@ -299,8 +303,8 @@ export class LegendEntry extends LegendItem {
                 return;
             }
             visibility !== undefined
-                ? this._layer?.setVisibility(visibility, this.layerUID)
-                : this._layer?.setVisibility(!this.visibility, this.layerUID);
+                ? this._layer?.setVisibility(visibility)
+                : this._layer?.setVisibility(!this.visibility);
 
             // Check if some of the child symbols have their definition visibility on
             const noDefinitionsVisible: boolean = !this._layer
@@ -331,7 +335,7 @@ export class LegendEntry extends LegendItem {
     /**
      * Used by the placeholder component to set the legend entry to a loaded state
      */
-    reloadEntry(layer: LayerInstance) {
+    setEntry(layer: LayerInstance) {
         this._layer = layer;
         this._type = LegendTypes.Entry;
     }
@@ -389,6 +393,10 @@ export class LegendGroup extends LegendItem {
                 ) {
                     this._children.push(new LegendGroup(entry, this));
                 } else {
+                    // if the entry is a sublayer, set the entry id to the sublayers id
+                    if (entry.entryIndex !== undefined) {
+                        entry.layerId = `${entry.layerId}-${entry.entryIndex}`;
+                    }
                     this._children.push(new LegendEntry(entry, this));
                 }
             });

@@ -377,11 +377,27 @@ export class LayerInstance extends APIScope {
 
     supportsIdentify: boolean;
 
+    supportsFeatures: boolean;
+
+    supportsSublayers: boolean;
+
     state: LayerState;
+
+    // TODO[Layer-Refactor]: should this be here?
+    layerIdx: number; // server layer index - not used anywhere but can be useful
 
     isFile: boolean;
 
+    isSublayer: boolean;
+
+    // TODO[Layer-Refactor]: is this efficient?
+    isRemoved: boolean; // used to mark sublayers for removal
+
     initialized: boolean;
+
+    protected _parentLayer: LayerInstance | undefined;
+
+    protected _sublayers: Array<LayerInstance>;
 
     /**
      * Creates an instance of LayerInstance.
@@ -395,13 +411,20 @@ export class LayerInstance extends APIScope {
         this.id = ''; // take from config here?
         this.uid = ''; // shutting up typescript. will get set somewhere else. // TODO verify setting, move here if that is smarter.
         this.supportsIdentify = false; // this is updated by subclasses as they will know the real deal.
+        this.supportsFeatures = false; // moved from common layer
+        this.supportsSublayers = false; // by default layers do not support sublayers
+        this.isRemoved = false;
         this.state = LayerState.NEW;
         this.config = config;
         this.isFile = false;
+        this.isSublayer = false;
         this.initialized = false;
+        this._sublayers = [];
+        this.layerIdx = 0;
     }
 
     esriLayer: __esri.Layer | undefined;
+    esriSubLayer: __esri.Sublayer | undefined; // used only by sublayers
     esriView: __esri.LayerView | undefined;
 
     /**
@@ -444,6 +467,26 @@ export class LayerInstance extends APIScope {
     }
 
     /**
+     * @returns {LayerInstance | undefined} the parent layer of this layer
+     */
+    getParentLayer(): LayerInstance | undefined {
+        if (!this.isSublayer) {
+            throw new Error(
+                'Attempted to get parent layer of a non-sublayer object'
+            );
+        } else {
+            return this._parentLayer;
+        }
+    }
+
+    /**
+     * @returns {Array<LayerInstance>} the sublayers of this layer
+     */
+    getSublayers(): Array<LayerInstance> {
+        return this._sublayers;
+    }
+
+    /**
      * Provides a tree structure describing the layer and any sublayers,
      * including uid values. Should only be called after isLayerLoaded resolves.
      *
@@ -473,10 +516,9 @@ export class LayerInstance extends APIScope {
      * Returns the name of the layer/sublayer.
      *
      * @function getName
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name for. Uses first/only if omitted.
      * @returns {String} name of the layer/sublayer
      */
-    getName(layerIdx: number | string | undefined = undefined): string {
+    getName(): string {
         return 'error';
     }
 
@@ -484,56 +526,60 @@ export class LayerInstance extends APIScope {
      * Returns the visibility of the layer/sublayer.
      *
      * @function getVisibility
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      * @returns {Boolean} visibility of the layer/sublayer
      */
-    getVisibility(layerIdx: number | string | undefined = undefined): boolean {
+    getVisibility(): boolean {
         return false;
     }
 
     /**
-     * Applies visibility to feature class.
+     * Applies visibility to layer.
      *
      * @function setVisibility
      * @param {Boolean} value the new visibility setting
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
      */
-    setVisibility(
-        value: boolean,
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    setVisibility(value: boolean): void {}
+
+    /**
+     * Checks the visibility of the sublayers
+     * If all sublayers are invisible, then this layer is also set to invisible
+     *
+     * @function setVisibility
+     * @param {Boolean} value the new visibility setting
+     */
+    checkVisibility(): void {
+        if (this.supportsSublayers) {
+            this.setVisibility(
+                this._sublayers.some(sublayer => sublayer.getVisibility())
+            );
+        }
+    }
 
     /**
      * Returns the opacity of the layer/sublayer.
      *
      * @function getOpacity
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
      * @returns {Boolean} opacity of the layer/sublayer
      */
-    getOpacity(layerIdx: number | string | undefined = undefined): number {
+    getOpacity(): number {
         return 0;
     }
 
     /**
-     * Applies opacity to feature class.
+     * Applies opacity to layer.
      *
      * @function setOpacity
      * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
      */
-    setOpacity(
-        value: number,
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    setOpacity(value: number): void {}
 
     /**
      * Returns the scale set (min and max visible scale) of the layer/sublayer.
      *
      * @function getScaleSet
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the scale set for. Uses first/only if omitted.
      * @returns {ScaleSet} scale set of the layer/sublayer
      */
-    getScaleSet(layerIdx: number | string | undefined = undefined): ScaleSet {
+    getScaleSet(): ScaleSet {
         return new ScaleSet();
     }
 
@@ -541,45 +587,33 @@ export class LayerInstance extends APIScope {
      * Indicates if the layer/sublayer is not in a visible scale range.
      *
      * @function isOffscale
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to check offscale status for. Uses first/only if omitted.
      * @param {Integer} [testScale] optional scale to test against. if not provided, current map scale is used.
      * @returns {Boolean} true if the layer/sublayer is outside of a visible scale range
      */
-    isOffscale(
-        layerIdx: number | string | undefined = undefined,
-        testScale: number | undefined = undefined
-    ): boolean {
+    isOffscale(testScale: number | undefined = undefined): boolean {
         return false;
     }
 
     /**
      * Cause the map to zoom to a scale level where the layer is visible.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to check offscale status for. Uses first/only if omitted.
      * @returns {Promise} resolves when map has finished zooming
      */
-    zoomToVisibleScale(
-        layerIdx: number | string | undefined = undefined
-    ): Promise<void> {
+    zoomToVisibleScale(): Promise<void> {
         return Promise.resolve();
     }
 
-    /**
-     * Indicates if a feature class supports features (false would be an image/raster/etc)
-     *
-     * @function supportsFeatures
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get visibility for. Uses first/only if omitted.
-     * @returns {Boolean} if the layer/sublayer supports features
-     */
-    supportsFeatures(
-        layerIdx: number | string | undefined = undefined
-    ): boolean {
-        return false;
-    }
+    // /**
+    //  * Indicates if a feature class supports features (false would be an image/raster/etc)
+    //  *
+    //  * @function supportsFeatures
+    //  * @returns {Boolean} if the layer/sublayer supports features
+    //  */
+    // supportsFeatures(): boolean {
+    //     return false;
+    // }
 
-    getLegend(
-        layerIdx: number | string | undefined = undefined
-    ): Array<LegendSymbology> {
+    getLegend(): Array<LegendSymbology> {
         return [];
     }
 
@@ -605,13 +639,11 @@ export class LayerInstance extends APIScope {
      *
      * @param {Integer} objectId the object id of the graphic to find
      * @param {Object} options options object for the request, see above
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to find the graphic in. Uses first/only if omitted.
      * @returns {Promise} resolves with a fake graphic containing the requested information
      */
     getGraphic(
         objectId: number,
-        options: GetGraphicParams,
-        layerIdx: number | string | undefined = undefined
+        options: GetGraphicParams
     ): Promise<GetGraphicResult> {
         return Promise.resolve({});
     }
@@ -620,13 +652,9 @@ export class LayerInstance extends APIScope {
      * Gets the icon for a specific feature, as an SVG string.
      *
      * @param {Integer} objectId the object id of the feature to find
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to find the icon in. Uses first/only if omitted.
      * @returns {Promise} resolves with an svg string encoding of the icon
      */
-    getIcon(
-        objectId: number,
-        layerIdx: number | string | undefined = undefined
-    ): Promise<string> {
+    getIcon(objectId: number): Promise<string> {
         return Promise.resolve('');
     }
 
@@ -634,12 +662,9 @@ export class LayerInstance extends APIScope {
      * Invokes the process to get the full set of attribute values for the given sublayer.
      * Repeat calls will re-use the downloaded values unless the values have been explicitly cleared.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of attribute values
      */
-    getAttributes(
-        layerIdx: number | string | undefined = undefined
-    ): Promise<AttributeSet> {
+    getAttributes(): Promise<AttributeSet> {
         return Promise.resolve({
             features: [],
             oidIndex: {}
@@ -649,62 +674,50 @@ export class LayerInstance extends APIScope {
     /**
      * Returns an array of field definitions about the given sublayer's fields. Raster layers will have empty arrays.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get fields for. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getFields(
-        layerIdx: number | string | undefined = undefined
-    ): Array<FieldDefinition> {
+    getFields(): Array<FieldDefinition> {
         return [];
     }
 
     /**
      * Returns the geometry type of the given sublayer.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the geometry type of. Uses first/only if omitted.
      * @returns {Array} list of field definitions
      */
-    getGeomType(layerIdx: number | string | undefined = undefined): string {
+    getGeomType(): string {
         return 'error';
     }
 
     /**
      * Returns the name field of the given sublayer.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name field of. Uses first/only if omitted.
      * @returns {string} name field
      */
-    getNameField(layerIdx: number | string | undefined = undefined): string {
+    getNameField(): string {
         return 'error';
     }
 
     /**
      * Returns the OID field of the given sublayer.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the OID field of. Uses first/only if omitted.
      * @returns {string} OID field
      */
-    getOidField(layerIdx: number | string | undefined = undefined): string {
+    getOidField(): string {
         return 'error';
     }
 
     /**
      * Requests that an attribute load request be aborted. Useful when encountering a massive dataset or a runaway process.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to stop loading attributes for. Uses first/only if omitted.
      */
-    abortAttributeLoad(
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    abortAttributeLoad(): void {}
 
     /**
      * Requests that any downloaded attribute sets be removed from memory. The next getAttributes request will pull from the server again.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to detroy attributes for. Uses first/only if omitted.
      */
-    destroyAttributes(
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    destroyAttributes(): void {}
 
     // formerly known as getFormattedAttributes
     /**
@@ -712,12 +725,9 @@ export class LayerInstance extends APIScope {
      * formatted in a tabular format. Additional data properties are also included.
      * Repeat calls will re-use the downloaded values unless the values have been explicitly cleared.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get tabular attributes for. Uses first/only if omitted.
      * @returns {Promise} resolves with set of tabular attribute values
      */
-    getTabularAttributes(
-        layerIdx: number | string | undefined = undefined
-    ): Promise<TabularAttributeSet> {
+    getTabularAttributes(): Promise<TabularAttributeSet> {
         return Promise.resolve({
             columns: [],
             rows: [],
@@ -730,10 +740,9 @@ export class LayerInstance extends APIScope {
     /**
      * Get the feature count for the given sublayer.
      *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the feature count for. Uses first/only if omitted.
      * @returns {Integer} number of features in the sublayer
      */
-    getFeatureCount(layerIdx: number | string | undefined = undefined): number {
+    getFeatureCount(): number {
         return -1;
     }
 
@@ -741,13 +750,9 @@ export class LayerInstance extends APIScope {
      * Returns the value of a named SQL filter for a given sublayer.
      *
      * @param {String} filterKey the filter key / named filter to view
-     * @param {Integer | String} [layerIdx] targets a layer index or uid that has the filter. Uses first/only if omitted.
      * @returns {String} the value of the where clause for the filter. Empty string if not defined.
      */
-    getSqlFilter(
-        filterKey: string,
-        layerIdx: number | string | undefined = undefined
-    ): string {
+    getSqlFilter(filterKey: string): string {
         return '';
     }
 
@@ -757,38 +762,27 @@ export class LayerInstance extends APIScope {
      *
      * @param {String} filterKey the filter key / named filter to apply the SQL to
      * @param {String} whereClause the WHERE clause of the filter
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to apply the filter to. Uses first/only if omitted.
      */
-    setSqlFilter(
-        filterKey: string,
-        whereClause: string,
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    setSqlFilter(filterKey: string, whereClause: string): void {}
 
     /**
      * Applies the current filter settings to the physical map layer.
      *
      * @function applySqlFilter
      * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to update. Uses first/only if omitted.
      */
-    applySqlFilter(
-        exclusions: Array<string> = [],
-        layerIdx: number | string | undefined = undefined
-    ): void {}
+    applySqlFilter(exclusions: Array<string> = []): void {}
 
     /**
      * Gets array of object ids that currently pass any filters for the given sublayer
      *
      * @param {Array} [exclusions] list of any filters keys to exclude from the result. omission includes all filters
      * @param {Extent} [extent] if provided, the result list will only include features intersecting the extent
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to inspect. Uses first/only if omitted.
      * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
      */
     getFilterOIDs(
         exclusions: Array<string> = [],
-        extent: Extent | undefined = undefined,
-        layerIdx: number | string | undefined = undefined
+        extent: Extent | undefined = undefined
     ): Promise<Array<number> | undefined> {
         return Promise.resolve(undefined);
     }
@@ -854,4 +848,103 @@ export class LayerInstance extends APIScope {
         return this.$vApp.$store.get('config/getFixtureConfig', this.id);
     }
     */
+
+    /**
+     * Finds an FC index corresponding to the given uid.
+     * -1 indicates the uid targets the root layer
+     *
+     * @private
+     * @param {string} uid the uid we want the index for
+     * @returns {number} the integer index of the uid
+     */
+    private uidToIdx(uid: string): number {
+        if (uid === this.uid) {
+            return -1;
+        } else {
+            const sublayerIdx: number = this._sublayers.findIndex(
+                sublayer => sublayer?.uid === uid
+            );
+            if (sublayerIdx === -1) {
+                // no match
+                throw new Error(
+                    `Attempt to access non-existing unique id [layerid ${this.id}, uid ${uid}]`
+                );
+            } else {
+                return sublayerIdx;
+            }
+        }
+    }
+
+    /**
+     * Attempts to get an FC based on the index or uid provided.
+     * Will return undefined if a valid root request is made.
+     * A missing layerIdx will be interpreted as root request if validRoot is true,
+     * otherwise it will interpret as a request for the first valid FC child.
+     * An index of -1 will be interpreted as a root request.
+     * Will throw error if specific parameters cannot be matched to items in the layer
+     *
+     * @private
+     * @param {number | string} layerIdx the uid or numeric index of the item we are interested in
+     * @param {boolean} [validRoot=false] indicates if asking for the layer root is a valid request
+     * @returns {BaseFC} the matching feature class object, or undefined if the root was requested
+     */
+    getSublayer(
+        layerIdx: number | string | undefined,
+        validRoot: boolean = false
+    ): LayerInstance | undefined {
+        // highscool cs IF party
+
+        // check if this layer supports sublayers
+        if (!this.supportsSublayers) {
+            console.warn(
+                `Attempted to call getSublayer on a layer (layer id: ${this.id}) that does not support FCs`
+            );
+            return undefined;
+        }
+
+        // default request
+        if (typeof layerIdx === 'undefined') {
+            if (validRoot) {
+                // requesting the root layer
+                return this;
+            } else {
+                // find first sublayer (there could be indexes of nothing, thus the find)
+                return this._sublayers.find(
+                    (sublayer: LayerInstance) => sublayer
+                );
+            }
+        }
+
+        let workingIdx: number;
+
+        if (typeof layerIdx === 'string') {
+            // uid request
+            workingIdx = this.uidToIdx(layerIdx);
+        } else {
+            // index request
+            workingIdx = layerIdx;
+        }
+
+        if (workingIdx === -1) {
+            if (validRoot) {
+                // requesting the root layer
+                return this;
+            } else {
+                // asked for the root when not valid
+                // TODO would it be kinder/friendlier to return the first child sublayer?
+                // throw new Error(`Attempt to access a function on layer root that only applies to an index of the layer [layerid ${this.esriLayer.id}]`);
+                // TODO going with return first for the time being, revisit later
+                return this._sublayers.find(
+                    (sublayer: LayerInstance) => sublayer
+                );
+            }
+        } else if (typeof this._sublayers[workingIdx] === 'undefined') {
+            // passed a non-existing index/uid
+            throw new Error(
+                `Attempt to access non-existing layer index [layerid ${this.id}, lookup value ${layerIdx}]`
+            );
+        } else {
+            return this._sublayers[workingIdx];
+        }
+    }
 }

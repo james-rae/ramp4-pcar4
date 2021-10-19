@@ -121,8 +121,8 @@ export default defineComponent({
     data() {
         return {
             layerName: '',
-            visibilityModel: this.layer.getVisibility(this.uid),
-            opacityModel: this.layer.getOpacity(this.uid) * 100,
+            visibilityModel: this.layer.getVisibility(),
+            opacityModel: this.layer.getOpacity() * 100,
             snapshotToggle: false,
             handlers: [] as Array<string>
         };
@@ -130,9 +130,9 @@ export default defineComponent({
     mounted() {
         // Listen for a layer load event. Some of these values may change when the layer fully loads.
         this.layer.isLayerLoaded().then(() => {
-            this.visibilityModel = this.layer.getVisibility(this.uid);
-            this.opacityModel = this.layer.getOpacity(this.uid) * 100;
-            this.layerName = this.layer.getName(this.uid);
+            this.visibilityModel = this.layer.getVisibility();
+            this.opacityModel = this.layer.getOpacity() * 100;
+            this.layerName = this.layer.getName();
         });
 
         this.handlers.push(
@@ -151,25 +151,9 @@ export default defineComponent({
                 GlobalEvents.LAYER_RELOAD_END,
                 (reloadedLayer: LayerInstance) => {
                     reloadedLayer.isLayerLoaded().then(() => {
-                        if (reloadedLayer.layerType === LayerType.MAPIMAGE) {
-                            // Check if this.uid is a child of reloadedLayer
-                            if (
-                                reloadedLayer
-                                    .getLayerTree()
-                                    .findChildByUid(this.uid)
-                            ) {
-                                this.visibilityModel = this.layer.getVisibility(
-                                    this.uid
-                                );
-                                this.opacityModel =
-                                    this.layer.getOpacity(this.uid) * 100;
-                            }
-                        } else if (this.uid === reloadedLayer.uid) {
-                            this.visibilityModel = this.layer.getVisibility(
-                                this.uid
-                            );
-                            this.opacityModel =
-                                this.layer.getOpacity(this.uid) * 100;
+                        if (this.uid === reloadedLayer.uid) {
+                            this.visibilityModel = this.layer.getVisibility();
+                            this.opacityModel = this.layer.getOpacity() * 100;
                         }
                     });
                 }
@@ -190,7 +174,7 @@ export default defineComponent({
         // Update the layer opacity.
         updateOpacity(val: number) {
             this.opacityModel = val;
-            this.layer.setOpacity(this.opacityModel / 100, this.uid);
+            this.layer.setOpacity(this.opacityModel / 100);
         },
 
         // Toggle snapshot mode for the layer.
