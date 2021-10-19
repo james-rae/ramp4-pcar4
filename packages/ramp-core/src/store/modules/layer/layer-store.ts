@@ -34,15 +34,32 @@ const getters = {
     getLayerByUid:
         (state: LayerState) =>
         (uid: string): LayerInstance | undefined => {
-            return state.layers.find(
-                (layer: LayerInstance) =>
-                    layer.getLayerTree().findChildByUid(uid) !== undefined
-            );
+            // bfs
+            let queue = [...state.layers];
+            while (queue.length > 0) {
+                const layer = queue.shift();
+                if (layer?.uid === uid) {
+                    return layer;
+                }
+                if (layer) {
+                    queue.push(...layer.getSublayers());
+                }
+            }
         },
     getLayerById:
         (state: LayerState) =>
         (id: string): LayerInstance | undefined => {
-            return state.layers.find((layer: LayerInstance) => layer.id === id);
+            // bfs
+            let queue = [...state.layers];
+            while (queue.length > 0) {
+                const layer = queue.shift();
+                if (layer?.id === id) {
+                    return layer;
+                }
+                if (layer) {
+                    queue.push(...layer.getSublayers());
+                }
+            }
         }
 };
 

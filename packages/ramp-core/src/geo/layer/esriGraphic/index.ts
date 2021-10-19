@@ -54,11 +54,11 @@ class GraphicLayer extends CommonGraphicLayer {
         //      would probably want to create them here.
 
         // feature has only one layer
-        const normieFC = new CommonFC(this, 0);
-        this.fcs[0] = normieFC;
+        // const normieFC = new CommonFC(this, 0);
+        // this.fcs[0] = normieFC;
 
-        this.layerTree.children.push(new TreeNode(0, normieFC.uid, this.name)); // TODO verify name is populated at this point
-        normieFC.name = this.name; // feature layer is flat, so the FC and layer share their name
+        this.layerTree.children.push(new TreeNode(0, this.uid, this.name)); // TODO verify name is populated at this point
+        // normieFC.name = this.name; // feature layer is flat, so the FC and layer share their name
 
         // TODO see if we need to re-synch the parent name
         // this.layerTree.name = this.name;
