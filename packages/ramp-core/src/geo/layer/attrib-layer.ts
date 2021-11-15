@@ -190,9 +190,9 @@ export class AttribLayer extends CommonLayer {
             const renderer =
                 options && options.customRenderer && options.customRenderer.type
                     ? options.customRenderer
-                    : sData.drawingInfo.renderer;
+                    : EsriRendererFromJson(sData.drawingInfo.renderer);
             this.renderer = this.$iApi.geo.utils.symbology.makeRenderer(
-                EsriRendererFromJson(renderer),
+                renderer,
                 this.fields
             );
 
