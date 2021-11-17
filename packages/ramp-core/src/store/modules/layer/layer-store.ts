@@ -42,7 +42,7 @@ const getters = {
                     return layer;
                 }
                 if (layer) {
-                    queue.push(...layer.getSublayers());
+                    queue.push(...layer.sublayers);
                 }
             }
         },
@@ -57,7 +57,7 @@ const getters = {
                     return layer;
                 }
                 if (layer) {
-                    queue.push(...layer.getSublayers());
+                    queue.push(...layer.sublayers);
                 }
             }
         }

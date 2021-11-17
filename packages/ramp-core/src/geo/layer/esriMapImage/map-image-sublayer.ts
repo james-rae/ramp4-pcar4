@@ -20,11 +20,11 @@ export class MapImageSublayer extends AttribLayer {
 
         // TODO: below code needs to be added to every sublayer class we make - could we make a general sublayer interface?
         // maybe use mixins for multiple inheritance (extend from Attrib and Sublayer)? https://codeburst.io/multiple-inheritance-with-typescript-mixins-d92d01198907
-        this._parentLayer = parent;
-        this.layerIdx = layerIdx;
+        this.isSublayer = true;
+        this.layerIndex = layerIdx;
+        this.parentLayer = parent;
         this.id = `${parent.id}-${layerIdx}`;
 
-        this.isSublayer = true;
         this.dataFormat = DataFormat.ESRI_FEATURE;
         this.tooltipField = '';
 
@@ -55,7 +55,7 @@ export class MapImageSublayer extends AttribLayer {
         // TODO[Layer-Refactor] not found check? - unlikely to happen but how do we handle that?
         this.esriSubLayer = markRaw(
             parent.esriLayer.allSublayers.find(s => {
-                return s.id === this.layerIdx;
+                return s.id === this.layerIndex;
             })
         );
     }
@@ -87,12 +87,12 @@ export class MapImageSublayer extends AttribLayer {
     }
 
     /**
-     * Returns the visibility of the feature class.
+     * Returns the visibility of the sublayer.
      *
      * @function getVisibility
-     * @returns {Boolean} visibility of the feature class
+     * @returns {Boolean} visibility of the sublayer
      */
-    getVisibility(): boolean {
+    get visibility(): boolean {
         if (!this._parentLayer?.esriLayer || !this.esriSubLayer) {
             this.noLayerErr();
             return false;
@@ -102,12 +102,12 @@ export class MapImageSublayer extends AttribLayer {
     }
 
     /**
-     * Applies visibility to feature class.
+     * Applies visibility to sublayer.
      *
      * @function setVisibility
      * @param {Boolean} value the new visibility setting
      */
-    setVisibility(value: boolean): void {
+    set visibility(value: boolean) {
         if (!this._parentLayer?.esriLayer || !this.esriSubLayer) {
             this.noLayerErr();
             return;
@@ -116,12 +116,12 @@ export class MapImageSublayer extends AttribLayer {
     }
 
     /**
-     * Returns the opacity of the feature class.
+     * Returns the opacity of the sublayer.
      *
      * @function getOpacity
-     * @returns {Boolean} opacity of the feature class
+     * @returns {Boolean} opacity of the sublayer
      */
-    getOpacity(): number {
+    get opacity(): number {
         if (!this._parentLayer?.esriLayer || !this.esriSubLayer) {
             this.noLayerErr();
             return 0;
@@ -130,12 +130,12 @@ export class MapImageSublayer extends AttribLayer {
     }
 
     /**
-     * Applies opacity to feature class.
+     * Applies opacity to sublayer.
      *
      * @function setOpacity
      * @param {Boolean} value the new opacity setting
      */
-    setOpacity(value: number): void {
+    set opacity(value: number) {
         if (!this._parentLayer?.esriLayer || !this.esriSubLayer) {
             this.noLayerErr();
             return;

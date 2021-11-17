@@ -130,7 +130,7 @@ export default defineComponent({
             );
             if (!item) return;
 
-            return item.getName();
+            return item.name;
         }
     }
 });

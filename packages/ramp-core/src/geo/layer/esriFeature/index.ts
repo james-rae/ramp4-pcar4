@@ -187,8 +187,8 @@ class FeatureLayer extends AttribLayer {
 
         // early kickout check. not loaded/error; not visible; not queryable; off scale
         if (
-            !this.isValidState() ||
-            !this.getVisibility() ||
+            !this.isValidState ||
+            !this.visibility ||
             // !this.isQueryable() || // TODO implement when we have this flag created
             this.scaleSet.isOffScale(this.$iApi.geo.map.getScale()).offScale
         ) {

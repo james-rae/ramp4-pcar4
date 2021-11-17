@@ -321,19 +321,18 @@ export class MapAPI extends CommonMapAPI {
         }
         this.$iApi.$vApp.$store.dispatch(LegendStore.removeLayerEntry, uid);
         this.$iApi.event.emit(GlobalEvents.LAYER_REMOVE, sublayer);
-        layer.setVisibility(false); // make the sublayer invisible
+        layer.visibility = false; // make the sublayer invisible
         layer.isRemoved = true; // mark sublayer as removed
 
         // TODO[Layer-Refactor]: If this sublayer is the last removed layer, then remove the parent layer as well
         if (
-            layer
-                .getParentLayer()
-                ?.getSublayers()
-                .every((sub: LayerInstance) => sub.isRemoved)
+            layer.parentLayer?.sublayers.every(
+                (sub: LayerInstance) => sub.isRemoved
+            )
         ) {
             // all sublayers have been marked for removal
             // delete the parent
-            this.removeLayer(layer.getParentLayer()!);
+            this.removeLayer(layer.parentLayer!);
         }
     }
 

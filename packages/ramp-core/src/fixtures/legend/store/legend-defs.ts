@@ -157,7 +157,7 @@ export class LegendEntry extends LegendItem {
             //     this._layer = this._layer.getSublayer(legendEntry.entryIndex);
             // }
             this._isLoaded =
-                this._layer !== undefined ? this._layer.isValidState() : true;
+                this._layer !== undefined ? this._layer.isValidState : true;
 
             this._displaySymbology = false;
 
@@ -187,12 +187,12 @@ export class LegendEntry extends LegendItem {
      * Ensures visibility rules are followed if legend entry nested in legend group/set on initialization.
      */
     checkVisibilityRules(): void {
-        if (!this.visibility) {
+        if (!this.visibility || !this._layer) {
             return;
         }
         // if parent is turned off turn layer entry visiblity off
         if (this._parent !== undefined && !this._parent.visibility) {
-            this._layer?.setVisibility(false);
+            this._layer.visibility = false;
         } else if (this._parent?.type === LegendTypes.Set) {
             // toggle off visibility if entry is part of a visibility set with a set entry already toggled on
             const childVisible = this._parent.children.some(
@@ -200,7 +200,7 @@ export class LegendEntry extends LegendItem {
             );
 
             if (childVisible) {
-                this._layer?.setVisibility(false);
+                this._layer.visibility = false;
             }
         }
     }
@@ -222,7 +222,7 @@ export class LegendEntry extends LegendItem {
 
     /** Returns visibility of layer. */
     get visibility(): boolean | undefined {
-        return this._layer?.getVisibility();
+        return this._layer?.visibility;
     }
 
     /** Returns BaseLayer associated with legend entry. */
@@ -237,7 +237,7 @@ export class LegendEntry extends LegendItem {
 
     /** Returns if layer is done loading. */
     get isLoaded(): boolean {
-        return this._layer !== undefined ? this._layer.isValidState() : true;
+        return this._layer !== undefined ? this._layer.isValidState : true;
     }
 
     /** Returns true if entry is not from config. */
@@ -270,9 +270,9 @@ export class LegendEntry extends LegendItem {
      */
     setChildSymbologyVisibility(uid: string, value: boolean) {
         const filteredSymbology: Array<LegendSymbology> | undefined =
-            this._layer
-                ?.getLegend()
-                .filter((item: LegendSymbology) => item.uid === uid);
+            this._layer?.legend.filter(
+                (item: LegendSymbology) => item.uid === uid
+            );
 
         if (!filteredSymbology) {
             return;
@@ -280,7 +280,7 @@ export class LegendEntry extends LegendItem {
 
         if (filteredSymbology?.length === 0) {
             console.warn(
-                `Could not find child symbology in layer ${this._layer?.getName()} with uid: ${uid}`
+                `Could not find child symbology in layer ${this._layer?.name} with uid: ${uid}`
             );
             return;
         }
@@ -299,27 +299,27 @@ export class LegendEntry extends LegendItem {
     ): void {
         if (this._controls.includes(Controls.Visibility)) {
             // do nothing if visibility of entry is already equal to the argument value
-            if (this.visibility === visibility) {
+            if (this.visibility === visibility || !this.layer) {
                 return;
             }
             visibility !== undefined
-                ? this._layer?.setVisibility(visibility)
-                : this._layer?.setVisibility(!this.visibility);
+                ? (this._layer!.visibility = visibility)
+                : (this._layer!.visibility = !this.visibility);
 
             // Check if some of the child symbols have their definition visibility on
-            const noDefinitionsVisible: boolean = !this._layer
-                ?.getLegend()
-                .some((item: LegendSymbology) => item.lastVisbility);
+            const noDefinitionsVisible: boolean = !this._layer?.legend.some(
+                (item: LegendSymbology) => item.lastVisbility
+            );
 
             if (noDefinitionsVisible) {
                 // If there are no definitions visible and we toggled the parent layer on
                 // then we set all the children to visible
-                this._layer?.getLegend().forEach((item: LegendSymbology) => {
+                this._layer?.legend.forEach((item: LegendSymbology) => {
                     item.lastVisbility = true;
                 });
             }
 
-            this._layer?.getLegend().forEach((item: LegendSymbology) => {
+            this._layer?.legend.forEach((item: LegendSymbology) => {
                 item.visibility = this.visibility ? item.lastVisbility : false;
             });
 
@@ -330,6 +330,19 @@ export class LegendEntry extends LegendItem {
         }
 
         this._uid = RAMP.GEO.sharedUtils.generateUUID();
+    }
+
+    /**
+     * Set the layer's opacity
+     * Value must be within [0, 1]
+     *
+     * @param opacity the new layer opacity
+     */
+    setOpacity(opacity: number) {
+        if (!this._layer) {
+            return;
+        }
+        this._layer.opacity = opacity;
     }
 
     /**

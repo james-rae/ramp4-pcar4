@@ -121,8 +121,8 @@ export default defineComponent({
     data() {
         return {
             layerName: '',
-            visibilityModel: this.layer.getVisibility(),
-            opacityModel: this.layer.getOpacity() * 100,
+            visibilityModel: this.layer.visibility,
+            opacityModel: this.layer.opacity * 100,
             snapshotToggle: false,
             handlers: [] as Array<string>
         };
@@ -130,9 +130,9 @@ export default defineComponent({
     mounted() {
         // Listen for a layer load event. Some of these values may change when the layer fully loads.
         this.layer.isLayerLoaded().then(() => {
-            this.visibilityModel = this.layer.getVisibility();
-            this.opacityModel = this.layer.getOpacity() * 100;
-            this.layerName = this.layer.getName();
+            this.visibilityModel = this.layer.visibility;
+            this.opacityModel = this.layer.opacity * 100;
+            this.layerName = this.layer.name;
         });
 
         this.handlers.push(
@@ -152,8 +152,8 @@ export default defineComponent({
                 (reloadedLayer: LayerInstance) => {
                     reloadedLayer.isLayerLoaded().then(() => {
                         if (this.uid === reloadedLayer.uid) {
-                            this.visibilityModel = this.layer.getVisibility();
-                            this.opacityModel = this.layer.getOpacity() * 100;
+                            this.visibilityModel = this.layer.visibility;
+                            this.opacityModel = this.layer.opacity * 100;
                         }
                     });
                 }
@@ -173,8 +173,8 @@ export default defineComponent({
 
         // Update the layer opacity.
         updateOpacity(val: number) {
+            this.legendItem.setOpacity(this.opacityModel / 100);
             this.opacityModel = val;
-            this.layer.setOpacity(this.opacityModel / 100);
         },
 
         // Toggle snapshot mode for the layer.

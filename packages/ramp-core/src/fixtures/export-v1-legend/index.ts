@@ -54,7 +54,7 @@ class ExportV1LegendFixture
         // filter out loading/errored and invisible layers
         const layers = this.$vApp.$store
             .get<LayerInstance[]>(LayerStore.layers)!
-            .filter(layer => layer.isValidState() && layer.getVisibility());
+            .filter(layer => layer.isValidState && layer.visibility);
 
         // number of columns based on export width and min col width
         const columns = Math.min(
@@ -200,7 +200,7 @@ class ExportV1LegendFixture
         segmentWidth: number
     ): Promise<Segment>[] {
         return layers.map(async (layer: LayerInstance) => {
-            const title = new fabric.Textbox(layer.getName(), {
+            const title = new fabric.Textbox(layer.name, {
                 fontSize: 24,
                 fontFamily: DEFAULT_FONT,
                 width: segmentWidth
@@ -257,10 +257,10 @@ class ExportV1LegendFixture
                 };
             }
 
-            await Promise.all(currLayer.getLegend().map(lg => lg.drawPromise));
-            const symbologyStack = currLayer.getLegend();
+            await Promise.all(currLayer.legend.map(lg => lg.drawPromise));
+            const symbologyStack = currLayer.legend;
 
-            const title = new fabric.Textbox(currLayer.getName(), {
+            const title = new fabric.Textbox(currLayer.name, {
                 fontSize: 20,
                 fontFamily: DEFAULT_FONT,
                 width: segmentWidth
@@ -351,7 +351,7 @@ class ExportV1LegendFixture
      */
     private _getLayerTreeIds(rootLayer: LayerInstance): number[] {
         let ids: Array<number> = [];
-        let queue: Array<LayerInstance> = [...rootLayer.getSublayers()];
+        let queue: Array<LayerInstance> = [...rootLayer.sublayers];
 
         while (queue.length > 0) {
             const sublayer: LayerInstance = queue.shift()!;
@@ -359,8 +359,8 @@ class ExportV1LegendFixture
                 continue;
             }
 
-            sublayer.getVisibility() && ids.push(sublayer.layerIdx);
-            queue.push(...sublayer.getSublayers());
+            sublayer.visibility && ids.push(sublayer.layerIndex);
+            queue.push(...sublayer.sublayers);
         }
 
         return ids;

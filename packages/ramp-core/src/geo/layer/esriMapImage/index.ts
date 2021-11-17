@@ -111,7 +111,7 @@ class MapImageLayer extends AttribLayer {
         // function is done.
         this.isLayerLoaded().then(() => {
             if (this.origRampConfig && this.origRampConfig.state) {
-                this.setVisibility(!!this.origRampConfig.state.visibility);
+                this.visibility = !!this.origRampConfig.state.visibility;
             }
         });
 
@@ -318,14 +318,11 @@ class MapImageLayer extends AttribLayer {
                         this.$iApi.event.emit(
                             GlobalEvents.LAYER_VISIBILITYCHANGE,
                             {
-                                visibility:
-                                    this._sublayers[sid].getVisibility(),
+                                visibility: this._sublayers[sid].visibility,
                                 uid: this._sublayers[sid].uid
                             }
                         );
-                        this._sublayers[sid]
-                            .getParentLayer()
-                            ?.checkVisibility();
+                        this._sublayers[sid].parentLayer?.checkVisibility();
                     })
                 );
             }
@@ -348,7 +345,7 @@ class MapImageLayer extends AttribLayer {
         // process each leaf sublayer we walked to in the sublayer tree crawl above
         leafsToInit.forEach((mlFC: MapImageSublayer) => {
             // NOTE: can consider alternates, like esriLayer.url + / + layerIdx
-            mlFC.serviceUrl = findSublayer(mlFC.layerIdx).url;
+            mlFC.serviceUrl = findSublayer(mlFC.layerIndex).url;
 
             // TODO[Layer-Refactor] the sublayer needs to be re-fetched because the initial sublayer was marked as "raw"
             mlFC.fetchEsriSublayer(this);
@@ -356,10 +353,10 @@ class MapImageLayer extends AttribLayer {
             // TODO check if we have custom renderer, add to options parameter here
             const pLMD: Promise<void> = mlFC.loadLayerMetadata().then(() => {
                 // apply any updates that were in the configuration snippets
-                const subC = subConfigs[mlFC.layerIdx];
+                const subC = subConfigs[mlFC.layerIndex];
                 if (subC) {
-                    mlFC.setVisibility(subC.state?.visibility || false);
-                    mlFC.setOpacity(subC.state?.opacity || 1);
+                    mlFC.visibility = subC.state?.visibility || false;
+                    mlFC.opacity = subC.state?.opacity || 0;
                     // mlFC.setQueryable(subC.state.query); // TODO uncomment when done
                     mlFC.nameField = subC.nameField || mlFC.nameField || '';
                     mlFC.processFieldMetadata(subC.fieldMetadata);
@@ -396,7 +393,7 @@ class MapImageLayer extends AttribLayer {
             if (
                 !s.sublayers &&
                 !leafsToInit.find(
-                    (sublayer: MapImageSublayer) => sublayer.layerIdx === s.id
+                    (sublayer: MapImageSublayer) => sublayer.layerIndex === s.id
                 )
             ) {
                 s.visible = false;
@@ -440,155 +437,160 @@ class MapImageLayer extends AttribLayer {
     // so for properties that fall into this category, we intercept the common routies, and treat an undefined
     // layerIdx as targeting the layer proper (in other layers, undefined means take the default child)
 
-    /**
-     * Returns the name of the layer/sublayer.
-     *
-     * @function getName
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name for. Uses first/only if omitted.
-     * @returns {String} name of the layer/sublayer
-     */
-    getName(layerIdx: number | string | undefined = undefined): string {
-        if (!this.sawLoad) {
-            // layer has not been loaded yet
+    //TODO[Layer-Refactor] - not used anymore
+    // /**
+    //  * Returns the name of the layer/sublayer.
+    //  *
+    //  * @function getName
+    //  * @param {Integer | String} [layerIdx] targets a layer index or uid to get the name for. Uses first/only if omitted.
+    //  * @returns {String} name of the layer/sublayer
+    //  */
+    // getName(layerIdx: number | string | undefined = undefined): string {
+    //     if (!this.sawLoad) {
+    //         // layer has not been loaded yet
 
-            if (typeof layerIdx === 'string') {
-                // no uids at this point so we have no idea what's being requested
-                return '';
-            } else if (typeof layerIdx === 'number') {
-                // layerIdx is a layer index
-                const layerEntries: Array<RampLayerMapImageLayerEntryConfig> =
-                    this.origRampConfig.layerEntries || [];
-                const layer = (<Array<RampLayerMapImageLayerEntryConfig>>(
-                    layerEntries
-                )).filter((layer: any) => {
-                    return layer.index === layerIdx;
-                })[0];
-                if (layer && layer.name) {
-                    return layer.name;
-                } else {
-                    return '';
-                }
-            } else {
-                // if the layer was added through the wizard, or the parent layer has a name in the config, this.name will be defined
-                return this.name || '';
-            }
-        }
-        const sublayer = this.getSublayer(layerIdx, true);
-        if (!sublayer) {
-            // layerIdx belongs to the parent layer
-            return this.name || this.id;
-        } else {
-            // see comment in getOpacity
-            return super.getName();
-        }
-    }
+    //         if (typeof layerIdx === 'string') {
+    //             // no uids at this point so we have no idea what's being requested
+    //             return '';
+    //         } else if (typeof layerIdx === 'number') {
+    //             // layerIdx is a layer index
+    //             const layerEntries: Array<RampLayerMapImageLayerEntryConfig> =
+    //                 this.origRampConfig.layerEntries || [];
+    //             const layer = (<Array<RampLayerMapImageLayerEntryConfig>>(
+    //                 layerEntries
+    //             )).filter((layer: any) => {
+    //                 return layer.index === layerIdx;
+    //             })[0];
+    //             if (layer && layer.name) {
+    //                 return layer.name;
+    //             } else {
+    //                 return '';
+    //             }
+    //         } else {
+    //             // if the layer was added through the wizard, or the parent layer has a name in the config, this.name will be defined
+    //             return this.name || '';
+    //         }
+    //     }
+    //     const sublayer = this.getSublayer(layerIdx, true);
+    //     if (!sublayer) {
+    //         // layerIdx belongs to the parent layer
+    //         return this.name || this.id;
+    //     } else {
+    //         // see comment in getOpacity
+    //         return super.name;
+    //     }
+    // }
 
-    /**
-     * Returns the visibility of the layer/sublayer.
-     *
-     * @function getVisibility
-     * @param {Integer} [layerIdx] targets a layer index to get visibility for. Layer visibility is used if omitted.
-     * @returns {Boolean} visibility of the layer/sublayer
-     */
-    getVisibility(layerIdx: number | string | undefined = undefined): boolean {
-        const sublayer = this.getSublayer(layerIdx, true);
+    //TODO[Layer-Refactor] - not used anymore
+    // /**
+    //  * Returns the visibility of the layer/sublayer.
+    //  *
+    //  * @function getVisibility
+    //  * @param {Integer} [layerIdx] targets a layer index to get visibility for. Layer visibility is used if omitted.
+    //  * @returns {Boolean} visibility of the layer/sublayer
+    //  */
+    // getVisibility(layerIdx: number | string | undefined = undefined): boolean {
+    //     const sublayer = this.getSublayer(layerIdx, true);
 
-        if (!sublayer) {
-            return !!this.esriLayer?.visible;
-        } else {
-            // see comment in getOpacity
-            return super.getVisibility();
-        }
-    }
+    //     if (!sublayer) {
+    //         return !!this.esriLayer?.visible;
+    //     } else {
+    //         // see comment in getOpacity
+    //         return super.visibility;
+    //     }
+    // }
 
-    /**
-     * Applies visibility to feature class.
-     *
-     * @function setVisibility
-     * @param {Boolean} value the new visibility setting
-     * @param {Integer} [layerIdx] targets a layer index to set visibility for. Layer visibility is set if omitted.
-     */
-    setVisibility(
-        value: boolean,
-        layerIdx: number | string | undefined = undefined
-    ): void {
-        const sublayer = this.getSublayer(layerIdx, true);
-        if (!sublayer) {
-            if (this.esriLayer) {
-                this.esriLayer.visible = value;
-            }
-        } else {
-            // see comment in getOpacity
-            super.setVisibility(value);
-        }
-    }
+    //TODO[Layer-Refactor] - not used anymore
+    // /**
+    //  * Applies visibility to feature class.
+    //  *
+    //  * @function setVisibility
+    //  * @param {Boolean} value the new visibility setting
+    //  * @param {Integer} [layerIdx] targets a layer index to set visibility for. Layer visibility is set if omitted.
+    //  */
+    // setVisibility(
+    //     value: boolean,
+    //     layerIdx: number | string | undefined = undefined
+    // ): void {
+    //     const sublayer = this.getSublayer(layerIdx, true);
+    //     if (!sublayer) {
+    //         if (this.esriLayer) {
+    //             this.esriLayer.visible = value;
+    //         }
+    //     } else {
+    //         // see comment in getOpacity
+    //         super.visibility = value;
+    //     }
+    // }
 
-    /**
-     * Returns the opacity of the layer/sublayer.
-     *
-     * @function getOpacity
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Layer opacity is used if omitted.
-     * @returns {Boolean} opacity of the layer/sublayer
-     */
-    getOpacity(layerIdx: number | string | undefined = undefined): number {
-        const sublayer = this.getSublayer(layerIdx, true);
-        if (!sublayer || !this.isDynamic) {
-            return this.esriLayer?.opacity || 0;
-        } else {
-            // this is a bit redundant / inefficient. we could just do sublayer.getOpacity()
-            // current rationale is we keep the implementation in the baseclass
-            // (i.e. only one piece of code does the opacity call on the FC, so if we
-            // need to change it only changes in one spot)
-            // can change to more direct (logic in two spots) if we need the efficiency gains.
-            // this will apply to most of othe other things here that are doing "parent or sublayer"
-            return super.getOpacity();
-        }
-    }
+    //TODO[Layer-Refactor] - not used anymore
+    // /**
+    //  * Returns the opacity of the layer/sublayer.
+    //  *
+    //  * @function getOpacity
+    //  * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Layer opacity is used if omitted.
+    //  * @returns {Boolean} opacity of the layer/sublayer
+    //  */
+    // getOpacity(layerIdx: number | string | undefined = undefined): number {
+    //     const sublayer = this.getSublayer(layerIdx, true);
+    //     if (!sublayer || !this.isDynamic) {
+    //         return this.esriLayer?.opacity || 0;
+    //     } else {
+    //         // this is a bit redundant / inefficient. we could just do sublayer.getOpacity()
+    //         // current rationale is we keep the implementation in the baseclass
+    //         // (i.e. only one piece of code does the opacity call on the FC, so if we
+    //         // need to change it only changes in one spot)
+    //         // can change to more direct (logic in two spots) if we need the efficiency gains.
+    //         // this will apply to most of othe other things here that are doing "parent or sublayer"
+    //         return super.opacity;
+    //     }
+    // }
 
-    /**
-     * Applies opacity to feature class.
-     *
-     * @function setOpacity
-     * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
-     * @param {Integer} [layerIdx] targets a layer index to get opacity for. Layer opacity is set if omitted.
-     */
-    setOpacity(
-        value: number,
-        layerIdx: number | string | undefined = undefined
-    ): void {
-        const sublayer = this.getSublayer(layerIdx, true);
-        if (!sublayer || !this.isDynamic) {
-            if (this.esriLayer) {
-                this.esriLayer.opacity = value;
-            }
+    //TODO[Layer-Refactor] - not used anymore
+    // /**
+    //  * Applies opacity to feature class.
+    //  *
+    //  * @function setOpacity
+    //  * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
+    //  * @param {Integer} [layerIdx] targets a layer index to get opacity for. Layer opacity is set if omitted.
+    //  */
+    // setOpacity(
+    //     value: number,
+    //     layerIdx: number | string | undefined = undefined
+    // ): void {
+    //     const sublayer = this.getSublayer(layerIdx, true);
+    //     if (!sublayer || !this.isDynamic) {
+    //         if (this.esriLayer) {
+    //             this.esriLayer.opacity = value;
+    //         }
 
-            // TODO check our implementation inside MapImageFC. we might need to adjust the opacity value of all the
-            //      FCs if we are in the not-dynamic case
-        } else {
-            // see comment in getOpacity
-            super.setOpacity(value);
-        }
-    }
+    //         // TODO check our implementation inside MapImageFC. we might need to adjust the opacity value of all the
+    //         //      FCs if we are in the not-dynamic case
+    //     } else {
+    //         // see comment in getOpacity
+    //         super.opacity = value;
+    //     }
+    // }
 
-    /**
-     * Returns the opacity of the layer/sublayer.
-     *
-     * @function getOpacity
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
-     * @returns {Boolean} opacity of the layer/sublayer
-     */
-    // TODO need to verify if a MapImage root layer can have its own scaleset, or if it just
-    //      uses the collation of all its children
-    /*
-    getScaleSet (layerIdx: number | string | undefined = undefined): ScaleSet {
-        const sublayer = this.getSublayer(layerIdx, true);
-        if (!sublayer) {
-            return this.scaleSet;
-        } else {
-            return this.getSublayer(sublayer.layerIdx).scaleSet;
-        }
-    }
-    */
+    // /**
+    //  * Returns the opacity of the layer/sublayer.
+    //  *
+    //  * @function getOpacity
+    //  * @param {Integer | String} [layerIdx] targets a layer index or uid to get opacity for. Uses first/only if omitted.
+    //  * @returns {Boolean} opacity of the layer/sublayer
+    //  */
+    // // TODO need to verify if a MapImage root layer can have its own scaleset, or if it just
+    // //      uses the collation of all its children
+    // /*
+    // getScaleSet (layerIdx: number | string | undefined = undefined): ScaleSet {
+    //     const sublayer = this.getSublayer(layerIdx, true);
+    //     if (!sublayer) {
+    //         return this.scaleSet;
+    //     } else {
+    //         return this.getSublayer(sublayer.layerIdx).scaleSet;
+    //     }
+    // }
+    // */
 
     // ----------- LAYER ACTIONS -----------
 
@@ -602,7 +604,7 @@ class MapImageLayer extends AttribLayer {
         //         also, if the grid has been opened, the identify can utilize the local attribute set.
 
         // early kickout check. not loaded/error
-        if (!this.isValidState()) {
+        if (!this.isValidState || !this.visibility) {
             // return empty result.
             return super.identify(options);
         }
@@ -632,7 +634,7 @@ class MapImageLayer extends AttribLayer {
                   (sublayer: MapImageSublayer) => {
                       // query for visible, queryable, on-scale sublayers
                       return (
-                          sublayer.getVisibility() &&
+                          sublayer.visibility &&
                           sublayer.supportsFeatures &&
                           !sublayer.scaleSet.isOffScale(map.getScale()).offScale
                       );
@@ -641,7 +643,7 @@ class MapImageLayer extends AttribLayer {
               );
 
         // early kickout check. all sublayers are one of: not visible; not queryable; off scale; a raster layer
-        if (activeFCs.length === 0 || !this.getVisibility()) {
+        if (activeFCs.length === 0 || !this.visibility) {
             // return empty result.
             return super.identify(options);
         }

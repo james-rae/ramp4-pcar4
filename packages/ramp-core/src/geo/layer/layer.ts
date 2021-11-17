@@ -372,32 +372,34 @@ export class LayerInstance extends APIScope {
      * @memberof FixtureInstance
      */
     id: string;
-
     uid: string;
 
+    state: LayerState;
+    initialized: boolean;
+
+    // Direct access layer properties
     supportsIdentify: boolean;
-
     supportsFeatures: boolean;
-
     supportsSublayers: boolean;
 
-    state: LayerState;
-
-    // TODO[Layer-Refactor]: should this be here?
-    layerIdx: number; // server layer index - not used anywhere but can be useful
-
     isFile: boolean;
-
     isSublayer: boolean;
-
     // TODO[Layer-Refactor]: is this efficient?
     isRemoved: boolean; // used to mark sublayers for removal
 
-    initialized: boolean;
-
+    // Layer Properties
     protected _parentLayer: LayerInstance | undefined;
-
     protected _sublayers: Array<LayerInstance>;
+    _name: string;
+    _scaleSet: ScaleSet;
+    // TODO[Layer-Refactor]: should this be here?
+    _layerIdx: number; // server layer index - not used anywhere but can be useful
+    _legend: Array<LegendSymbology>;
+    _featureCount: number;
+    _fields: Array<FieldDefinition>;
+    _geomType: string;
+    _nameField: string;
+    _oidField: string;
 
     /**
      * Creates an instance of LayerInstance.
@@ -411,7 +413,7 @@ export class LayerInstance extends APIScope {
         this.id = ''; // take from config here?
         this.uid = ''; // shutting up typescript. will get set somewhere else. // TODO verify setting, move here if that is smarter.
         this.supportsIdentify = false; // this is updated by subclasses as they will know the real deal.
-        this.supportsFeatures = false; // moved from common layer
+        this.supportsFeatures = false;
         this.supportsSublayers = false; // by default layers do not support sublayers
         this.isRemoved = false;
         this.state = LayerState.NEW;
@@ -419,8 +421,18 @@ export class LayerInstance extends APIScope {
         this.isFile = false;
         this.isSublayer = false;
         this.initialized = false;
+
+        // Initialize layer properties
         this._sublayers = [];
-        this.layerIdx = 0;
+        this._name = 'error';
+        this._scaleSet = new ScaleSet();
+        this._layerIdx = 0;
+        this._legend = [];
+        this._featureCount = -1;
+        this._fields = [];
+        this._geomType = 'error';
+        this._nameField = 'error';
+        this._oidField = 'error';
     }
 
     esriLayer: __esri.Layer | undefined;
@@ -467,26 +479,6 @@ export class LayerInstance extends APIScope {
     }
 
     /**
-     * @returns {LayerInstance | undefined} the parent layer of this layer
-     */
-    getParentLayer(): LayerInstance | undefined {
-        if (!this.isSublayer) {
-            throw new Error(
-                'Attempted to get parent layer of a non-sublayer object'
-            );
-        } else {
-            return this._parentLayer;
-        }
-    }
-
-    /**
-     * @returns {Array<LayerInstance>} the sublayers of this layer
-     */
-    getSublayers(): Array<LayerInstance> {
-        return this._sublayers;
-    }
-
-    /**
      * Provides a tree structure describing the layer and any sublayers,
      * including uid values. Should only be called after isLayerLoaded resolves.
      *
@@ -502,93 +494,137 @@ export class LayerInstance extends APIScope {
     }
 
     /**
+     * @returns {LayerInstance | undefined} the parent layer of this layer
+     */
+    get parentLayer(): LayerInstance | undefined {
+        if (!this.isSublayer) {
+            throw new Error(
+                'Attempted to get parent layer of a non-sublayer object'
+            );
+        } else {
+            return this._parentLayer;
+        }
+    }
+
+    /**
+     * @param {LayerInstance | undefined} layer the new parent layer for this layer
+     */
+    set parentLayer(layer: LayerInstance | undefined) {
+        if (!this.isSublayer && layer) {
+            throw new Error(
+                'Attempted to set parent layer for a non-sublayer object'
+            );
+        } else {
+            this._parentLayer = layer;
+        }
+    }
+
+    /**
+     * @returns {Array<LayerInstance>} the sublayers of this layer
+     */
+    get sublayers(): Array<LayerInstance> {
+        return this._sublayers;
+    }
+
+    /**
      * Indicates if the layer is in a state that is makes sense to interact with.
      * I.e. False if layer has not done it's initial load, or is in error state.
      *
-     * @method isValidState
      * @returns {Boolean} true if layer is in an interactive state
      */
-    isValidState(): boolean {
+    get isValidState(): boolean {
         return false;
     }
 
     /**
-     * Returns the name of the layer/sublayer.
+     * Returns the name of the layer.
      *
-     * @function getName
-     * @returns {String} name of the layer/sublayer
+     * @returns {String} name of the layer
      */
-    getName(): string {
-        return 'error';
+    get name(): string {
+        return this._name;
     }
 
     /**
-     * Returns the visibility of the layer/sublayer.
+     * Sets the name of the layer.
+     *
+     * @param {String} name the new name of the layer
+     */
+    set name(name: string) {
+        this._name = name;
+    }
+
+    /**
+     * Returns the visibility of the layer.
+     *
+     * @returns {Boolean} visibility of the layer
+     */
+    get visibility(): boolean {
+        return false;
+    }
+
+    /**
+     * Sets the visibility of the layer.
      *
      * @function getVisibility
-     * @returns {Boolean} visibility of the layer/sublayer
+     * @param {Boolean} visibility the new visibility of the layer
      */
-    getVisibility(): boolean {
-        return false;
-    }
-
-    /**
-     * Applies visibility to layer.
-     *
-     * @function setVisibility
-     * @param {Boolean} value the new visibility setting
-     */
-    setVisibility(value: boolean): void {}
+    set visibility(visibility: boolean) {}
 
     /**
      * Checks the visibility of the sublayers
      * If all sublayers are invisible, then this layer is also set to invisible
      *
-     * @function setVisibility
-     * @param {Boolean} value the new visibility setting
+     * @function checkVisibility
      */
     checkVisibility(): void {
         if (this.supportsSublayers) {
-            this.setVisibility(
-                this._sublayers.some(sublayer => sublayer.getVisibility())
+            this.visibility = this._sublayers.some(
+                sublayer => sublayer.visibility
             );
         }
     }
 
     /**
-     * Returns the opacity of the layer/sublayer.
+     * Returns the opacity of the layer.
      *
-     * @function getOpacity
-     * @returns {Boolean} opacity of the layer/sublayer
+     * @returns {Boolean} opacity of the layer
      */
-    getOpacity(): number {
+    get opacity(): number {
         return 0;
     }
 
     /**
-     * Applies opacity to layer.
+     * Set the opacity of the layer.
      *
-     * @function setOpacity
      * @param {Decimal} value the new opacity setting. Valid value is anything between 0 and 1, inclusive.
      */
-    setOpacity(value: number): void {}
+    set opacity(value: number) {}
 
     /**
-     * Returns the scale set (min and max visible scale) of the layer/sublayer.
+     * Returns the scale set (min and max visible scale) of the layer.
      *
-     * @function getScaleSet
-     * @returns {ScaleSet} scale set of the layer/sublayer
+     * @returns {ScaleSet} scale set of the layer
      */
-    getScaleSet(): ScaleSet {
-        return new ScaleSet();
+    get scaleSet(): ScaleSet {
+        return this._scaleSet;
     }
 
     /**
-     * Indicates if the layer/sublayer is not in a visible scale range.
+     * Set the scale set (min and max visible scale) of the layer.
+     *
+     * @param {ScaleSet} scaleSet the new scale set of the layer
+     */
+    set scaleSet(scaleSet: ScaleSet) {
+        this._scaleSet = scaleSet;
+    }
+
+    /**
+     * Indicates if the layer is not in a visible scale range.
      *
      * @function isOffscale
      * @param {Integer} [testScale] optional scale to test against. if not provided, current map scale is used.
-     * @returns {Boolean} true if the layer/sublayer is outside of a visible scale range
+     * @returns {Boolean} true if the layer is outside of a visible scale range
      */
     isOffscale(testScale: number | undefined = undefined): boolean {
         return false;
@@ -603,18 +639,130 @@ export class LayerInstance extends APIScope {
         return Promise.resolve();
     }
 
-    // /**
-    //  * Indicates if a feature class supports features (false would be an image/raster/etc)
-    //  *
-    //  * @function supportsFeatures
-    //  * @returns {Boolean} if the layer/sublayer supports features
-    //  */
-    // supportsFeatures(): boolean {
-    //     return false;
-    // }
+    /**
+     * Returns the layer index of the layer.
+     *
+     * @returns {number} layer index of the layer
+     */
+    get layerIndex(): number {
+        return this._layerIdx;
+    }
 
-    getLegend(): Array<LegendSymbology> {
-        return [];
+    /**
+     * Set the layer index of the layer.
+     *
+     * @param {number} idx the new layer index of the layer
+     */
+    set layerIndex(idx: number) {
+        this._layerIdx = idx;
+    }
+
+    /**
+     * Return the legend of the layer
+     *
+     * @returns {Array<LegendSymbology>} the legend of the layer
+     */
+    get legend(): Array<LegendSymbology> {
+        return this._legend;
+    }
+
+    /**
+     * Set the legend of the layer
+     *
+     * @param {Array<LegendSymbology>} legend the new legend of the layer
+     */
+    set legend(legend: Array<LegendSymbology>) {
+        this._legend = legend;
+    }
+
+    /**
+     * Get the feature count for the layer
+     *
+     * @returns {Integer} number of features in the layer
+     */
+    get featureCount(): number {
+        return this._featureCount;
+    }
+
+    /**
+     * Set the feature count for thelayer
+     *
+     * @param {Integer} count the new number of features in the layer
+     */
+    set featureCount(count: number) {
+        this._featureCount = count;
+    }
+
+    /**
+     * Gets the array of field definitions about the layers's fields. Raster layers will have empty arrays.
+     *
+     * @returns {Array<FieldDefinition>} the list of field definitions
+     */
+    get fields(): Array<FieldDefinition> {
+        return this._fields;
+    }
+
+    /**
+     * Sets the array of field definitions about the layers's fields
+     *
+     * @param {Array<FieldDefinition>} fields the list of field definitions
+     */
+    set fields(fields: Array<FieldDefinition>) {
+        this._fields = fields;
+    }
+
+    /**
+     * Returns the geometry type of the layer
+     *
+     * @returns {string} the geometry type
+     */
+    get geomType(): string {
+        return this._geomType;
+    }
+
+    /**
+     * Sets the geometry type of the layer
+     *
+     * @param {string} type the new the geometry type
+     */
+    set geomType(type: string) {
+        this._geomType = type;
+    }
+
+    /**
+     * Returns the name field of the layer
+     *
+     * @returns {string} the name field
+     */
+    get nameField(): string {
+        return this._nameField;
+    }
+
+    /**
+     * Set the name field of the layer
+     *
+     * @param {string} name the new name field
+     */
+    set nameField(name: string) {
+        this._nameField = name;
+    }
+
+    /**
+     * Returns the OID field of the layer
+     *
+     * @returns {string} the OID field
+     */
+    get oidField(): string {
+        return this._oidField;
+    }
+
+    /**
+     * Set the OID field of the layer
+     *
+     * @param {string} name the new OID field
+     */
+    set oidField(name: string) {
+        this._oidField = name;
     }
 
     /**
@@ -672,42 +820,6 @@ export class LayerInstance extends APIScope {
     }
 
     /**
-     * Returns an array of field definitions about the given sublayer's fields. Raster layers will have empty arrays.
-     *
-     * @returns {Array} list of field definitions
-     */
-    getFields(): Array<FieldDefinition> {
-        return [];
-    }
-
-    /**
-     * Returns the geometry type of the given sublayer.
-     *
-     * @returns {Array} list of field definitions
-     */
-    getGeomType(): string {
-        return 'error';
-    }
-
-    /**
-     * Returns the name field of the given sublayer.
-     *
-     * @returns {string} name field
-     */
-    getNameField(): string {
-        return 'error';
-    }
-
-    /**
-     * Returns the OID field of the given sublayer.
-     *
-     * @returns {string} OID field
-     */
-    getOidField(): string {
-        return 'error';
-    }
-
-    /**
      * Requests that an attribute load request be aborted. Useful when encountering a massive dataset or a runaway process.
      *
      */
@@ -735,15 +847,6 @@ export class LayerInstance extends APIScope {
             oidField: 'error',
             oidIndex: 0 // TODO determine if we need this anymore
         });
-    }
-
-    /**
-     * Get the feature count for the given sublayer.
-     *
-     * @returns {Integer} number of features in the sublayer
-     */
-    getFeatureCount(): number {
-        return -1;
     }
 
     /**

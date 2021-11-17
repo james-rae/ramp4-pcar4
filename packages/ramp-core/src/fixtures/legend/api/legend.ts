@@ -1,4 +1,4 @@
-import { CommonLayer, FixtureInstance, LayerInstance } from '@/api';
+import { FixtureInstance, LayerInstance } from '@/api';
 import { LegendConfig, LegendStore } from '../store';
 import {
     LegendItem,
@@ -100,10 +100,10 @@ export class LegendAPI extends FixtureInstance {
         const entry = new LegendEntry(
             {
                 layerId: layer.id,
-                name: layer.getName(),
+                name: layer.name,
                 isDefault: true,
                 layers: this.$vApp.$store.get(LayerStore.layers),
-                entryIndex: layer.layerIdx
+                entryIndex: layer.layerIndex
             },
             parent
         );

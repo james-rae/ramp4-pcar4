@@ -14,7 +14,6 @@ import {
     TreeNode
 } from '@/geo/api';
 import { EsriRequest, EsriWMSLayer, EsriWMSSublayer } from '@/geo/esri';
-import { WmsFC } from './wms-fc';
 import { UrlWrapper } from '@/geo/api';
 import { markRaw } from 'vue';
 
@@ -200,8 +199,8 @@ export default class WmsLayer extends CommonLayer {
 
         // early kickout check. not loaded/error
         if (
-            !this.isValidState() ||
-            !this.getVisibility() ||
+            !this.isValidState ||
+            !this.visibility ||
             // !this.isQueryable() || // TODO implement when we have this flag created
             // !infoMap[this.config.featureInfoMimeType] || // TODO implement once config is defined
             this.scaleSet.isOffScale(map.getScale()).offScale

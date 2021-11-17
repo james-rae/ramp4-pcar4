@@ -108,7 +108,7 @@ export class MaptipAPI extends APIScope {
         this.setContent(
             `<div class="flex items-center">${info.icon} ${
                 info.attributes[
-                    info.layer.config.tooltipField || info.layer.getNameField()
+                    info.layer.config.tooltipField || info.layer.nameField
                 ]
             }</div>`
         );

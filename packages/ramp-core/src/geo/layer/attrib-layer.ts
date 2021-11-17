@@ -44,13 +44,10 @@ export class AttribLayer extends CommonLayer {
     // property does get initialized in the super. typescript just being grousy
     // @ts-ignore
     geomType: GeometryType;
-    oidField: string;
-    fields: Array<EsriField>;
+    esrifields: Array<EsriField>;
     fieldList: string; // list of field names, useful for numerous esri api calls
-    nameField: string;
     extent: EsriExtent | undefined;
     attLoader: AttributeLoaderBase | undefined;
-    featureCount: number;
     renderer: BaseRenderer | undefined;
     serviceUrl: string;
     protected quickCache: QuickCache | undefined;
@@ -60,12 +57,9 @@ export class AttribLayer extends CommonLayer {
         super(rampConfig, $iApi);
         this.supportsIdentify = true;
         this.geomType = GeometryType.UNKNOWN;
-        this.oidField = '';
-        this.nameField = '';
         this.serviceUrl = '';
         this.fieldList = '';
-        this.featureCount = -1;
-        this.fields = [];
+        this.esrifields = [];
         this.filter = new Filter();
     }
 
@@ -157,13 +151,13 @@ export class AttribLayer extends CommonLayer {
         if (sData.type === 'Feature Layer') {
             this.supportsFeatures = true;
             this.dataFormat = DataFormat.ESRI_FEATURE;
-            this.fields = markRaw(
+            this.esrifields = markRaw(
                 sData.fields.map((f: any) => EsriField.fromJSON(f))
             ); // TODO need to use Field.fromJSON() to make things correct
             this.nameField = sData.displayField;
 
             // find object id field
-            const noFieldDefOid: boolean = this.fields.every(elem => {
+            const noFieldDefOid: boolean = this.esrifields.every(elem => {
                 if (elem.type === 'oid') {
                     this.oidField = elem.name;
                     return false; // break the loop
@@ -193,7 +187,7 @@ export class AttribLayer extends CommonLayer {
                     : EsriRendererFromJson(sData.drawingInfo.renderer);
             this.renderer = this.$iApi.geo.utils.symbology.makeRenderer(
                 renderer,
-                this.fields
+                this.esrifields
             );
 
             // this array will have a set of promises that resolve when all the legend svg has drawn.
@@ -217,7 +211,7 @@ export class AttribLayer extends CommonLayer {
             this.attLoader = new ArcServerAttributeLoader(this.$iApi, loadData);
         } else {
             this.dataFormat = DataFormat.ESRI_RASTER;
-            this.fields = [];
+            this.esrifields = [];
         }
     }
 
@@ -264,7 +258,7 @@ export class AttribLayer extends CommonLayer {
                 .map(f => f.data)
                 .join(',');
             const tempFI = configMetadata.fieldInfo; // required because typescript is throwing a fit about undefineds inside the .filter
-            this.fields = this.fields.filter(origField => {
+            this.esrifields = this.esrifields.filter(origField => {
                 return tempFI.find(fInfo => fInfo.data === origField.name);
             });
         } else {
@@ -274,7 +268,7 @@ export class AttribLayer extends CommonLayer {
         // if any aliases overrides, apply them
         configMetadata.fieldInfo.forEach(cf => {
             if (cf.alias) {
-                const ff = this.fields.find(fff => fff.name === cf.data);
+                const ff = this.esrifields.find(fff => fff.name === cf.data);
                 if (ff) {
                     ff.alias = cf.alias;
                 }
@@ -302,9 +296,9 @@ export class AttribLayer extends CommonLayer {
      *
      * @returns {Array} list of field definitions
      */
-    getFields(): Array<FieldDefinition> {
+    get fields(): Array<FieldDefinition> {
         // extra fancy so we dont have to expose the ESRI field class
-        return this.fields.map(f => {
+        return this.esrifields.map(f => {
             f = toRaw(f);
             return {
                 name: f.name,
@@ -316,30 +310,12 @@ export class AttribLayer extends CommonLayer {
     }
 
     /**
-     * Returns the geometry type of the given sublayer.
+     * Sets the array of field definitions about the layers's fields
      *
-     * @returns {Array} list of field definitions
+     * @param {Array<FieldDefinition>} fields the list of field definitions
      */
-    getGeomType(): string {
-        return this.geomType;
-    }
-
-    /**
-     * Returns the name field of the given sublayer.
-     *
-     * @returns {string} name field
-     */
-    getNameField(): string {
-        return this.nameField;
-    }
-
-    /**
-     * Returns the OID field of the given sublayer.
-     *
-     * @returns {string} OID field
-     */
-    getOidField(): string {
-        return this.oidField;
+    set fields(fields: Array<FieldDefinition>) {
+        super.fields = fields;
     }
 
     /**
@@ -447,7 +423,7 @@ export class AttribLayer extends CommonLayer {
 
         // create columns array consumable by datables. We don't include the alias defined in the config here as
         // the grid handles it seperately.
-        const columns = this.fields
+        const columns = this.esrifields
             .filter(field =>
                 // assuming there is at least one attribute - empty attribute budnle promises should be rejected, so it never even gets this far
                 // filter out fields where there is no corresponding attribute data
@@ -494,7 +470,7 @@ export class AttribLayer extends CommonLayer {
         return {
             columns,
             rows,
-            fields: this.getFields(), // keep fields for reference ...
+            fields: this.fields, // keep fields for reference ...
             oidField: this.oidField // ... keep a reference to id field ...
             // oidIndex: attSet.oidIndex, // TODO determine if we need this anymore. who uses it? // ... and keep id mapping array
             // renderer: this.renderer // TODO this should probably not be here. we should have a better way to derive data that the renderer could provide
@@ -510,16 +486,6 @@ export class AttribLayer extends CommonLayer {
                 }
             });
         */
-    }
-
-    /**
-     * Get the feature count for the given sublayer.
-     *
-     * @param {Integer | String} [layerIdx] targets a layer index or uid to get the feature count for. Uses first/only if omitted.
-     * @returns {Integer} number of features in the sublayer
-     */
-    getFeatureCount(): number {
-        return this.featureCount;
     }
 
     // TODO think about this name. using getGraphic for consistency.

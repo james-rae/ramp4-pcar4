@@ -211,7 +211,7 @@ export class FileLayer extends AttribLayer {
         // NOTE name field overrides from config have already been applied by this point
         if (this.origRampConfig.tooltipField) {
             this.tooltipField = fieldValidator(
-                this.fields,
+                this.esrifields,
                 this.origRampConfig.tooltipField
             );
         } else {
@@ -258,8 +258,8 @@ export class FileLayer extends AttribLayer {
 
         // early kickout check. not loaded/error; not visible; not queryable; off scale
         if (
-            !this.isValidState() ||
-            !this.getVisibility() ||
+            !this.isValidState ||
+            !this.visibility ||
             // !this.isQueryable() || // TODO implement when we have this flag created
             this.scaleSet.isOffScale(map.getScale()).offScale
         ) {
@@ -366,7 +366,7 @@ export class FileLayer extends AttribLayer {
         // layer was constructed. no need to check here.
         this.renderer = this.$iApi.geo.utils.symbology.makeRenderer(
             l.renderer,
-            this.fields
+            this.esrifields
         );
 
         // this array will have a set of promises that resolve when all the legend svg has drawn.

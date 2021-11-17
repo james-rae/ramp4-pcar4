@@ -29,12 +29,6 @@ export class CommonLayer extends LayerInstance {
     // used to manage debouncing when applying filter updates against a layer. Private! but needs to be seen by FCs.
     _lastFilterUpdate: string = '';
 
-    // statuses
-    state: LayerState;
-    supportsIdentify: boolean;
-    isFile: boolean;
-    initialized: boolean;
-
     /**
      * Indicates layer had loaded and achieved one sucessful update. I.e. layer has been drawn on the map once.
      * @property initLoadDone
@@ -44,7 +38,6 @@ export class CommonLayer extends LayerInstance {
     }
     protected sawLoad: boolean;
     protected sawRefresh: boolean;
-    name: string; // TODO re-evaluate this. using protected property here to store name until FCs get created. might be smarter way
     protected origRampConfig: RampLayerConfig;
     protected _layerType: LayerType = LayerType.UNKNOWN; // TODO change to readonly?
 
@@ -54,10 +47,6 @@ export class CommonLayer extends LayerInstance {
     protected viewPromise: DefPromise; // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
 
     dataFormat: DataFormat;
-    scaleSet: ScaleSet;
-    // TODO old ramp stored this in same structure as arcgis server i.e. legend.layer[idx].legend[]
-    //      not really seeing a reason to keep the outer structure. if we find we need it, can change back or to something better
-    legend: Array<LegendSymbology>;
 
     protected layerTree: TreeNode | undefined;
     protected reloadTree: TreeNode | undefined;
@@ -83,11 +72,9 @@ export class CommonLayer extends LayerInstance {
         this.loadPromise = new DefPromise();
         this.viewPromise = new DefPromise();
         this.watches = [];
-        this.name = '';
         this.origRampConfig = rampConfig;
         this.name = rampConfig.name || '';
         this.id = rampConfig.id || '';
-        this.scaleSet = new ScaleSet();
         this.supportsFeatures = false; // default state. featurish layers should set to true when the load
         this.legend = [];
         this.dataFormat = DataFormat.UNKNOWN;
@@ -227,7 +214,7 @@ export class CommonLayer extends LayerInstance {
         this.initialized = true;
 
         // initiate sublayers last (top down intiation)
-        this._sublayers.forEach(s => s.initiate());
+        this.sublayers.forEach(s => s.initiate());
     }
 
     async terminate(): Promise<void> {
@@ -236,7 +223,7 @@ export class CommonLayer extends LayerInstance {
         //       erases any downloaded/cached attribute data.
 
         // terminate sublayers first (bottom up termination)
-        this._sublayers.forEach(s => s.terminate());
+        this.sublayers.forEach(s => s.terminate());
 
         this.loadPromise = new DefPromise();
         this.viewPromise = new DefPromise();
@@ -284,7 +271,7 @@ export class CommonLayer extends LayerInstance {
             //      and restore state after. Might be more flexible.
 
             this.$iApi.event.emit(GlobalEvents.LAYER_RELOAD_START, this);
-            this._sublayers.forEach(sublayer =>
+            this.sublayers.forEach(sublayer =>
                 this.$iApi.event.emit(GlobalEvents.LAYER_RELOAD_START, sublayer)
             );
             await this.terminate();
@@ -302,7 +289,7 @@ export class CommonLayer extends LayerInstance {
         this.$iApi.geo.map.esriMap.layers.add(this.esriLayer, mapStackPosition);
 
         this.$iApi.event.emit(GlobalEvents.LAYER_RELOAD_END, this);
-        this._sublayers.forEach(sublayer =>
+        this.sublayers.forEach(sublayer =>
             this.$iApi.event.emit(GlobalEvents.LAYER_RELOAD_END, sublayer)
         );
     }
@@ -347,8 +334,8 @@ export class CommonLayer extends LayerInstance {
             this.reloadTree = this.layerTree;
             this.loadPromise.resolveMe();
 
-            this._sublayers.forEach(
-                sublayer => (sublayer as CommonLayer)?.onLoad() // This will just trigger the above statements
+            this.sublayers.forEach(
+                sublayer => (sublayer as any)?.onLoad() // This will just trigger the above statements
             );
         });
     }
@@ -410,7 +397,7 @@ export class CommonLayer extends LayerInstance {
      * @method isValidState
      * @returns {Boolean} true if layer is in an interactive state
      */
-    isValidState(): boolean {
+    get isValidState(): boolean {
         return (
             this.state === LayerState.LOADED ||
             this.state === LayerState.REFRESH
@@ -438,6 +425,18 @@ export class CommonLayer extends LayerInstance {
      */
     get layerType(): LayerType {
         return this._layerType;
+    }
+
+    /**
+     * Returns the data format of a sublayer.
+     *
+     * @function dataFormat
+     * @returns {String} format type of the sublayer
+     */
+    get getDataFormat(): DataFormat {
+        // TODO return value might need to be common string to allow for outside layers to have custom formats.
+        //      see if the interface on LayerInstance can be string and we can still compile an enum here or not.
+        return this.dataFormat;
     }
 
     /**
@@ -476,41 +475,39 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Returns the name of the layer/sublayer.
+     * Returns the name of the layer.
      *
      * @function getName
-     * @returns {String} name of the layer/sublayer
+     * @returns {String} name of the layer
      */
-    getName(): string {
+    get name(): string {
         if (!this.sawLoad) {
             // layer has not been loaded yet
             // if the config has a name defined, this.name will be set
             // empty string will indicate the layer has not loaded and has no name defined
-            return this.name || '';
+            return super.name || '';
         }
-        return this.name || this.id;
+        return super.name || this.id;
     }
 
     /**
-     * Returns the data format of a sublayer.
+     * Set the name of the layer.
      *
-     * @function dataFormat
-     * @returns {String} format type of the sublayer
+     * @function getName
+     * @param {String} name the new name of the layer
      */
-    get getDataFormat(): DataFormat {
-        // TODO return value might need to be common string to allow for outside layers to have custom formats.
-        //      see if the interface on LayerInstance can be string and we can still compile an enum here or not.
-        return this.dataFormat;
+    set name(name: string) {
+        super.name = name;
     }
 
     /**
-     * Returns the visibility of the feature class.
+     * Returns the visibility of the layer.
      *
      * @function getVisibility
-     * @returns {Boolean} visibility of the feature class
+     * @returns {Boolean} visibility of the layer
      */
-    getVisibility(): boolean {
-        // basic case - fc vis === layer vis
+    get visibility(): boolean {
+        // basic case - sublayer vis === layer vis
         if (this.esriLayer) {
             return this.esriLayer.visible;
         } else {
@@ -520,12 +517,12 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Applies visibility to feature class.
+     * Applies visibility to layer.
      *
      * @function setVisibility
      * @param {Boolean} value the new visibility setting
      */
-    setVisibility(value: boolean): void {
+    set visibility(value: boolean) {
         // basic case - set layer visibility
         if (this.esriLayer) {
             this.esriLayer.visible = value;
@@ -535,28 +532,28 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Returns the opacity of the feature class.
+     * Returns the opacity of the layer.
      *
      * @function getOpacity
-     * @returns {Boolean} opacity of the feature class
+     * @returns {Boolean} opacity of the layer
      */
-    getOpacity(): number {
-        // basic case - fc opac === layer opac
+    get opacity(): number {
+        // basic case - sublayer opac === layer opac
         if (this.esriLayer) {
             return this.esriLayer.opacity;
         } else {
             this.noLayerErr();
-            return 1; // default to chill things.
+            return 0; // default to chill things.
         }
     }
 
     /**
-     * Applies opacity to feature class.
+     * Applies opacity to layer.
      *
      * @function setOpacity
      * @param {Boolean} value the new opacity setting
      */
-    setOpacity(value: number): void {
+    set opacity(value: number) {
         // basic case - set layer opacity
         if (this.esriLayer) {
             this.esriLayer.opacity = value;
@@ -566,28 +563,11 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Returns the scale set (min and max visible scale) of the layer/sublayer.
-     *
-     * @function getScaleSet
-     * @returns {ScaleSet} scale set of the layer/sublayer
-     */
-    getScaleSet(): ScaleSet {
-        // const fc = this.getSublayer(layerIdx);
-        // if (fc) {
-        //     return fc.scaleSet;
-        // } else {
-        //     this.noLayerErr();
-        //     return new ScaleSet();
-        // }
-        return this.scaleSet;
-    }
-
-    /**
-     * Indicates if the layer/sublayer is not in a visible scale range.
+     * Indicates if the layer is not in a visible scale range.
      *
      * @function isOffscale
      * @param {Integer} [testScale] optional scale to test against. if not provided, current map scale is used.
-     * @returns {Boolean} true if the layer/sublayer is outside of a visible scale range
+     * @returns {Boolean} true if the layer is outside of a visible scale range
      */
     isOffscale(testScale: number | undefined = undefined): boolean {
         let mahScale: number;
@@ -598,7 +578,7 @@ export class CommonLayer extends LayerInstance {
             mahScale = testScale;
         }
 
-        return this.getScaleSet().isOffScale(mahScale).offScale;
+        return this.scaleSet.isOffScale(mahScale).offScale;
     }
 
     /**
@@ -615,18 +595,7 @@ export class CommonLayer extends LayerInstance {
         //      inside the layer extent. if not, pan the map to layer extent center.
         //      would need to add an extra boolean flag parameter to indicate if we do the pan or not.
         //      alternate idea is make a separate pan-to-extent function and let caller make two calls. hmmm. nice.
-        return this.$iApi.geo.map.zoomToVisibleScale(this.getScaleSet());
-    }
-
-    getLegend(): Array<LegendSymbology> {
-        // const fc = this.getSublayer(layerIdx);
-        // if (fc) {
-        //     return fc.legend;
-        // } else {
-        //     this.noLayerErr();
-        //     return [];
-        // }
-        return this.legend;
+        return this.$iApi.geo.map.zoomToVisibleScale(this.scaleSet);
     }
 
     // ----------- LAYER ACTIONS -----------
@@ -680,9 +649,18 @@ export class CommonLayer extends LayerInstance {
      *
      * @returns {Array} list of field definitions
      */
-    getFields(): Array<FieldDefinition> {
-        this.stubError();
-        return [];
+    get fields(): Array<FieldDefinition> {
+        // this.stubError();
+        return super.fields;
+    }
+
+    /**
+     * Sets the array of field definitions about the layers's fields
+     *
+     * @param {Array<FieldDefinition>} fields the list of field definitions
+     */
+    set fields(fields: Array<FieldDefinition>) {
+        super.fields = fields;
     }
 
     /**
@@ -690,9 +668,18 @@ export class CommonLayer extends LayerInstance {
      *
      * @returns {Array} list of field definitions
      */
-    getGeomType(): string {
-        this.stubError();
-        return '';
+    get geomType(): string {
+        //this.stubError();
+        return super.geomType;
+    }
+
+    /**
+     * Sets the geometry type of the layer
+     *
+     * @param {string} type the new the geometry type
+     */
+    set geomType(type: string) {
+        super.geomType = type;
     }
 
     /**
@@ -700,9 +687,18 @@ export class CommonLayer extends LayerInstance {
      *
      * @returns {string} name field
      */
-    getNameField(): string {
-        this.stubError();
-        return '';
+    get nameField(): string {
+        //this.stubError();
+        return super.nameField;
+    }
+
+    /**
+     * Set the name field of the layer
+     *
+     * @param {string} name the new name field
+     */
+    set nameField(name: string) {
+        super.nameField = name;
     }
 
     /**
@@ -710,9 +706,18 @@ export class CommonLayer extends LayerInstance {
      *
      * @returns {string} OID field
      */
-    getOidField(): string {
-        this.stubError();
-        return '';
+    get oidField(): string {
+        //this.stubError();
+        return super.oidField;
+    }
+
+    /**
+     * Set the OID field of the layer
+     *
+     * @param {string} name the new OID field
+     */
+    set oidField(name: string) {
+        super.oidField = name;
     }
 
     /**
@@ -757,9 +762,18 @@ export class CommonLayer extends LayerInstance {
      *
      * @returns {Integer} number of features in the sublayer
      */
-    getFeatureCount(): number {
-        this.stubError();
-        return 0;
+    get featureCount(): number {
+        //this.stubError();
+        return super.featureCount;
+    }
+
+    /**
+     * Set the feature count for thelayer
+     *
+     * @param {Integer} count the new number of features in the layer
+     */
+    set featureCount(count: number) {
+        super.featureCount = count;
     }
 
     // TODO think about this name. using getGraphic for consistency.

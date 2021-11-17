@@ -286,7 +286,7 @@ export default defineComponent({
          * Wrapper to safely get the legend from layer while avoiding ArcGIS and Vue3 conflict
          */
         _getLegend(): LegendSymbology[] {
-            return toRaw(this.legendItem!.layer!).getLegend();
+            return toRaw(this.legendItem!.layer!).legend;
         }
     }
 });

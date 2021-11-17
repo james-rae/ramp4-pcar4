@@ -157,7 +157,7 @@ const actions = {
 
         // If layer is a sublayer, we want to update the default entry using the parent layer
         const layer: LayerInstance | undefined = entry.layer?.isSublayer
-            ? entry.layer?.getParentLayer()
+            ? entry.layer?.parentLayer
             : entry.layer;
 
         if (!layer) {
