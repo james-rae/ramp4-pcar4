@@ -1,8 +1,10 @@
 import {
+    RampExtentSetConfig,
     RampMapConfig,
     RampBasemapConfig,
-    RampLodConfig,
-    RampSpatialReference
+    RampLodSetConfig,
+    RampSpatialReference,
+    RampTileSchemaConfig
 } from '@/geo/api';
 
 export class OverviewmapState {
@@ -12,9 +14,10 @@ export class OverviewmapState {
 
 export interface OverviewmapConfig {
     map: {
-        lods: RampLodConfig;
+        lodSets: Array<RampLodSetConfig>;
+        extentSets: Array<RampExtentSetConfig>;
+        tileSchemas: Array<RampTileSchemaConfig>;
         basemap: RampBasemapConfig;
-        spatialReference: RampSpatialReference;
     };
     startMinimized: boolean;
 }

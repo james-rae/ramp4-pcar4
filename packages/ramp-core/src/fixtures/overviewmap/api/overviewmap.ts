@@ -11,14 +11,9 @@ export class OverviewmapAPI extends FixtureInstance {
     _parseConfig(overviewmapConfig?: OverviewmapConfig) {
         if (!overviewmapConfig) return;
         let mapConfig = {
-            extent: {
-                xmax: 1,
-                xmin: 0,
-                ymax: 1,
-                ymin: 0,
-                spatialReference: overviewmapConfig.map.spatialReference
-            },
-            lods: overviewmapConfig.map.lods,
+            extentSets: overviewmapConfig.map.extentSets,
+            lodSets: overviewmapConfig.map.lodSets,
+            tileSchemas: overviewmapConfig.map.tileSchemas,
             basemaps: [overviewmapConfig.map.basemap],
             initialBasemapId: overviewmapConfig.map.basemap.id
         };

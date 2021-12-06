@@ -3,7 +3,7 @@ import { RampBasemapConfig, RampTileSchemaConfig } from '@/geo/api';
 export class BasemapState {
     tileSchemas: Array<RampTileSchemaConfig> = [];
     basemaps: Array<RampBasemapConfig> = [];
-    selectedBasemap: RampBasemapConfig | null = null;
+    selectedBasemap: RampBasemapConfig | undefined = undefined;
 }
 
 export interface BasemapConfig {

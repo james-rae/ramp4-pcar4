@@ -94,6 +94,7 @@ import { defineComponent, PropType } from 'vue';
 import { RampBasemapConfig, RampTileSchemaConfig } from '@/geo/api';
 import { get, call } from '@/store/pathify-helper';
 import { BasemapStore } from './store';
+import { GlobalEvents } from '@/api';
 
 export default defineComponent({
     name: 'BasemapItemV',
@@ -115,13 +116,24 @@ export default defineComponent({
     methods: {
         selectBasemap(basemap: any) {
             if (this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId) {
-                console.warn(
-                    'Basemap switching between two different tile schemas has not been implemented yet.'
-                );
-                return;
+                // reproject the map
+                // Recreate map view by overriding the intial basemap id
+                // TODO: Maybe we need a better way to do this? Overriding the inital basemap id feels like a hack
+                //       Maybe we can rename "intialBasemapId" to "startBasemap" or "currentBasemap"
+                let config = this.$iApi.getConfig().map;
+                config.initialBasemapId = basemap.id;
+                this.$iApi.geo.map.reloadMap(config);
+            } else {
+                // change the basemap
+                this.$iApi.geo.map.setBasemap(basemap.id);
             }
 
-            this.$iApi.geo.map.setBasemap(basemap.id);
+            this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, {
+                basemapId: basemap.id,
+                schemaChanged:
+                    this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId
+            });
+
             this.$iApi.$vApp.$store.set(BasemapStore.setBasemap, basemap);
         }
     }

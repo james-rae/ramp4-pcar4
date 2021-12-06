@@ -50,14 +50,31 @@
                     "type": "object",
                     "description": "Specifies the map of the overviewmap fixture",
                     "properties": {
-                        "lods": {
-                            "$ref": "#/defs/lodSetNode"
+                        "tileSchemas": {
+                            "type": "array",
+                            "description": "Combinations of LOD and extent sets for the overviewmap.",
+                            "items": {
+                                "$ref": "#/$defs/tileSchemaNode"
+                            },
+                            "minItems": 1
+                        },
+
+                        "extentSets": {
+                            "type": "array",
+                            "description": "The default, full and maximum extents of the overviewmap.",
+                            "items": {
+                                "$ref": "#/$defs/extentSetNode"
+                            }
+                        },
+                        "lodSets": {
+                            "type": "array",
+                            "description": "The levels of detail (zoom scales) available for the overviewmap.",
+                            "items": {
+                                "$ref": "#/$defs/lodSetNode"
+                            }
                         },
                         "basemap": {
                             "$ref": "#/defs/basemapNode"
-                        },
-                        "spatialReference": {
-                            "$ref": "#/$defs/spatialReferenceNode"
                         }
                     }
                 },

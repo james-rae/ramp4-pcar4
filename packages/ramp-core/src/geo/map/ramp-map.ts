@@ -2,6 +2,7 @@
 // TODO add proper comments
 
 import {
+    Basemap,
     CommonMapAPI,
     GlobalEvents,
     InstanceAPI,
@@ -13,6 +14,7 @@ import {
     CoreFilter,
     DefPromise,
     Extent,
+    ExtentSet,
     GeometryType,
     GraphicHitResult,
     // IdentifyMode,
@@ -26,12 +28,17 @@ import {
     ScreenPoint,
     Screenshot,
     ScaleSet,
-    SpatialReference
+    SpatialReference,
+    RampBasemapConfig,
+    RampTileSchemaConfig,
+    RampExtentSetConfig,
+    RampLodSetConfig
 } from '@/geo/api';
 import { EsriGraphic, EsriLOD, EsriMapView } from '@/geo/esri';
 import { LayerStore } from '@/store/modules/layer';
 import { MapCaptionAPI } from './caption';
 import { markRaw } from 'vue';
+import { BasemapStore } from '@/fixtures/basemap/store';
 
 export class MapAPI extends CommonMapAPI {
     // NOTE unlike ESRI3, the map view doesnt have a custom event, it uses property watches.
@@ -59,6 +66,22 @@ export class MapAPI extends CommonMapAPI {
      */
     private _rampSR: SpatialReference | undefined;
 
+    /**
+     * The active extent set in RAMP API Extent Set format.
+     * Allows a quick reference to the available extents if needed.
+     * @private
+     */
+    private _rampExtentSet: ExtentSet | undefined;
+
+    /**
+     * The viewDiv for the ESRI MapView
+     * The map will be rendered using this div object
+     * @private
+     */
+    private _targetDiv: string | HTMLDivElement | undefined;
+
+    private handlers: Array<any>;
+
     // API for managing the maptip
     maptip: MaptipAPI;
 
@@ -75,6 +98,7 @@ export class MapAPI extends CommonMapAPI {
         this.maptip = new MaptipAPI(iApi);
         this.caption = new MapCaptionAPI(iApi);
         this._viewPromise = new DefPromise();
+        this.handlers = [];
     }
 
     /**
@@ -85,113 +109,170 @@ export class MapAPI extends CommonMapAPI {
     createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
         super.createMap(config, targetDiv);
 
-        // TODO if .esriMap or .esriView exists, do we want to do any cleanup on it? E.g. remove event handlers?
+        this._targetDiv = targetDiv;
 
-        this._rampSR = SpatialReference.fromConfig(
-            config.extent.spatialReference
+        // get the current tile schema we are in
+        const bm: Basemap = this.findBasemap(config.initialBasemapId);
+        const tileSchemaConfig: RampTileSchemaConfig | undefined =
+            config.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
+
+        if (!tileSchemaConfig) {
+            throw new Error(
+                `Could not find tile schema for the given basemap. ID: ${bm.id}`
+            );
+        }
+
+        const extentSetConfig: RampExtentSetConfig | undefined =
+            config.extentSets.find(
+                es => es.id === tileSchemaConfig.extentSetId
+            );
+
+        if (!extentSetConfig) {
+            throw new Error(
+                `Could not find extent set with the given id: ${tileSchemaConfig.extentSetId}`
+            );
+        }
+
+        this._rampExtentSet = ExtentSet.fromConfig(extentSetConfig);
+        this._rampSR = this._rampExtentSet.spatialReference.clone();
+
+        const lodSetConfig: RampLodSetConfig | undefined = config.lodSets.find(
+            ls => ls.id === tileSchemaConfig.lodSetId
         );
 
-        const esriViewConfig: __esri.MapViewProperties = {
-            map: this.esriMap,
-            container: targetDiv,
-            constraints: {
-                lods: <Array<EsriLOD>>config.lods,
-                rotationEnabled: false // TODO make rotation a config option?
-            },
-            spatialReference: this._rampSR.toESRI(),
-            extent: config.extent,
-            navigation: {
-                browserTouchPanEnabled: false
-            }
-        };
-
-        // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
-        this.esriView = markRaw(new EsriMapView(esriViewConfig));
-
-        this.esriView.watch('extent', (newval: __esri.Extent) => {
-            // NOTE: yes, double events. rationale is a block of code dealing with filters will not
-            //       want to have two event handlers (one on filter, one on extent change) and synch
-            //       between them. They can subscribe to the filter event and get all the info they need.
-
-            const newExtent = <Extent>(
-                this.$iApi.geo.utils.geom.geomEsriToRamp(
-                    newval,
-                    'map_extent_event'
-                )
+        if (!lodSetConfig) {
+            throw new Error(
+                `Could not find lod set with the given id: ${tileSchemaConfig.lodSetId}`
             );
-            this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, newExtent);
-            this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
-                extent: newExtent,
-                filterKey: CoreFilter.EXTENT
-            });
-        });
+        }
+
+        // create esri view with config
+        this.esriView = markRaw(
+            new EsriMapView({
+                map: this.esriMap,
+                container: this._targetDiv,
+                constraints: {
+                    lods: <Array<EsriLOD>>lodSetConfig.lods,
+                    rotationEnabled: false
+                },
+                spatialReference: this._rampSR.toESRI(),
+                extent: this._rampExtentSet.defaultExtent.toESRI(),
+                navigation: {
+                    browserTouchPanEnabled: false
+                }
+            })
+        );
 
         // Rewove all ui components
         this.esriView.ui.components = [];
 
-        this.esriView.watch('scale', (newval: number) => {
-            this.$iApi.event.emit(GlobalEvents.MAP_SCALECHANGE, newval);
-        });
+        // TODO extract more from config and set appropriate view properties (e.g. intial extent, initial projection, LODs)
+        // this.esriView = markRaw(new EsriMapView(esriViewConfig));
 
-        this.esriView.on('resize', esriResize => {
-            this.$iApi.event.emit(GlobalEvents.MAP_RESIZED, {
-                height: esriResize.height,
-                width: esriResize.width
-            });
-        });
+        this.handlers.push(
+            this.esriView.watch('extent', (newval: __esri.Extent) => {
+                // NOTE: yes, double events. rationale is a block of code dealing with filters will not
+                //       want to have two event handlers (one on filter, one on extent change) and synch
+                //       between them. They can subscribe to the filter event and get all the info they need.
 
-        this.esriView.on('click', esriClick => {
-            this.$iApi.event.emit(
-                GlobalEvents.MAP_CLICK,
-                this.$iApi.geo.utils.geom.esriMapClickToRamp(
-                    esriClick,
-                    'map_click_point'
-                )
-            );
-        });
+                const newExtent = <Extent>(
+                    this.$iApi.geo.utils.geom.geomEsriToRamp(
+                        newval,
+                        'map_extent_event'
+                    )
+                );
+                this.$iApi.event.emit(GlobalEvents.MAP_EXTENTCHANGE, newExtent);
+                this.$iApi.event.emit(GlobalEvents.FILTER_CHANGE, {
+                    extent: newExtent,
+                    filterKey: CoreFilter.EXTENT
+                });
+            })
+        );
 
-        this.esriView.on('double-click', esriClick => {
-            this.$iApi.event.emit(
-                GlobalEvents.MAP_DOUBLECLICK,
-                this.$iApi.geo.utils.geom.esriMapClickToRamp(
-                    esriClick,
-                    'map_doubleclick_point'
-                )
-            );
-        });
+        this.handlers.push(
+            this.esriView.watch('scale', (newval: number) => {
+                this.$iApi.event.emit(GlobalEvents.MAP_SCALECHANGE, newval);
+            })
+        );
 
-        this.esriView.on('pointer-move', esriMouseMove => {
-            // TODO debounce here? the map event fires pretty much every change in pixel value.
-            this.$iApi.event.emit(
-                GlobalEvents.MAP_MOUSEMOVE,
-                this.$iApi.geo.utils.geom.esriMapMouseToRamp(esriMouseMove)
-            );
-        });
+        this.handlers.push(
+            this.esriView.on('resize', esriResize => {
+                this.$iApi.event.emit(GlobalEvents.MAP_RESIZED, {
+                    height: esriResize.height,
+                    width: esriResize.width
+                });
+            })
+        );
 
-        this.esriView.on('pointer-down', esriMouseDown => {
-            // .native is a DOM pointer event
-            this.$iApi.event.emit(
-                GlobalEvents.MAP_MOUSEDOWN,
-                esriMouseDown.native
-            );
-        });
+        this.handlers.push(
+            this.esriView.on('click', esriClick => {
+                this.$iApi.event.emit(
+                    GlobalEvents.MAP_CLICK,
+                    this.$iApi.geo.utils.geom.esriMapClickToRamp(
+                        esriClick,
+                        'map_click_point'
+                    )
+                );
+            })
+        );
 
-        this.esriView.on('key-down', esriKeyDown => {
-            // .native is a DOM keyboard event
-            this.$iApi.event.emit(GlobalEvents.MAP_KEYDOWN, esriKeyDown.native);
-            esriKeyDown.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('double-click', esriClick => {
+                this.$iApi.event.emit(
+                    GlobalEvents.MAP_DOUBLECLICK,
+                    this.$iApi.geo.utils.geom.esriMapClickToRamp(
+                        esriClick,
+                        'map_doubleclick_point'
+                    )
+                );
+            })
+        );
 
-        this.esriView.on('key-up', esriKeyUp => {
-            // .native is a DOM keyboard event
-            this.$iApi.event.emit(GlobalEvents.MAP_KEYUP, esriKeyUp.native);
-            esriKeyUp.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('pointer-move', esriMouseMove => {
+                // TODO debounce here? the map event fires pretty much every change in pixel value.
+                this.$iApi.event.emit(
+                    GlobalEvents.MAP_MOUSEMOVE,
+                    this.$iApi.geo.utils.geom.esriMapMouseToRamp(esriMouseMove)
+                );
+            })
+        );
 
-        this.esriView.on('blur', esriBlur => {
-            // .native is a DOM keyboard event
-            this.$iApi.event.emit(GlobalEvents.MAP_BLUR, esriBlur.native);
-        });
+        this.handlers.push(
+            this.esriView.on('pointer-down', esriMouseDown => {
+                // .native is a DOM pointer event
+                this.$iApi.event.emit(
+                    GlobalEvents.MAP_MOUSEDOWN,
+                    esriMouseDown.native
+                );
+            })
+        );
+
+        this.handlers.push(
+            this.esriView.on('key-down', esriKeyDown => {
+                // .native is a DOM keyboard event
+                this.$iApi.event.emit(
+                    GlobalEvents.MAP_KEYDOWN,
+                    esriKeyDown.native
+                );
+                esriKeyDown.stopPropagation();
+            })
+        );
+
+        this.handlers.push(
+            this.esriView.on('key-up', esriKeyUp => {
+                // .native is a DOM keyboard event
+                this.$iApi.event.emit(GlobalEvents.MAP_KEYUP, esriKeyUp.native);
+                esriKeyUp.stopPropagation();
+            })
+        );
+
+        this.handlers.push(
+            this.esriView.on('blur', esriBlur => {
+                // .native is a DOM keyboard event
+                this.$iApi.event.emit(GlobalEvents.MAP_BLUR, esriBlur.native);
+            })
+        );
 
         this.esriView.container.addEventListener('touchmove', e => {
             // need this for panning and zooming to work on mobile devices / touchscreens
@@ -200,14 +281,39 @@ export class MapAPI extends CommonMapAPI {
         });
 
         this._viewPromise.resolveMe();
-
         this.created = true;
+    }
 
-        // emit basemap changed event
-        this.$iApi.event.emit(
-            GlobalEvents.MAP_BASEMAPCHANGE,
-            config.initialBasemapId
-        );
+    /**
+     * Reloads the map view by destroying it first and then recreating it
+     * @param config the config the recreate the map with
+     */
+    reloadMap(config: RampMapConfig): void {
+        if (!this.esriView || !this.esriMap) {
+            this.noMapErr();
+            return;
+        }
+
+        // Clean up map view
+        this._viewPromise = new DefPromise();
+        this.handlers.forEach(h => h.remove());
+        this.handlers = [];
+
+        // Destroy the current map view
+        // @ts-ignore
+        this.esriView.map = null;
+        // @ts-ignore
+        this.esriView.container = null;
+        // @ts-ignore
+        this.esriView.spatialReference = null;
+        // @ts-ignore
+        this.esriView.extent = null;
+        // @ts-ignore
+        this.esriView.navigation = null;
+        this.esriView.destroy();
+        delete this.esriView;
+
+        this.createMap(config, this._targetDiv!);
     }
 
     /**
@@ -631,7 +737,7 @@ export class MapAPI extends CommonMapAPI {
             return Extent.fromESRI(this.esriView.extent);
         } else {
             this.noMapErr();
-            return Extent.fromParams('i_am_error', 0, 1, 0, 1); // default fake value. avoids us having undefined checks everywhere.
+            return Extent.fromParams('i_am_error_extent', 0, 1, 0, 1); // default fake value. avoids us having undefined checks everywhere.
         }
     }
 
@@ -646,6 +752,32 @@ export class MapAPI extends CommonMapAPI {
         } else {
             this.noMapErr();
             return SpatialReference.latLongSR(); // default fake value. avoids us having undefined checks everywhere.
+        }
+    }
+
+    /**
+     * Provides the active extent set of the map
+     *
+     * @returns {ExtentSet} the active extent set of the map
+     */
+    getExtentSet(): ExtentSet {
+        if (this._rampExtentSet) {
+            return this._rampExtentSet;
+        } else {
+            this.noMapErr();
+            // default fake value. avoids us having undefined checks everywhere.
+            return ExtentSet.fromConfig({
+                id: 'i_am_error_extent_set',
+                spatialReference: {
+                    wkid: -1
+                },
+                default: {
+                    xmin: 0,
+                    xmax: 1,
+                    ymin: 0,
+                    ymax: 1
+                }
+            });
         }
     }
 

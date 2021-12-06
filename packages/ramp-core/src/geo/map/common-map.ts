@@ -31,13 +31,27 @@ export class CommonMapAPI extends APIScope {
         this._basemapStore = config.basemaps.map(
             bmConfig => new Basemap(bmConfig)
         );
-        const esriConfig: __esri.MapProperties = {};
-        if (config.initialBasemapId) {
-            esriConfig.basemap = toRaw(
-                this.findBasemap(config.initialBasemapId).innerBasemap
-            );
+
+        if (!this.esriMap) {
+            // first time map setup
+            const esriConfig: __esri.MapProperties = {};
+            if (config.initialBasemapId) {
+                esriConfig.basemap = toRaw(
+                    this.findBasemap(config.initialBasemapId).innerBasemap
+                );
+            }
+            this.esriMap = markRaw(new EsriMap(esriConfig));
+            // emit basemap changed event
+            // need to do this here for first time map setup
+            this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, {
+                basemapId: config.initialBasemapId,
+                schemaChanged: false
+            });
+        } else {
+            // creating map again - probably due to map refresh
+            // just set the basemap
+            this.setBasemap(config.initialBasemapId);
         }
-        this.esriMap = markRaw(new EsriMap(esriConfig));
     }
 
     protected findBasemap(id: string): Basemap {
@@ -59,13 +73,7 @@ export class CommonMapAPI extends APIScope {
 
         if (id) {
             const bm: Basemap = this.findBasemap(id);
-            // TODO test tile schema here? trigger a map reload if new schema?
-            //      or will this be handled by the basemap UI? might make sense to do it there;
-            //      would need to back out of this function call and trigger something else if we
-            //      detect here.
-
-            this.esriMap.basemap = bm.innerBasemap;
-            this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, id);
+            this.esriMap.basemap = toRaw(bm.innerBasemap);
         } else {
             // blank basemap case
             // TODO validate this works. the map api spec does not allow setting to undefined.
@@ -76,6 +84,12 @@ export class CommonMapAPI extends APIScope {
     protected noMapErr(): void {
         console.error(
             'Attempted to manipulate the map before calling createMap()'
+        );
+    }
+
+    protected abstractError(): void {
+        throw new Error(
+            `Attempted to call an abstract method in the parent CommonMapAPI`
         );
     }
 

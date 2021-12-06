@@ -1,11 +1,15 @@
 import { markRaw } from 'vue';
-import { CommonMapAPI, InstanceAPI } from '@/api/internal';
+import { Basemap, CommonMapAPI, InstanceAPI } from '@/api/internal';
 import {
     BaseGeometry,
     DefPromise,
     Extent,
+    ExtentSet,
     GeometryType,
+    RampExtentSetConfig,
+    RampLodSetConfig,
     RampMapConfig,
+    RampTileSchemaConfig,
     SpatialReference
 } from '@/geo/api';
 import { EsriLOD, EsriMapView, EsriGraphic } from '@/geo/esri';
@@ -31,6 +35,13 @@ export class OverviewMapAPI extends CommonMapAPI {
     private _rampSR: SpatialReference | undefined;
 
     /**
+     * The viewDiv for the ESRI MapView
+     * The overview map will be rendered using this div object
+     * @private
+     */
+    private _targetDiv: string | HTMLDivElement | undefined;
+
+    /**
      * @constructor
      * @param {InstanceAPI} iApi the RAMP instance
      */
@@ -44,26 +55,72 @@ export class OverviewMapAPI extends CommonMapAPI {
      * Will generate the actual Map control objects and construct it on the page
      * @param {RampMapConfig} config configuration data for the map
      * @param {string | HTMLDivElement} targetDiv the page div or the div id that the map should be created in
+     * @param {boolean | undefined} skipEsriMap flag to indicate if map creation should be skipped (used during reprojection)
      */
-    createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
-        super.createMap(config, targetDiv);
+    createMap(
+        config: RampMapConfig,
+        targetDiv: string | HTMLDivElement,
+        skipEsriMap?: boolean
+    ): void {
+        if (!skipEsriMap) {
+            super.createMap(config, targetDiv);
+        }
 
-        this._rampSR = SpatialReference.fromConfig(
-            config.extent.spatialReference
+        this._targetDiv = targetDiv;
+
+        // get the current tile schema we are in
+        const bm: Basemap = this.findBasemap(config.initialBasemapId);
+        const tileSchemaConfig: RampTileSchemaConfig | undefined =
+            config.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
+
+        if (!tileSchemaConfig) {
+            throw new Error(
+                `Could not find tile schema for the given basemap. ID: ${bm.id}`
+            );
+        }
+
+        const extentSetConfig: RampExtentSetConfig | undefined =
+            config.extentSets.find(
+                es => es.id === tileSchemaConfig.extentSetId
+            );
+
+        if (!extentSetConfig) {
+            throw new Error(
+                `Could not find extent set with the given id: ${tileSchemaConfig.extentSetId}`
+            );
+        }
+
+        const extentSet: ExtentSet = ExtentSet.fromConfig(extentSetConfig);
+        this._rampSR = extentSet.spatialReference.clone();
+
+        const lodSetConfig: RampLodSetConfig | undefined = config.lodSets.find(
+            ls => ls.id === tileSchemaConfig.lodSetId
         );
 
-        const esriViewConfig: __esri.MapViewProperties = {
-            map: this.esriMap,
-            container: targetDiv,
-            constraints: {
-                lods: <Array<EsriLOD>>config.lods,
-                rotationEnabled: false
-            },
-            spatialReference: this._rampSR.toESRI(),
-            extent: config.extent
-        };
+        if (!lodSetConfig) {
+            throw new Error(
+                `Could not find lod set with the given id: ${tileSchemaConfig.lodSetId}`
+            );
+        }
 
-        this.esriView = markRaw(new EsriMapView(esriViewConfig));
+        // create esri view with config
+        this.esriView = markRaw(
+            new EsriMapView({
+                map: this.esriMap,
+                container: targetDiv,
+                constraints: {
+                    lods: <Array<EsriLOD>>lodSetConfig.lods,
+                    rotationEnabled: false
+                },
+                spatialReference: this._rampSR.toESRI(),
+                extent: extentSet.defaultExtent.toESRI(),
+                navigation: {
+                    browserTouchPanEnabled: false
+                }
+            })
+        );
+
+        // Rewove all ui components
         this.esriView.ui.components = [];
 
         // initialize extent rectangle graphic
@@ -105,6 +162,36 @@ export class OverviewMapAPI extends CommonMapAPI {
         });
 
         this._viewPromise.resolveMe();
+    }
+
+    /**
+     * Reloads the map view by destroying it first and then recreating it
+     * @param config the config the recreate the map with
+     */
+    reloadMap(config: RampMapConfig): void {
+        if (!this.esriView || !this.esriMap) {
+            this.noMapErr();
+            return;
+        }
+
+        // Clean up map view
+        this._viewPromise = new DefPromise();
+
+        // Destroy the current map view
+        // @ts-ignore
+        this.esriView.map = null;
+        // @ts-ignore
+        this.esriView.container = null;
+        // @ts-ignore
+        this.esriView.spatialReference = null;
+        // @ts-ignore
+        this.esriView.extent = null;
+        // @ts-ignore
+        this.esriView.navigation = null;
+        this.esriView.destroy();
+        delete this.esriView;
+
+        this.createMap(config, this._targetDiv!);
     }
 
     /**

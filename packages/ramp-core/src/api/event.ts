@@ -114,7 +114,7 @@ export enum GlobalEvents {
 
     /**
      * Fires when the basemap changes.
-     * Payload: `(basemapId: string)`
+     * Payload: `({ basemapId: string, schemaChanged: boolean })`
      */
     MAP_BASEMAPCHANGE = 'map/basemapchanged',
 
@@ -730,11 +730,16 @@ export class EventAPI extends APIScope {
                 );
                 break;
             case DefEH.MAP_BASEMAPCHANGE_ATTRIBUTION:
-                zeHandler = (payload: string) => {
+                zeHandler = (payload: {
+                    basemapId: string;
+                    schemaChanged: boolean;
+                }) => {
                     let currentBasemapConfig: RampBasemapConfig | undefined =
                         this.$iApi
                             .getConfig()
-                            .map.basemaps.find(bms => bms.id === payload);
+                            .map.basemaps.find(
+                                bms => bms.id === payload.basemapId
+                            );
 
                     this.$iApi.geo.map.caption.updateAttribution(
                         currentBasemapConfig?.attribution

@@ -8,11 +8,11 @@ import {
     Polygon,
     SpatialReference,
     SrDef,
-    IdDef,
-    RampExtentConfig
+    IdDef
 } from '@/geo/api';
 import { EsriExtent } from '@/geo/esri';
 import GeoJson from 'geojson';
+import { RampExtentConfig, RampSpatialReference } from '../../geo-defs';
 
 export class Extent extends BaseGeometry {
     // doing things a bit different for Extents.
@@ -119,12 +119,18 @@ export class Extent extends BaseGeometry {
         return new Extent(id, [xmin, ymin], [xmax, ymax], sr);
     }
 
-    static fromConfig(id: IdDef, configExtent: RampExtentConfig): Extent {
+    static fromConfig(
+        id: IdDef,
+        configExtent: RampExtentConfig,
+        configSr?: RampSpatialReference
+    ): Extent {
         return new Extent(
             id,
             [configExtent.xmin, configExtent.ymin],
             [configExtent.xmax, configExtent.ymax],
-            SpatialReference.fromConfig(configExtent.spatialReference)
+            configSr !== undefined
+                ? SpatialReference.fromConfig(configSr)
+                : undefined
         );
     }
 
