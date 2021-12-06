@@ -92,8 +92,9 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { RampBasemapConfig, RampTileSchemaConfig } from '@/geo/api';
-import { get, call } from '@/store/pathify-helper';
+import { get } from '@/store/pathify-helper';
 import { BasemapStore } from './store';
+import { GlobalEvents } from '@/api';
 
 export default defineComponent({
     name: 'BasemapItemV',
@@ -114,15 +115,33 @@ export default defineComponent({
     },
     methods: {
         selectBasemap(basemap: any) {
-            if (this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId) {
-                console.warn(
-                    'Basemap switching between two different tile schemas has not been implemented yet.'
-                );
+            if (this.selectedBasemap.id === basemap.id) {
+                // selected the currently selected basemap, so we return
                 return;
             }
 
-            this.$iApi.geo.map.setBasemap(basemap.id);
-            this.$iApi.$vApp.$store.set(BasemapStore.setBasemap, basemap);
+            const schemaChanged: boolean =
+                this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId;
+
+            // update the store
+            this.$iApi.$vApp.$store.set(BasemapStore.selectedBasemap, basemap);
+            this.$iApi.$vApp.$store.set(
+                BasemapStore.currentTileSchemaId,
+                basemap.tileSchemaId
+            );
+
+            if (schemaChanged) {
+                // reproject the map
+                this.$iApi.geo.map.refreshMap(basemap.id);
+            } else {
+                // change the basemap
+                this.$iApi.geo.map.setBasemap(basemap.id);
+            }
+
+            this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, {
+                basemapId: basemap.id,
+                schemaChanged: schemaChanged
+            });
         }
     }
 });

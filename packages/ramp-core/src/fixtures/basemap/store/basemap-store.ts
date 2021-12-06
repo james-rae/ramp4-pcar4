@@ -9,29 +9,9 @@ type BasemapContext = ActionContext<BasemapState, RootState>;
 
 const getters = {};
 
-const actions = {
-    /**
-     * Update map projection with newly selected basemap (trigger map reload?).
-     *
-     * @function setSelectedBasemap
-     */
-    setBasemap: function (
-        context: BasemapContext,
-        basemap: RampBasemapConfig | undefined
-    ): void {
-        if (!basemap) {
-            return;
-        }
-        context.commit('SET_SELECTED_BASEMAP', basemap);
-    }
-};
+const actions = {};
 
-const mutations = {
-    SET_SELECTED_BASEMAP: (state: BasemapState, basemap: RampBasemapConfig) => {
-        // TODO: reload map with new basemap
-        state.selectedBasemap = basemap;
-    }
-};
+const mutations = {};
 
 export enum BasemapStore {
     /**
@@ -47,9 +27,9 @@ export enum BasemapStore {
      */
     selectedBasemap = 'basemap/selectedBasemap',
     /**
-     * (Action) setBasemap: (basemap: RampBasemapConfig)
+     * (State) currentTileSchemaId: any
      */
-    setBasemap = 'basemap/setBasemap!'
+    currentTileSchemaId = 'basemap/currentTileSchemaId'
 }
 
 export function basemap() {
