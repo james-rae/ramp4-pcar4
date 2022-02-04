@@ -73,10 +73,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { get } from '@/store/pathify-helper';
-import { Extent, ExtentSet, SpatialReference } from '@/geo/api';
+import { Extent } from '@/geo/api';
 import { GlobalEvents, OverviewMapAPI } from '@/api/internal';
 import { OverviewmapStore } from './store';
-import { config } from './default-config';
+import { BasemapStore } from '@/fixtures/basemap/store';
 
 export default defineComponent({
     name: 'OverviewmapV',
@@ -97,11 +97,12 @@ export default defineComponent({
     },
 
     mounted() {
-        const config = this.mapConfig ? this.mapConfig : this.defaultConfig();
+        this._adaptBasemap();
         this.overviewMap.createMap(
-            config,
+            this.mapConfig,
             this.$el.querySelector('.overviewmap') as HTMLDivElement
         );
+
         this.minimized = this.startMinimized;
 
         this.$iApi.event.on(
@@ -111,10 +112,8 @@ export default defineComponent({
             }
         );
 
-        this.$iApi.event.on(GlobalEvents.MAP_BASEMAPCHANGE, (event: any) => {
-            if (event.schemaChanged) {
-                this.reprojectOverview();
-            }
+        this.$iApi.event.on(GlobalEvents.MAP_REFRESH_END, () => {
+            this._adaptBasemap();
         });
     },
 
@@ -122,86 +121,6 @@ export default defineComponent({
         async cursorHitTest(e: MouseEvent) {
             this.hoverOnExtent =
                 !this.minimized && (await this.overviewMap.cursorHitTest(e));
-        },
-
-        defaultConfig() {
-            // check the current main map projection and set the intial basemap accordingly
-            const mercator = [900913, 3587, 54004, 41001, 102113, 102100, 3785];
-            const sr = this.$iApi.geo.map.getSR();
-            if (
-                (sr.wkid && mercator.includes(sr.wkid)) ||
-                (sr.latestWkid && mercator.includes(sr.latestWkid))
-            ) {
-                config.initialBasemapId = 'esriTopo';
-                return config;
-            } else if (sr.wkid === 3978 || sr.latestWkid === 3978) {
-                config.initialBasemapId = 'CBCT';
-                return config;
-            }
-
-            console.error('No default overviewmap for current map projection');
-            return {};
-        },
-
-        /**
-         * Reprojects the overview map
-         * Checks the current spatial reference of the main map and selects a new basemap accordingly
-         */
-        reprojectOverview() {
-            // TODO: is there a better way to do this?
-            //      First I find an extent set with a spatial reference that matches the main map's spatial reference
-            //      Then I find its associated tile schema and then find a basemap in that tile schema.
-            //      If there is a mismatch anywhere in this process, it will blow up with an error
-            try {
-                const config = this.mapConfig
-                    ? this.mapConfig
-                    : this.defaultConfig();
-                let extentSets: Array<ExtentSet> = config.extentSets.map(
-                    (es: any) => ExtentSet.fromConfig(es)
-                );
-
-                const currentMapSR: SpatialReference =
-                    this.$iApi.geo.map.getSR();
-
-                // find an extent set with matching spatial reference
-                const extentSet = extentSets.find(es =>
-                    es.spatialReference.isEqual(currentMapSR)
-                );
-
-                if (!extentSet) {
-                    throw new Error(
-                        'Overview Map could not find an extent set that matches the spatial reference of the map'
-                    );
-                }
-
-                // find a tile schema that uses the found extent set's id
-                const tileSchema = config.tileSchemas.find(
-                    (ts: any) => ts.extentSetId === extentSet.id
-                );
-
-                if (!tileSchema) {
-                    throw new Error(
-                        'Overview Map could not find an tile schema that matches the spatial reference of the map'
-                    );
-                }
-
-                // find a basemap in this tile schema
-                const basemap = config.basemaps.find(
-                    (bm: any) => bm.tileSchemaId === tileSchema.id
-                );
-
-                if (!basemap) {
-                    throw new Error(
-                        'Overview Map could not find a suiting basemap that matches the spatial reference of the map'
-                    );
-                }
-
-                config.initialBasemapId = basemap.id;
-                this.overviewMap.reloadMap(config);
-            } catch {
-                // set to a blank basemap
-                this.overviewMap.setBasemap('');
-            }
         },
 
         mapStyle() {
@@ -217,6 +136,39 @@ export default defineComponent({
                 right: `${this.minimized ? -6 : -3}px`,
                 transform: `rotate(${this.minimized ? 225 : 45}deg)`
             };
+        },
+
+        _adaptBasemap() {
+            const tileSchemaId: string | undefined =
+                this.$iApi.$vApp.$store.get(BasemapStore.currentTileSchemaId);
+
+            if (!tileSchemaId) {
+                throw new Error(
+                    'Overview Map could not obtain the tile schema of the map'
+                );
+            }
+
+            // find a basemap in this tile schema
+            const basemap = this.mapConfig.basemaps.find(
+                (bm: any) => bm.tileSchemaId === tileSchemaId
+            );
+
+            if (!basemap) {
+                throw new Error(
+                    'Overview Map could not find a suitable basemap that matches the spatial reference of the map'
+                );
+            }
+
+            // update intial basemap to suitable basemap
+            this.$iApi.$vApp.$store.set(
+                OverviewmapStore.updateIntialBasemap,
+                basemap.id
+            );
+
+            // check if the map has been created, and if it has refresh it
+            if (this.overviewMap.created) {
+                this.overviewMap.refreshMap(basemap.id);
+            }
         }
     }
 });

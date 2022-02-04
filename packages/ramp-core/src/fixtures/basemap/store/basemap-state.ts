@@ -4,6 +4,7 @@ export class BasemapState {
     tileSchemas: Array<RampTileSchemaConfig> = [];
     basemaps: Array<RampBasemapConfig> = [];
     selectedBasemap: RampBasemapConfig | undefined = undefined;
+    currentTileSchemaId: string | undefined = undefined;
 }
 
 export interface BasemapConfig {

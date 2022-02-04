@@ -1,77 +1,54 @@
 import { markRaw } from 'vue';
 import { Basemap, CommonMapAPI, InstanceAPI } from '@/api/internal';
 import {
-    BaseGeometry,
-    DefPromise,
     Extent,
     ExtentSet,
-    GeometryType,
     RampExtentSetConfig,
     RampLodSetConfig,
     RampMapConfig,
-    RampTileSchemaConfig,
-    SpatialReference
+    RampTileSchemaConfig
 } from '@/geo/api';
 import { EsriLOD, EsriMapView, EsriGraphic } from '@/geo/esri';
+import { ConfigStore } from '@/store/modules/config';
+import { OverviewmapStore } from '@/fixtures/overviewmap/store';
 
 export class OverviewMapAPI extends CommonMapAPI {
-    /**
-     * The internal esri map view. Avoid referencing outside of geoapi.
-     * @private
-     */
-    esriView: __esri.MapView | undefined;
-    protected _viewPromise: DefPromise;
-
-    // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
-    get viewPromise(): Promise<void> {
-        return this._viewPromise.getPromise();
-    }
-
-    /**
-     * The map spatial reference in RAMP API Spatial Reference format.
-     * Saves us from converting from ESRI format every time it is needed
-     * @private
-     */
-    private _rampSR: SpatialReference | undefined;
-
-    /**
-     * The viewDiv for the ESRI MapView
-     * The overview map will be rendered using this div object
-     * @private
-     */
-    private _targetDiv: string | HTMLDivElement | undefined;
-
     /**
      * @constructor
      * @param {InstanceAPI} iApi the RAMP instance
      */
     constructor(iApi: InstanceAPI) {
         super(iApi);
-
-        this._viewPromise = new DefPromise();
     }
 
     /**
-     * Will generate the actual Map control objects and construct it on the page
-     * @param {RampMapConfig} config configuration data for the map
-     * @param {string | HTMLDivElement} targetDiv the page div or the div id that the map should be created in
-     * @param {boolean | undefined} skipEsriMap flag to indicate if map creation should be skipped (used during reprojection)
+     * Will generate a ESRI map view and add it to the page
+     *
+     * @param {string | undefined} basemapId the id of the basemap that should be used when creating the map view
+     * @private
      */
-    createMap(
-        config: RampMapConfig,
-        targetDiv: string | HTMLDivElement,
-        skipEsriMap?: boolean
-    ): void {
-        if (!skipEsriMap) {
-            super.createMap(config, targetDiv);
+    protected createMapView(basemapId?: string): void {
+        // get the config from the store
+        const config: RampMapConfig | undefined = this.$iApi.$vApp.$store.get(
+            OverviewmapStore.mapConfig
+        );
+        if (!config) {
+            throw new Error(
+                'Attempted to create overview map view without a map config'
+            );
         }
 
-        this._targetDiv = targetDiv;
+        basemapId =
+            basemapId !== undefined ? basemapId : config.initialBasemapId;
 
         // get the current tile schema we are in
-        const bm: Basemap = this.findBasemap(config.initialBasemapId);
+        const bm: Basemap = this.findBasemap(basemapId);
+        this.setBasemap(bm.id);
+
+        let mainMapConfig: RampMapConfig | undefined =
+            this.$iApi.$vApp.$store.get(ConfigStore.getMapConfig);
         const tileSchemaConfig: RampTileSchemaConfig | undefined =
-            config.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
+            mainMapConfig?.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
 
         if (!tileSchemaConfig) {
             throw new Error(
@@ -90,8 +67,8 @@ export class OverviewMapAPI extends CommonMapAPI {
             );
         }
 
-        const extentSet: ExtentSet = ExtentSet.fromConfig(extentSetConfig);
-        this._rampSR = extentSet.spatialReference.clone();
+        this._rampExtentSet = ExtentSet.fromConfig(extentSetConfig);
+        this._rampSR = this._rampExtentSet.sr.clone();
 
         const lodSetConfig: RampLodSetConfig | undefined = config.lodSets.find(
             ls => ls.id === tileSchemaConfig.lodSetId
@@ -107,20 +84,20 @@ export class OverviewMapAPI extends CommonMapAPI {
         this.esriView = markRaw(
             new EsriMapView({
                 map: this.esriMap,
-                container: targetDiv,
+                container: this._targetDiv,
                 constraints: {
                     lods: <Array<EsriLOD>>lodSetConfig.lods,
                     rotationEnabled: false
                 },
                 spatialReference: this._rampSR.toESRI(),
-                extent: extentSet.defaultExtent.toESRI(),
+                extent: this._rampExtentSet.defaultExtent.toESRI(),
                 navigation: {
                     browserTouchPanEnabled: false
                 }
             })
         );
 
-        // Rewove all ui components
+        // Remove all ui components
         this.esriView.ui.components = [];
 
         // initialize extent rectangle graphic
@@ -134,26 +111,36 @@ export class OverviewMapAPI extends CommonMapAPI {
         };
         this.esriView.graphics.add(new EsriGraphic(graphic));
 
-        this.esriView.on('mouse-wheel', esriMouseWheel => {
-            esriMouseWheel.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('mouse-wheel', esriMouseWheel => {
+                esriMouseWheel.stopPropagation();
+            })
+        );
 
-        this.esriView.on('double-click', esriDoubleClick => {
-            esriDoubleClick.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('double-click', esriDoubleClick => {
+                esriDoubleClick.stopPropagation();
+            })
+        );
 
-        this.esriView.on('key-down', esriKeyDown => {
-            esriKeyDown.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('key-down', esriKeyDown => {
+                esriKeyDown.stopPropagation();
+            })
+        );
 
-        this.esriView.on('key-up', esriKeyUp => {
-            esriKeyUp.stopPropagation();
-        });
+        this.handlers.push(
+            this.esriView.on('key-up', esriKeyUp => {
+                esriKeyUp.stopPropagation();
+            })
+        );
 
-        this.esriView.on('drag', esriDrag => {
-            esriDrag.stopPropagation();
-            this.mapDrag(esriDrag);
-        });
+        this.handlers.push(
+            this.esriView.on('drag', esriDrag => {
+                esriDrag.stopPropagation();
+                this.mapDrag(esriDrag);
+            })
+        );
 
         this.esriView.container.addEventListener('touchmove', e => {
             // need this for panning and zooming to work on mobile devices / touchscreens
@@ -162,36 +149,7 @@ export class OverviewMapAPI extends CommonMapAPI {
         });
 
         this._viewPromise.resolveMe();
-    }
-
-    /**
-     * Reloads the map view by destroying it first and then recreating it
-     * @param config the config the recreate the map with
-     */
-    reloadMap(config: RampMapConfig): void {
-        if (!this.esriView || !this.esriMap) {
-            this.noMapErr();
-            return;
-        }
-
-        // Clean up map view
-        this._viewPromise = new DefPromise();
-
-        // Destroy the current map view
-        // @ts-ignore
-        this.esriView.map = null;
-        // @ts-ignore
-        this.esriView.container = null;
-        // @ts-ignore
-        this.esriView.spatialReference = null;
-        // @ts-ignore
-        this.esriView.extent = null;
-        // @ts-ignore
-        this.esriView.navigation = null;
-        this.esriView.destroy();
-        delete this.esriView;
-
-        this.createMap(config, this._targetDiv!);
+        this.created = true;
     }
 
     /**
@@ -266,145 +224,5 @@ export class OverviewMapAPI extends CommonMapAPI {
     ): Promise<boolean> {
         const hitTestResult = await this.esriView!.hitTest(e);
         return hitTestResult.results.length > 0;
-    }
-
-    /**
-     * Projects a geometry to the map's spatial reference
-     *
-     * @private
-     * @param {BaseGeometry} geom the RAMP API geometry to project
-     * @returns {Promise<BaseGeometry>} the geometry projected to the map's projection, in RAMP API Geometry format
-     */
-    private geomToMapSR(geom: BaseGeometry): Promise<BaseGeometry> {
-        if (!this._rampSR) {
-            throw new Error(
-                'call to map.geomToMapSR before the map spatial ref was created'
-            );
-        }
-        if (this._rampSR.isEqual(geom.sr)) {
-            return Promise.resolve(geom);
-        } else {
-            return this.$iApi.geo.utils.proj.projectGeometry(
-                this._rampSR,
-                geom
-            );
-        }
-    }
-
-    /**
-     * Zooms the map to a given geometry.
-     *
-     * @param {BaseGeometry} geom A RAMP API geometry to zoom the map to
-     * @param {number} [scale] An optional scale value of the map. Is ignored for non-Point geometries
-     * @param {boolean} [animate] An optional animation setting. On by default
-     * @returns {Promise<void>} A promise that resolves when the map has finished zooming
-     */
-    async zoomMapTo(
-        geom: BaseGeometry,
-        scale?: number,
-        animate: boolean = true
-    ): Promise<void> {
-        // TODO technically this can accept any geometry. should we open up the suggested signatures to allow various things?
-        if (this.esriView) {
-            const g = await this.geomToMapSR(geom);
-            // TODO investigate the `snapTo` parameter if we have an extent / poly coming in
-            //      see how it compares to the old "fit to view" parameter of ESRI3
-            const zoomP: any = {
-                target: this.$iApi.geo.utils.geom.geomRampToEsri(g)
-            };
-            if (g.type === GeometryType.POINT) {
-                zoomP.scale = scale || 50000;
-            }
-            const opts: any = { animate: animate };
-            if (this.esriView) {
-                return this.esriView.goTo(zoomP, opts);
-            }
-        } else {
-            this.noMapErr();
-        }
-    }
-
-    /**
-     * Provides the scale of the map (the scale denominator as integer)
-     *
-     * @returns {number} the map scale
-     */
-    getScale(): number {
-        if (this.esriView) {
-            return this.esriView.scale;
-        } else {
-            this.noMapErr();
-            return 1; // avoid returning zero, could cause divide-by-zero error in caller.
-        }
-    }
-
-    /**
-     * Provides the resolution of the map. This means the number of map units that is covered by one pixel.
-     *
-     * @returns {number} the map resolution
-     */
-    getResolution(): number {
-        if (this.esriView) {
-            return this.esriView.resolution;
-        } else {
-            this.noMapErr();
-            return 1; // avoid returning zero, could cause divide-by-zero error in caller.
-        }
-    }
-
-    /**
-     * Provides the extent of the map
-     *
-     * @returns {Extent} the map extent in RAMP API Extent format
-     */
-    getExtent(): Extent {
-        if (this.esriView) {
-            return Extent.fromESRI(this.esriView.extent);
-        } else {
-            this.noMapErr();
-            return Extent.fromParams('i_am_error', 0, 1, 0, 1); // default fake value. avoids us having undefined checks everywhere.
-        }
-    }
-
-    /**
-     * Provides the spatial reference of the map
-     *
-     * @returns {SpatialReference} the map spatial reference in RAMP API format
-     */
-    getSR(): SpatialReference {
-        if (this._rampSR) {
-            return this._rampSR.clone();
-        } else {
-            this.noMapErr();
-            return SpatialReference.latLongSR(); // default fake value. avoids us having undefined checks everywhere.
-        }
-    }
-
-    /**
-     * Get the height of the map on the screen in pixels
-     *
-     * @returns {Number} pixel height
-     */
-    getPixelHeight(): number {
-        if (this.esriView) {
-            return this.esriView.height;
-        } else {
-            this.noMapErr();
-            return 1; // avoid returning zero, could cause divide-by-zero error in caller.
-        }
-    }
-
-    /**
-     * Get the width of the map on the screen in pixels
-     *
-     * @returns {Number} pixel width
-     */
-    getPixelWidth(): number {
-        if (this.esriView) {
-            return this.esriView.width;
-        } else {
-            this.noMapErr();
-            return 1; // avoid returning zero, could cause divide-by-zero error in caller.
-        }
     }
 }

@@ -1,40 +1,40 @@
-import { SpatialReference, Extent, RampExtentSetConfig } from '@/geo/api';
+import {
+    SpatialReference,
+    Extent,
+    RampExtentSetConfig,
+    SrDef
+} from '@/geo/api';
 
 export class ExtentSet {
-    private _id: string;
-    private _sr: SpatialReference;
+    id: string;
+    sr: SpatialReference;
     private _defaultExtent: Extent;
     private _fullExtent: Extent | undefined;
     private _maximumExtent: Extent | undefined;
 
     constructor(
         id: string,
-        sr: SpatialReference,
         defaultExtent: Extent,
         fullExtent: Extent | undefined = undefined,
         maximumExtent: Extent | undefined = undefined
     ) {
-        this._id = id;
-        this._sr = sr;
+        this.id = id;
+        this.sr = defaultExtent.sr.clone();
         this._defaultExtent = defaultExtent;
         this._fullExtent = fullExtent;
         this._maximumExtent = maximumExtent;
-    }
 
-    get id(): string {
-        return this._id;
-    }
-
-    set id(id: string) {
-        this._id = id;
-    }
-
-    get spatialReference(): SpatialReference {
-        return this._sr;
-    }
-
-    set spatialReference(sr: SpatialReference) {
-        this._sr = sr;
+        // quick extent spatial reference sanity check
+        if (fullExtent && !fullExtent.sr.isEqual(this.sr)) {
+            console.error(
+                `Full extent provided in extent set has a mismatching spatial reference: ${fullExtent.sr}`
+            );
+        }
+        if (maximumExtent && !maximumExtent.sr.isEqual(this.sr)) {
+            console.error(
+                `Maximum extent provided in extent set has a mismatching spatial reference: ${maximumExtent.sr}`
+            );
+        }
     }
 
     get defaultExtent(): Extent {
@@ -81,24 +81,20 @@ export class ExtentSet {
     static fromConfig(extentSetConfig: RampExtentSetConfig): ExtentSet {
         return new ExtentSet(
             extentSetConfig.id,
-            SpatialReference.fromConfig(extentSetConfig.spatialReference),
             Extent.fromConfig(
                 `${extentSetConfig.id}-extent-default`,
-                extentSetConfig.default,
-                extentSetConfig.spatialReference
+                extentSetConfig.default
             ),
             extentSetConfig.full !== undefined
                 ? Extent.fromConfig(
                       `${extentSetConfig.id}-extent-full`,
-                      extentSetConfig.full,
-                      extentSetConfig.spatialReference
+                      extentSetConfig.full
                   )
                 : undefined,
             extentSetConfig.maximum !== undefined
                 ? Extent.fromConfig(
                       `${extentSetConfig.id}-extent-maximum`,
-                      extentSetConfig.maximum,
-                      extentSetConfig.spatialReference
+                      extentSetConfig.maximum
                   )
                 : undefined
         );

@@ -50,15 +50,6 @@
                     "type": "object",
                     "description": "Specifies the map of the overviewmap fixture",
                     "properties": {
-                        "tileSchemas": {
-                            "type": "array",
-                            "description": "Combinations of LOD and extent sets for the overviewmap.",
-                            "items": {
-                                "$ref": "#/$defs/tileSchemaNode"
-                            },
-                            "minItems": 1
-                        },
-
                         "extentSets": {
                             "type": "array",
                             "description": "The default, full and maximum extents of the overviewmap.",
@@ -73,8 +64,12 @@
                                 "$ref": "#/$defs/lodSetNode"
                             }
                         },
-                        "basemap": {
-                            "$ref": "#/defs/basemapNode"
+                        "basemaps": {
+                            "type": "array",
+                            "description": "A list of basemaps to be made available for the overview map. Must provide one basemap for each tile schema provided in the main map config.",
+                            "items": {
+                                "$ref": "#/$defs/basemapNode"
+                            }
                         }
                     }
                 },
@@ -1562,9 +1557,6 @@
                     "type": "string",
                     "description": "Identification for extent set that is mainly referenced by a tile schema."
                 },
-                "spatialReference": {
-                    "$ref": "#/$defs/spatialReferenceNode"
-                },
                 "default": {
                     "$ref": "#/$defs/extentNode",
                     "description": "The default (starting) extent."
@@ -1578,7 +1570,7 @@
                     "description": "The maximum extent; full or default extents will be used if not supplied."
                 }
             },
-            "required": ["id", "default", "spatialReference"],
+            "required": ["id", "default"],
             "unevaluatedProperties": false
         },
         "extentNode": {

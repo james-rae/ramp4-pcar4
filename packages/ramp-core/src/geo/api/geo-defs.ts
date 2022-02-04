@@ -492,6 +492,7 @@ export interface RampExtentConfig {
     xmax: number;
     ymin: number;
     ymax: number;
+    spatialReference: RampSpatialReference;
 }
 
 export interface RampExtentSetConfig {
@@ -499,7 +500,6 @@ export interface RampExtentSetConfig {
     default: RampExtentConfig;
     full?: RampExtentConfig;
     maximum?: RampExtentConfig;
-    spatialReference: RampSpatialReference;
 }
 
 export interface RampBasemapLayerConfig {

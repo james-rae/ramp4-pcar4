@@ -1,5 +1,5 @@
 import { FixtureInstance } from '@/api/internal';
-import { RampMapConfig } from '@/geo/api';
+import { RampBasemapConfig, RampMapConfig } from '@/geo/api';
 import { ConfigStore } from '@/store/modules/config';
 import { BasemapStore, BasemapConfig } from '../store';
 
@@ -35,11 +35,17 @@ export class BasemapAPI extends FixtureInstance {
             basemapConfig.tileSchemas
         );
 
-        this.$iApi.$vApp.$store.set(
-            BasemapStore.selectedBasemap,
+        const basemap: RampBasemapConfig | undefined =
             basemapConfig.basemaps.find(
                 basemap => basemap.id === basemapConfig.initialBasemapId
-            ) || null
-        );
+            );
+
+        if (basemap) {
+            this.$iApi.$vApp.$store.set(BasemapStore.selectedBasemap, basemap);
+            this.$iApi.$vApp.$store.set(
+                BasemapStore.currentTileSchemaId,
+                basemap.tileSchemaId
+            );
+        }
     }
 }

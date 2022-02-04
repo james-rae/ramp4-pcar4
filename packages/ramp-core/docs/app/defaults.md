@@ -103,6 +103,8 @@ TODO if we have API docs that expose the payload interfaces, link to those defin
 | MAP_KEYUP<br>'map/keyup'                           | KeyboardEvent object                                           | A key was released                               |
 | MAP_MOUSEDOWN<br>'map/mousedown'                   | PointerEvent object                                            | A mouse button was depressed                     |
 | MAP_MOUSEMOVE<br>'map/mousemove'                   | MapMove object                                                 | The mouse moved over the map                     |
+| MAP_REFRESH_END<br>'map/refreshend'                | none                                                           | The map view started refreshing                  |
+| MAP_REFRESH_START<br>'map/refreshstart'            | none                                                           | The map views finished refreshing                     |
 | MAP_RESIZED<br>'map/resized'                       | { height: number, width: number }                              | The map view changed size                        |
 | MAP_SCALECHANGE<br>'map/scalechanged'              | scale denominator: number                                      | The map scale changed                            |
 | MAP_START<br>'map/start'                           | none                                                           | The map startup was requested                    |

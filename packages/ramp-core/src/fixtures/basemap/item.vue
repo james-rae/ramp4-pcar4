@@ -92,7 +92,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { RampBasemapConfig, RampTileSchemaConfig } from '@/geo/api';
-import { get, call } from '@/store/pathify-helper';
+import { get } from '@/store/pathify-helper';
 import { BasemapStore } from './store';
 import { GlobalEvents } from '@/api';
 
@@ -115,14 +115,24 @@ export default defineComponent({
     },
     methods: {
         selectBasemap(basemap: any) {
-            if (this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId) {
+            if (this.selectedBasemap.id === basemap.id) {
+                // selected the currently selected basemap, so we return
+                return;
+            }
+
+            const schemaChanged: boolean =
+                this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId;
+
+            // update the store
+            this.$iApi.$vApp.$store.set(BasemapStore.selectedBasemap, basemap);
+            this.$iApi.$vApp.$store.set(
+                BasemapStore.currentTileSchemaId,
+                basemap.tileSchemaId
+            );
+
+            if (schemaChanged) {
                 // reproject the map
-                // Recreate map view by overriding the intial basemap id
-                // TODO: Maybe we need a better way to do this? Overriding the inital basemap id feels like a hack
-                //       Maybe we can rename "intialBasemapId" to "startBasemap" or "currentBasemap"
-                let config = this.$iApi.getConfig().map;
-                config.initialBasemapId = basemap.id;
-                this.$iApi.geo.map.reloadMap(config);
+                this.$iApi.geo.map.refreshMap(basemap.id);
             } else {
                 // change the basemap
                 this.$iApi.geo.map.setBasemap(basemap.id);
@@ -130,11 +140,8 @@ export default defineComponent({
 
             this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, {
                 basemapId: basemap.id,
-                schemaChanged:
-                    this.selectedBasemap.tileSchemaId !== basemap.tileSchemaId
+                schemaChanged: schemaChanged
             });
-
-            this.$iApi.$vApp.$store.set(BasemapStore.setBasemap, basemap);
         }
     }
 });
