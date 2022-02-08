@@ -33,7 +33,7 @@ import {
 import { EsriGraphic, EsriLOD, EsriMapView } from '@/geo/esri';
 import { LayerStore } from '@/store/modules/layer';
 import { MapCaptionAPI } from './caption';
-import { markRaw } from 'vue';
+import { markRaw, toRaw } from 'vue';
 import { ConfigStore } from '@/store/modules/config';
 
 export class MapAPI extends CommonMapAPI {
@@ -76,15 +76,15 @@ export class MapAPI extends CommonMapAPI {
             (typeof basemap === 'string'
                 ? this.findBasemap(basemap)
                 : basemap) || this.findBasemap(config.initialBasemapId);
-        this.setBasemap(bm);
+        this.applyBasemap(bm);
 
         // get the current tile schema we are in
         const tileSchemaConfig: RampTileSchemaConfig | undefined =
-            config.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
+            config.tileSchemas.find(ts => ts.id === bm.config.tileSchemaId);
 
         if (!tileSchemaConfig) {
             throw new Error(
-                `Could not find tile schema for the given basemap id: ${bm.id}`
+                `Could not find tile schema for the given basemap id: ${bm.config.id}`
             );
         }
 
@@ -248,7 +248,7 @@ export class MapAPI extends CommonMapAPI {
     }
 
     /**
-     * Reloads the map view by destroying it first and then recreating it
+     * Refreshes the map view by destroying it first and then recreating it
      * Can optionally provide the basemap or basemap id to be used when creating the map
      *
      * @param {string | Basemap | undefined} basemap the basemap or basemap id that should be used when recreating the map view
@@ -286,6 +286,48 @@ export class MapAPI extends CommonMapAPI {
         this.createMapView(basemap);
 
         this.$iApi.event.emit(GlobalEvents.MAP_REFRESH_END);
+    }
+
+    /**
+     * Sets the basemap to the basemap with the given id or the basemap object
+     * Throws error if basemap could not be found
+     *
+     * @param {string | basemap} basemap the basemap id or object
+     * @protected
+     */
+    protected applyBasemap(basemap: string | Basemap): void {
+        if (!this.esriMap) {
+            this.noMapErr();
+            return;
+        }
+
+        const bm: Basemap =
+            typeof basemap === 'string' ? this.findBasemap(basemap) : basemap;
+        this.esriMap.basemap = toRaw(bm.innerBasemap);
+
+        // update the store
+        this.$iApi.$vApp.$store.set(ConfigStore.setActiveBasemap, bm.config);
+    }
+
+    /**
+     * Set the map's basemap to the basemap with the given id.
+     * If the new basemap's tile schema differs from the current one, the map view will be refreshed
+     *
+     * The returned boolean indicates if the schema has changed.
+     *
+     * @param {string} basemapId the basemap id
+     * @returns {boolean} indicates if the schema has changed
+     */
+    setBasemap(basemapId: string): boolean {
+        const schemaChanged: boolean = super.setBasemap(basemapId);
+
+        // fire the basemap change event
+        this.$iApi.event.emit(GlobalEvents.MAP_BASEMAPCHANGE, {
+            basemapId: basemapId,
+            schemaChanged: schemaChanged
+        });
+
+        return schemaChanged;
     }
 
     /**

@@ -186,13 +186,13 @@ export enum GlobalEvents {
     MAP_MOUSEMOVE = 'map/mousemove',
 
     /**
-     * Fires when the map view ends reloading.
+     * Fires when the map view finishes refreshing.
      * Payload: none
      */
     MAP_REFRESH_END = 'map/refreshend',
 
     /**
-     * Fires when the map view starts reloading.
+     * Fires when the map view starts refreshing.
      * Payload: none
      */
     MAP_REFRESH_START = 'map/refreshstart',
@@ -745,19 +745,13 @@ export class EventAPI extends APIScope {
                 );
                 break;
             case DefEH.MAP_BASEMAPCHANGE_ATTRIBUTION:
-                zeHandler = (payload: {
-                    basemapId: string;
-                    schemaChanged: boolean;
-                }) => {
-                    let mainMapConfig: RampMapConfig | undefined =
-                        this.$iApi.$vApp.$store.get(ConfigStore.getMapConfig);
-                    let currentBasemapConfig: RampBasemapConfig | undefined =
-                        mainMapConfig!.basemaps.find(
-                            bms => bms.id === payload.basemapId
-                        );
-
+                zeHandler = () => {
                     this.$iApi.geo.map.caption.updateAttribution(
-                        currentBasemapConfig?.attribution
+                        (
+                            this.$iApi.$vApp.$store.get(
+                                ConfigStore.getActiveBasemapConfig
+                            ) as RampBasemapConfig
+                        )?.attribution
                     );
                 };
                 this.$iApi.event.on(
@@ -787,15 +781,12 @@ export class EventAPI extends APIScope {
                 break;
             case DefEH.MAP_CREATED_ATTRIBUTION:
                 zeHandler = () => {
-                    let mainMapConfig: RampMapConfig | undefined =
-                        this.$iApi.$vApp.$store.get(ConfigStore.getMapConfig);
-                    let currentBasemapConfig: RampBasemapConfig | undefined =
-                        mainMapConfig!.basemaps.find(
-                            bms => bms.id === mainMapConfig!.initialBasemapId
-                        );
-
                     this.$iApi.geo.map.caption.updateAttribution(
-                        currentBasemapConfig?.attribution
+                        (
+                            this.$iApi.$vApp.$store.get(
+                                ConfigStore.getActiveBasemapConfig
+                            ) as RampBasemapConfig
+                        )?.attribution
                     );
                 };
                 this.$iApi.event.on(

@@ -66,7 +66,7 @@
                         },
                         "basemaps": {
                             "type": "array",
-                            "description": "A list of basemaps to be made available for the overview map. Must provide one basemap for each tile schema provided in the main map config.",
+                            "description": "A list of basemaps to be made available for the overview map. Can provide one basemap for each tile schema provided in the main map config.",
                             "items": {
                                 "$ref": "#/$defs/basemapNode"
                             }

@@ -76,7 +76,7 @@ import { get } from '@/store/pathify-helper';
 import { Extent, RampBasemapConfig } from '@/geo/api';
 import { GlobalEvents, OverviewMapAPI } from '@/api/internal';
 import { OverviewmapStore } from './store';
-import { BasemapStore } from '@/fixtures/basemap/store';
+import { ConfigStore } from '@/store/modules/config';
 
 export default defineComponent({
     name: 'OverviewmapV',
@@ -141,12 +141,19 @@ export default defineComponent({
         },
 
         _adaptBasemap() {
+            // try to find a suitable basemap
+            const currBm: RampBasemapConfig | undefined =
+                this.$iApi.$vApp.$store.get(ConfigStore.getActiveBasemapConfig);
+
+            if (!currBm) {
+                console.error(
+                    'Overview Map could not obtain the basemap config used by the main map'
+                );
+                return;
+            }
+
             try {
-                // try to find a suitable basemap
-                const tileSchemaId: string | undefined =
-                    this.$iApi.$vApp.$store.get(
-                        BasemapStore.currentTileSchemaId
-                    );
+                const tileSchemaId: string | undefined = currBm?.tileSchemaId;
 
                 if (!tileSchemaId) {
                     throw new Error(
@@ -165,13 +172,15 @@ export default defineComponent({
                     );
                 }
 
-                // update intial basemap to suitable basemap
-                this.$iApi.$vApp.$store.set(
-                    OverviewmapStore.updateIntialBasemap,
-                    basemap.id
-                );
+                // override the intial basemap id in the overview map config
+                if (!this.overviewMap.created) {
+                    this.$iApi.$vApp.$store.set(
+                        OverviewmapStore.updateIntialBasemap,
+                        basemap.id
+                    );
+                }
 
-                // refresh the map once the map loads
+                // set the basemap if the map has been created
                 if (this.overviewMap.created) {
                     this.overviewMap.refreshMap(basemap.id);
                 }
@@ -179,25 +188,9 @@ export default defineComponent({
                 // if we errored above, just use the main map's basemap
                 console.warn(`${err}. Will default to the main map's basemap.`);
 
-                // get the config of the basemap used currently by the map
-                const bmConfig: RampBasemapConfig | undefined =
-                    this.$iApi.$vApp.$store.get(BasemapStore.selectedBasemap);
-                if (!bmConfig) {
-                    console.error(
-                        'Overview Map could not use the basemap config of the main map'
-                    );
-                    return;
-                }
-
-                // update intial basemap to suitable basemap
-                this.$iApi.$vApp.$store.set(
-                    OverviewmapStore.updateIntialBasemap,
-                    bmConfig.id
-                );
-
                 // set the basemap once the map loads
                 this.overviewMap.viewPromise.then(() =>
-                    this.overviewMap.refreshMap(bmConfig.id)
+                    this.overviewMap.refreshMap(currBm.id)
                 );
             }
         }

@@ -43,17 +43,19 @@ export class OverviewMapAPI extends CommonMapAPI {
             (typeof basemap === 'string'
                 ? this.findBasemap(basemap)
                 : basemap) || this.findBasemap(config.initialBasemapId);
-        this.setBasemap(bm);
+        this.applyBasemap(bm);
 
         // get the current tile schema we are in
         let mainMapConfig: RampMapConfig | undefined =
             this.$iApi.$vApp.$store.get(ConfigStore.getMapConfig);
         const tileSchemaConfig: RampTileSchemaConfig | undefined =
-            mainMapConfig?.tileSchemas.find(ts => ts.id === bm.tileSchemaId);
+            mainMapConfig?.tileSchemas.find(
+                ts => ts.id === bm.config.tileSchemaId
+            );
 
         if (!tileSchemaConfig) {
             throw new Error(
-                `Could not find tile schema for the given basemap id: ${bm.id}`
+                `Could not find tile schema for the given basemap id: ${bm.config.id}`
             );
         }
 
@@ -163,7 +165,7 @@ export class OverviewMapAPI extends CommonMapAPI {
      */
     protected findBasemap(id: string): Basemap {
         const bm: Basemap | undefined = this._basemapStore.find(
-            bms => bms.id === id
+            bms => bms.config.id === id
         );
         if (bm) {
             return bm;

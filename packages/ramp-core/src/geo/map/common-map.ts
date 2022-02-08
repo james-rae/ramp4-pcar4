@@ -14,9 +14,11 @@ import {
     Extent,
     ExtentSet,
     GeometryType,
+    RampBasemapConfig,
     RampMapConfig,
     SpatialReference
 } from '@/geo/api';
+import { ConfigStore } from '@/store/modules/config';
 
 // Would ideally call this BaseMap, but that would get confused with Basemap.
 // We also use "Base" for our vuex state classes so want to avoid naming overlaps.
@@ -43,9 +45,6 @@ export class CommonMapAPI extends APIScope {
     // NOTE unlike ESRI3, the map view doesnt have a custom event, it uses property watches.
     //      so if we want to detect scale change we'll need to have another event, it won't be
     //      a big bundle of properties like ESRI3 provided
-
-    // NOTE while having this var be protected makes sense, there are also cases where other parts of the geoapi need to access this.
-    //      being public will also to allow hacking, which can be useful in a pinch. use underscore to make it clear this in not for playtimes.
     /**
      * The internal esri map view. Avoid referencing outside of geoapi.
      * @private
@@ -53,7 +52,7 @@ export class CommonMapAPI extends APIScope {
     esriView: __esri.MapView | undefined;
     protected _viewPromise: DefPromise;
 
-    // a promise that resolves when a layer view has been created on the map. helps bridge the view handler with the layer load handler
+    // a promise that resolves when the map view has been created
     get viewPromise(): Promise<void> {
         return this._viewPromise.getPromise();
     }
@@ -141,7 +140,7 @@ export class CommonMapAPI extends APIScope {
     }
 
     /**
-     * Reloads the map view by destroying it first and then recreating it
+     * Refreshes the map view by destroying it first and then recreating it
      * Can optionally provide the basemap or basemap id to be used when creating the map
      *
      * @param {string | Basemap | undefined} basemap the basemap or basemap id that should be used when recreating the map view
@@ -186,7 +185,7 @@ export class CommonMapAPI extends APIScope {
      */
     protected findBasemap(id: string): Basemap {
         const bm: Basemap | undefined = this._basemapStore.find(
-            bms => bms.id === id
+            bms => bms.config.id === id
         );
         if (bm) {
             return bm;
@@ -196,25 +195,50 @@ export class CommonMapAPI extends APIScope {
     }
 
     /**
-     * Sets the basemap to the basemap with the given id or the basemap object
-     * Throws error if basemap could not be found
+     * Applies the given basemap (or basemap with given id) to the esri map
+     * Throws error if basemap could not be found with the given id
      *
      * @param {string | basemap} basemap the basemap id or object
      * @protected
      */
-    setBasemap(basemap: string | Basemap): void {
+    protected applyBasemap(basemap: string | Basemap): void {
         if (!this.esriMap) {
             this.noMapErr();
             return;
         }
 
-        if (typeof basemap === 'string') {
-            this.esriMap.basemap = toRaw(
-                this.findBasemap(basemap).innerBasemap
-            );
+        const bm: Basemap =
+            typeof basemap === 'string' ? this.findBasemap(basemap) : basemap;
+        this.esriMap.basemap = toRaw(bm.innerBasemap);
+    }
+
+    /**
+     * Set the map's basemap to the basemap with the given id.
+     * If the new basemap's tile schema differs from the current one, the map view will be refreshed
+     *
+     * The returned boolean indicates if the schema has changed.
+     *
+     * @param {string} basemapId the basemap id
+     * @returns {boolean} indicates if the schema has changed
+     */
+    setBasemap(basemapId: string): boolean {
+        const bm: Basemap = this.findBasemap(basemapId);
+        const currentBasemp: RampBasemapConfig = this.$iApi.$vApp.$store.get(
+            ConfigStore.getActiveBasemapConfig
+        )! as RampBasemapConfig;
+
+        const schemaChanged: boolean =
+            currentBasemp.tileSchemaId !== bm.config.tileSchemaId;
+
+        if (schemaChanged) {
+            // reproject the map
+            this.refreshMap(bm);
         } else {
-            (this.esriMap as any).basemap = toRaw(basemap.innerBasemap);
+            // change the basemap
+            this.applyBasemap(bm);
         }
+
+        return schemaChanged;
     }
 
     /**
@@ -266,7 +290,6 @@ export class CommonMapAPI extends APIScope {
         scale?: number,
         animate: boolean = true
     ): Promise<void> {
-        // TODO technically this can accept any geometry. should we open up the suggested signatures to allow various things?
         if (this.esriView) {
             const g = await this.geomToMapSR(geom);
             // TODO investigate the `snapTo` parameter if we have an extent / poly coming in

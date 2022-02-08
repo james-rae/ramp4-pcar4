@@ -55,10 +55,14 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { get } from '@/store/pathify-helper';
-import { BasemapStore } from './store';
 import BasemapItemV from './item.vue';
-import { RampBasemapConfig } from '@/geo/api';
+import {
+    RampBasemapConfig,
+    RampMapConfig,
+    RampTileSchemaConfig
+} from '@/geo/api';
 import { PanelInstance } from '@/api';
+import { ConfigStore } from '@/store/modules/config';
 
 export default defineComponent({
     name: 'BasemapScreenV',
@@ -72,10 +76,17 @@ export default defineComponent({
     },
     data() {
         return {
-            tileSchemas: get(BasemapStore.tileSchemas),
-            basemaps: get(BasemapStore.basemaps),
-            selectedBasemap: get(BasemapStore.selectedBasemap)
+            tileSchemas: [] as Array<RampTileSchemaConfig>,
+            basemaps: [] as Array<RampBasemapConfig>,
+            selectedBasemap: get(ConfigStore.getActiveBasemapConfig)
         };
+    },
+    mounted() {
+        const mapConfig: RampMapConfig = this.$iApi.$vApp.$store.get(
+            ConfigStore.getMapConfig
+        )! as RampMapConfig;
+        this.tileSchemas = mapConfig.tileSchemas;
+        this.basemaps = mapConfig.basemaps;
     },
     methods: {
         filterBasemaps(schemaId: string) {
