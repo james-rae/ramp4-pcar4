@@ -442,6 +442,13 @@ let config = {
                         selected: false
                     },
                     fileName: 'ramp-pcar-4-map-carte'
+                },
+                hilight: {
+                    mode: 'glow',
+                    options: {
+                        haloColor: [0, 255, 0],
+                        haloOpacity: 0.8
+                    }
                 }
             },
             system: { animate: true }

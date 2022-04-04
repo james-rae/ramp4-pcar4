@@ -14,6 +14,16 @@
                         </div>
                     </div>
 
+                    <!-- highlight toggle -->
+                    <div class="p-8 mb-8 bg-gray-100 flex justify-between">
+                        <div>Toggle Highlight</div>
+                        <Toggle
+                            @change="() => onHilightToggle()"
+                            v-model="hilightToggle"
+                            :classes="toggleClasses"
+                        ></Toggle>
+                    </div>
+
                     <!-- result list -->
                     <button
                         class="w-full flex px-16 py-10 text-md hover:bg-gray-200 cursor-pointer"
@@ -60,10 +70,13 @@
 </template>
 
 <script lang="ts">
+// This screen is the view of all geometries on a specific layer interrogated in the identify (details screen)
+
 import { defineComponent, type PropType } from 'vue';
+import type { DetailsAPI } from './api/details';
 import { GlobalEvents, type LayerInstance, type PanelInstance } from '@/api';
 import type { IdentifyResult } from '@/geo/api';
-
+import Toggle from '@vueform/toggle';
 import { DetailsStore } from './store';
 
 export default defineComponent({
@@ -83,12 +96,36 @@ export default defineComponent({
             default: -1
         }
     },
+    components: { Toggle },
     data() {
         return {
             icon: [] as string[],
             layerExists: false, // tracks whether the layer still exists
             detailProperties: this.get(DetailsStore.properties),
-            handlers: [] as Array<string>
+            handlers: [] as Array<string>,
+            details: this.$iApi.fixture.get('details') as DetailsAPI,
+            hilightToggle: true,
+            // toggle classes from settings panel toggle
+            toggleClasses: {
+                container:
+                    'inline-block rounded-full outline-none focus:ring focus:ring-blue-500 focus:ring-opacity-30',
+                toggle: 'flex w-40 h-15 rounded-full relative cursor-pointer transition items-center box-content border-2 text-xs leading-none',
+                toggleOn:
+                    'bg-blue-500 border-blue-500 justify-start text-white',
+                toggleOff:
+                    'bg-gray-200 border-gray-200 justify-end text-gray-700',
+                toggleOnDisabled:
+                    'bg-gray-300 border-gray-300 justify-start text-gray-400 cursor-not-allowed',
+                toggleOffDisabled:
+                    'bg-gray-200 border-gray-200 justify-end text-gray-400 cursor-not-allowed',
+                handle: 'inline-block bg-white w-15 h-15 top-0 rounded-full absolute transition-all',
+                handleOn: 'left-full transform -translate-x-full',
+                handleOff: 'left-0',
+                handleOnDisabled:
+                    'bg-gray-100 left-full transform -translate-x-full',
+                handleOffDisabled: 'bg-gray-100 left-0',
+                label: 'text-center w-8 border-box whitespace-nowrap select-none'
+            }
         };
     },
     computed: {
@@ -121,6 +158,15 @@ export default defineComponent({
         this.layerExists =
             this.$iApi.geo.layer.getLayer(this.result.uid) !== undefined;
 
+        this.hilightToggle =
+            this.$store.get(DetailsStore.hilightToggle) ?? this.hilightToggle;
+        if (this.hilightToggle) {
+            this.details.hilightDetailsItems(
+                this.result.items,
+                this.result.uid
+            );
+        }
+
         this.$iApi.updateAlert(
             this.$iApi.$vApp.$t('details.item.alert.show.list', {
                 layerName: this.layerName
@@ -138,11 +184,39 @@ export default defineComponent({
                 }
             )
         );
+
+        this.handlers.push(
+            this.$iApi.event.on(GlobalEvents.DETAILS_CLOSED, () =>
+                this.detailsClosed()
+            )
+        );
+
+        this.handlers.push(
+            this.$iApi.event.on(GlobalEvents.DETAILS_MINIMIZED, () =>
+                this.detailsMinimized()
+            )
+        );
     },
     beforeUnmount() {
         this.handlers.forEach(handler => this.$iApi.event.off(handler));
     },
     methods: {
+        /**
+         * Clean up for when the details screen is closed.
+         */
+        detailsClosed() {
+            this.details.removeDetailsHilight();
+            this.$store.set(DetailsStore.hilightToggle, true);
+        },
+
+        /**
+         * Clean up for when the details screen is minimized.
+         */
+        detailsMinimized() {
+            // TODO: on minimize, do we want to keep the hilight?
+            this.details.removeDetailsHilight();
+        },
+
         /**
          * Switches the panel screen to display the data for a given result. Provides the currently selected layer index and the currently selected feature index as props.
          */
@@ -177,6 +251,14 @@ export default defineComponent({
             });
 
             return this.icon[idx];
+        },
+
+        onHilightToggle() {
+            this.details.onHilightToggle(
+                this.hilightToggle,
+                this.result.items,
+                this.result.uid
+            );
         }
     }
 });

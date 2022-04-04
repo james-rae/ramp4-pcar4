@@ -221,6 +221,12 @@ export class PanelAPI extends APIScope {
         );
         this.$iApi.event.emit(GlobalEvents.PANEL_CLOSED, panel);
 
+        switch (panel.id) {
+            case 'details-items':
+                this.$iApi.event.emit(GlobalEvents.DETAILS_CLOSED);
+                break;
+        }
+
         return panel;
     }
 
@@ -244,6 +250,12 @@ export class PanelAPI extends APIScope {
                 name: this.$vApp.$t(panel.alertName)
             })
         );
+
+        switch (panel.id) {
+            case 'details-items':
+                this.$iApi.event.emit(GlobalEvents.DETAILS_MINIMIZED);
+                break;
+        }
 
         return panel;
     }
