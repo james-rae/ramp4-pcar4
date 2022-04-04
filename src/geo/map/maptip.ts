@@ -79,7 +79,9 @@ export class MaptipAPI extends APIScope {
             return;
         }
 
-        if (!layerInstance.hovertips) {
+        // TODO: remove this once we support hovers on RAMP graphics
+        // HILGIHT TODO: after pulling test if we still need the 2nd condition
+        if (!layerInstance.hovertips || layerInstance.isCosmetic) {
             // the hit layer doesn't support hovertips
             return;
         }

@@ -127,6 +127,7 @@ import type { FieldDefinition, IdentifyResult, IdentifyItem } from '@/geo/api';
 
 import ESRIDefaultV from './templates/esri-default.vue';
 import HTMLDefaultV from './templates/html-default.vue';
+import type { HilightAPI } from '../hilight/api/hilight';
 
 export default defineComponent({
     name: 'DetailsItemScreenV',
@@ -172,6 +173,7 @@ export default defineComponent({
          * Returns the information for a single identify result item, item index.
          */
         identifyItem(): IdentifyItem {
+            console.log(this.result.items[this.currentIdx]);
             return this.result.items[this.currentIdx];
         },
 
@@ -278,6 +280,7 @@ export default defineComponent({
                             : ''
                     }`
                 );
+                this.hilightItems(this.result.items[this.currentIdx]);
             } else {
                 // wait for load.
                 const localCurrentIndex = this.currentIdx;
@@ -309,6 +312,7 @@ export default defineComponent({
                     previousItemIndex: this.currentIdx
                 }
             });
+            this.hilightItems(this.result.items);
         },
 
         /**
@@ -388,6 +392,35 @@ export default defineComponent({
             this.$iApi.updateAlert(
                 this.$iApi.$vApp.$t('details.item.alert.zoom')
             );
+        },
+
+        /**
+         * Highlight identified items
+         * @param items identified items
+         */
+        hilightItems(items: IdentifyItem | Array<IdentifyItem>) {
+            // hilight all geometries for this layer
+            const layer: LayerInstance | undefined = this.getLayerByUid(
+                this.result.uid
+            );
+            if (layer) {
+                const hItems = items instanceof Array ? items : [items];
+                const hilightFix: HilightAPI =
+                    this.$iApi.fixture.get('hilight');
+                if (hilightFix) {
+                    hilightFix.toggleHilightOff();
+                    const gids: Array<string> = [];
+                    hItems.forEach(g => {
+                        gids.push(
+                            hilightFix.constructGraphicKey(
+                                this.result.uid,
+                                g.data[layer.oidField]
+                            )
+                        );
+                    });
+                    hilightFix.toggleHilightOn(gids);
+                }
+            }
         }
     }
 });
