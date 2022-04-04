@@ -3,7 +3,7 @@
 // TODO add proper comments
 
 import { CommonLayer, InstanceAPI } from '@/api/internal';
-import type { EsriGraphicsLayer } from '@/geo/esri';
+import type { EsriGraphic, EsriGraphicsLayer } from '@/geo/esri';
 import { DataFormat, Graphic } from '@/geo/api';
 import type { RampLayerConfig } from '@/geo/api';
 
@@ -62,6 +62,10 @@ export class CommonGraphicLayer extends CommonLayer {
      */
     getLocalGraphic(graphicId: string): Graphic | undefined {
         return this._graphics.find(g => g.id === graphicId);
+    }
+
+    getEsriGraphic(graphicId: string): EsriGraphic | undefined {
+        return this.esriLayer?.graphics.find((g: any) => g.id === graphicId);
     }
 
     protected notLoadedErr(): void {
@@ -142,6 +146,7 @@ export class CommonGraphicLayer extends CommonLayer {
         if (typeof graphics === 'undefined') {
             // TODO remove hover stuff once supported
             this.esriLayer.removeAll();
+            this._graphics.splice(0, this._graphics.length);
             // TODO raise event?
             return;
         }
@@ -179,6 +184,8 @@ export class CommonGraphicLayer extends CommonLayer {
 
         // TODO remove hover stuff once supported
         this.esriLayer.removeMany(targets);
+        // not sure if there any places keeping a reference to this.graphics
+        this._graphics = this._graphics.filter(g => ids.includes(g.id));
 
         // TODO raise event?
     }

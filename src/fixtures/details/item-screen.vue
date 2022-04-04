@@ -127,6 +127,7 @@ import type { FieldDefinition, IdentifyResult, IdentifyItem } from '@/geo/api';
 
 import ESRIDefaultV from './templates/esri-default.vue';
 import HTMLDefaultV from './templates/html-default.vue';
+import type { HilightAPI } from '../hilight/api/hilight';
 
 export default defineComponent({
     name: 'DetailsItemScreenV',
@@ -172,6 +173,32 @@ export default defineComponent({
          * Returns the information for a single identify result item, item index.
          */
         identifyItem(): IdentifyItem {
+            console.log(this.result.items[this.currentIdx]);
+            // highlight the identified item
+            const layer: LayerInstance | undefined = this.getLayerByUid(
+                this.result.uid
+            );
+            if (layer) {
+                layer.isLayerLoaded().then(() => {
+                    const hilightFix: HilightAPI =
+                        this.$iApi.fixture.get('hilight');
+                    if (hilightFix) {
+                        hilightFix.toggleHilightOff();
+                        this.result.items[this.currentIdx].loading.then(() => {
+                            const oid =
+                                this.result.items[this.currentIdx].data[
+                                    layer.oidField
+                                ];
+                            const gid = hilightFix.constructGraphicKey(
+                                this.result.uid,
+                                oid
+                            );
+                            hilightFix.toggleHilightOn(gid);
+                        });
+                    }
+                });
+            }
+
             return this.result.items[this.currentIdx];
         },
 
@@ -302,6 +329,28 @@ export default defineComponent({
          * See all results from the identified layer
          */
         seeList() {
+            // hilight all geometries for this layer
+            const layer: LayerInstance | undefined = this.getLayerByUid(
+                this.result.uid
+            );
+            if (layer) {
+                const hilightFix: HilightAPI =
+                    this.$iApi.fixture.get('hilight');
+                if (hilightFix) {
+                    hilightFix.toggleHilightOff();
+                    const gids: Array<string> = [];
+                    this.result.items.forEach(g => {
+                        gids.push(
+                            hilightFix.constructGraphicKey(
+                                this.result.uid,
+                                g.data[layer.oidField]
+                            )
+                        );
+                    });
+                    hilightFix.toggleHilightOn(gids);
+                }
+            }
+
             this.panel.show({
                 screen: 'results-screen',
                 props: {

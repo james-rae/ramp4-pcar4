@@ -7,6 +7,7 @@ import type { GridAPI } from '@/fixtures/grid/api/grid';
 import type { WizardAPI } from '@/fixtures/wizard/api/wizard';
 import type { LegendAPI } from '@/fixtures/legend/api/legend';
 import type { LayerReorderAPI } from '@/fixtures/layer-reorder/api/layer-reorder';
+import type { HilightAPI } from '@/fixtures/hilight/api/hilight';
 import { LegendStore } from '@/fixtures/legend/store';
 import { GridStore, GridAction } from '@/fixtures/grid/store';
 import type {
@@ -598,9 +599,18 @@ export class EventAPI extends APIScope {
         switch (handlerName) {
             case DefEH.MAP_IDENTIFY:
                 // when map clicks, run the identify action
+
                 zeHandler = (clickParam: MapClick) => {
-                    if (clickParam.button === 0) {
-                        this.$iApi.geo.map.runIdentify(clickParam);
+                    const hilightFix: HilightAPI =
+                        this.$iApi.fixture.get('hilight');
+                    // implement identify on/off (first click identify, second click clears, third click identifies again)
+                    // NOTE: we might want to revisit this on/off behaviour later on if we feel this is too clunky
+                    if (hilightFix && hilightFix.isIdentified) {
+                        hilightFix.clearHilightGraphics();
+                    } else {
+                        if (clickParam.button === 0) {
+                            this.$iApi.geo.map.runIdentify(clickParam);
+                        }
                     }
                 };
                 this.on(GlobalEvents.MAP_CLICK, zeHandler, handlerName);

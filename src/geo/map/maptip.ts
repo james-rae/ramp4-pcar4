@@ -79,7 +79,7 @@ export class MaptipAPI extends APIScope {
             return;
         }
 
-        if (!layerInstance.hovertips) {
+        if (!layerInstance.hovertips || layerInstance.isCosmetic) {
             // the hit layer doesn't support hovertips
             return;
         }
