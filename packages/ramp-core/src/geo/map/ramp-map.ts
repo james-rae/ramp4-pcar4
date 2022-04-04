@@ -126,6 +126,10 @@ export class MapAPI extends CommonMapAPI {
                 extent: this._rampExtentSet.defaultExtent.toESRI(),
                 navigation: {
                     browserTouchPanEnabled: false
+                },
+                highlightOptions: {
+                    haloColor: [0, 255, 0],
+                    haloOpacity: 0.8
                 }
             })
         );

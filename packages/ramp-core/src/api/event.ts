@@ -7,6 +7,7 @@ import { GridAPI } from '@/fixtures/grid/api/grid';
 import { WizardAPI } from '@/fixtures/wizard/api/wizard';
 import { LegendAPI } from '@/fixtures/legend/api/legend';
 import { LayerReorderAPI } from '@/fixtures/layer-reorder/api/layer-reorder';
+import { HilightAPI } from '@/fixtures/hilight/api/hilight';
 import { LegendStore } from '@/fixtures/legend/store';
 import { GridStore, GridAction } from '@/fixtures/grid/store';
 import {
@@ -22,6 +23,7 @@ import { debounce, throttle } from 'throttle-debounce';
 import { MapCaptionStore } from '@/store/modules/map-caption';
 import { LayerStore } from '@/store/modules/layer';
 import { ConfigStore } from '@/store/modules/config';
+import { hilight } from '@/fixtures/hilight/store';
 
 // TODO ensure some of the internal types used in the payload comments are published
 //      as part of our API doc generator. Would be ideal if doc output hyperlinked to
@@ -580,9 +582,19 @@ export class EventAPI extends APIScope {
         switch (handlerName) {
             case DefEH.MAP_IDENTIFY:
                 // when map clicks, run the identify action
+
                 zeHandler = (clickParam: MapClick) => {
-                    if (clickParam.button === 0) {
-                        this.$iApi.geo.map.runIdentify(clickParam);
+                    const hilightFix: HilightAPI =
+                        this.$iApi.fixture.get('hilight');
+                    // console.log(hilightFix);
+                    if (hilightFix && hilightFix.isIdentified) {
+                        hilightFix.clearHilightPoints();
+                        hilightFix.isIdentified = false;
+                    } else {
+                        if (clickParam.button === 0) {
+                            this.$iApi.geo.map.runIdentify(clickParam);
+                        }
+                        hilightFix.isIdentified = true;
                     }
                 };
                 this.on(GlobalEvents.MAP_CLICK, zeHandler, handlerName);
