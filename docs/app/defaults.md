@@ -126,6 +126,8 @@ TODO add stuff as we make events that core fixtures raise
 
 | Event Name                           | Payload                                                 | Event Announces                                                |
 | ------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------- |
+| DETAILS_CLOSED <br> 'details/closed' | none | The details panel was closed.
+| DETAILS_MINIMIZED <br> 'details/minimized' | none | The details panel was minimized.
 | DETAILS_OPEN<br>'details/open'       | { data: any, uid: string, format: string }              | A feature's details was requested                              |
 | GRID_TOGGLE<br>'grid/toggle'         | layer: LayerInstance, _open_: boolean (optional)        | Grid panel toggle was requested with optional force open/close |
 | HELP_TOGGLE<br>'help/toggle'         | boolean (optional)                                      | Help panel toggle was requested with optional force open/close |

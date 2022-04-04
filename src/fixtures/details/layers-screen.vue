@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-// This screen is the view of all layers that were interrogated in the identify
+// This screen is the view of all layers that were interrogated in the identify (the identify panel)
 
 import { defineComponent } from 'vue';
 
@@ -61,7 +61,8 @@ export default defineComponent({
             layers: this.get('layer/layers'),
             mobileMode: this.get('panel/mobileView'),
             remainingWidth: this.get('panel/getRemainingWidth'),
-            watchers: [] as Array<Function>
+            watchers: [] as Array<Function>,
+            handlers: [] as Array<string>
         };
     },
     computed: {
@@ -89,15 +90,16 @@ export default defineComponent({
     },
     mounted() {
         // if details item screen is closed while greedy open is running, turn abort flag on
-        this.$iApi.event.on(
-            GlobalEvents.DETAILS_CLOSED,
-            () => (this.activeGreedy = 0),
-            'details_item_closed'
+        this.handlers.push(
+            this.$iApi.event.on(
+                GlobalEvents.DETAILS_CLOSED,
+                () => () => (this.activeGreedy = 0)
+            )
         );
     },
     beforeUnmount() {
         this.watchers.forEach(unwatch => unwatch());
-        this.$iApi.event.off('details_item_closed');
+        this.handlers.forEach(handler => this.$iApi.event.off(handler));
     },
     methods: {
         /**

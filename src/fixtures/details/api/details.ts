@@ -1,5 +1,5 @@
-import { FixtureInstance } from '@/api';
-import type { IdentifyResult } from '@/geo/api';
+import { AttribLayer, FixtureInstance, LayerInstance } from '@/api';
+import type { Graphic, IdentifyItem, IdentifyResult } from '@/geo/api';
 import { DetailsItemInstance, DetailsStore } from '../store';
 
 import type {
@@ -7,6 +7,8 @@ import type {
     DetailsConfigItem,
     DetailsItemSet
 } from '../store';
+
+import type { HilightAPI } from '../../hilight/api/hilight';
 
 export class DetailsAPI extends FixtureInstance {
     get config(): DetailsConfig | undefined {
@@ -143,5 +145,76 @@ export class DetailsAPI extends FixtureInstance {
                 );
             }
         });
+    }
+
+    /**
+     * Highlight identified items
+     * @param items identified items
+     */
+    async hilightDetailsItems(
+        items: IdentifyItem | Array<IdentifyItem>,
+        layerUid: string
+    ) {
+        // hilight all geometries for this layer
+        const layer: LayerInstance | undefined =
+            this.$iApi.geo.layer.getLayer(layerUid);
+        if (layer) {
+            const hItems = items instanceof Array ? items : [items];
+            const hilightFix: HilightAPI = this.$iApi.fixture.get('hilight');
+            if (hilightFix) {
+                await hilightFix.removeHilight(
+                    hilightFix.getGraphicsByOrigin('details')
+                );
+
+                // get all the identified Graphics
+                const gs: Array<Graphic> = [];
+                await Promise.all(
+                    hItems.map(async item => {
+                        const oid = item.data[layer.oidField];
+                        const g: Graphic = await (
+                            layer as AttribLayer
+                        ).getGraphic(oid, {
+                            getGeom: true,
+                            getAttribs: true,
+                            getStyle: true
+                        });
+                        g.id = hilightFix.constructGraphicKey(
+                            'details',
+                            layerUid,
+                            oid
+                        );
+                        gs.push(g);
+                    })
+                );
+
+                hilightFix.addHilight(gs);
+            }
+        }
+    }
+
+    /**
+     * Remove all details panel map hilights.
+     */
+    removeDetailsHilight() {
+        const hilightFix: HilightAPI = this.$iApi.fixture.get('hilight');
+        if (hilightFix) {
+            hilightFix.removeHilight(hilightFix.getGraphicsByOrigin('details'));
+        }
+    }
+
+    onHilightToggle(
+        hilightOn: boolean,
+        items: IdentifyItem | Array<IdentifyItem>,
+        layerUid: string
+    ) {
+        if (hilightOn) {
+            // hilight got turned on
+            this.hilightDetailsItems(items, layerUid);
+            this.$vApp.$store.set(DetailsStore.hilightToggle, true);
+        } else {
+            // hilight got turned off
+            this.removeDetailsHilight();
+            this.$vApp.$store.set(DetailsStore.hilightToggle, false);
+        }
     }
 }

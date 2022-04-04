@@ -85,4 +85,12 @@ export class DetailsState {
      * @memberof DetailsState
      */
     defaultTemplates: { [type: string]: string } = {};
+
+    /**
+     * Whether or not the details hilight toggle is on.
+     *
+     * @type boolean
+     * @memberof DetailsState
+     */
+    hilightToggle: boolean = true;
 }

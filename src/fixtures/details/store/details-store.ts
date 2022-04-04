@@ -61,6 +61,10 @@ export enum DetailsStore {
      */
     defaultTemplates = 'details/defaultTemplates',
     /**
+     * (State) hilightToggle: boolean
+     */
+    hilightToggle = 'details/hilightToggle',
+    /**
      * (Action) setPayload: (payload: ItemResult[])
      */
     setPayload = 'details/setPayload!',

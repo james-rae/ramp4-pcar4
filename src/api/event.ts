@@ -15,6 +15,7 @@ import type { LayerReorderAPI } from '@/fixtures/layer-reorder/api/layer-reorder
 import type { MetadataAPI } from '@/fixtures/metadata/api/metadata';
 import type { MetadataPayload } from '@/fixtures/metadata/store';
 import { AppbarAction } from '@/fixtures/appbar/store';
+import type { HilightAPI } from '@/fixtures/hilight/api/hilight';
 import { LegendStore } from '@/fixtures/legend/store';
 import { GridStore, GridAction } from '@/fixtures/grid/store';
 import type {
@@ -59,6 +60,12 @@ export enum GlobalEvents {
      * Payload: `({ identifyItem: IdentifyItem, uid: string })`
      */
     DETAILS_OPEN = 'details/open',
+
+    /**
+     * Fires when the details panel is minimized.
+     * Payload: none
+     */
+    DETAILS_MINIMIZED = 'details/minimized',
 
     /**
      * Fires when a filter is changed.
@@ -681,9 +688,7 @@ export class EventAPI extends APIScope {
             case DefEH.MAP_IDENTIFY:
                 // when map clicks, run the identify action
                 zeHandler = (clickParam: MapClick) => {
-                    if (clickParam.button === 0) {
-                        this.$iApi.geo.map.runIdentify(clickParam);
-                    }
+                    this.$iApi.geo.map.runIdentify(clickParam);
                 };
                 this.on(GlobalEvents.MAP_CLICK, zeHandler, handlerName);
                 break;
