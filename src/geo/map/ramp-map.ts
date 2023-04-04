@@ -73,7 +73,9 @@ export class MapAPI extends CommonMapAPI {
     createMap(config: RampMapConfig, targetDiv: string | HTMLDivElement): void {
         this.setMapMouseThrottle(config.mapMouseThrottle ?? 0);
         super.createMap(config, targetDiv);
-        this.$iApi.event.emit(GlobalEvents.MAP_CREATED);
+
+        // Note GlobalEvents.MAP_CREATED now gets raised after the view has generated (super.createMap will trigger that).
+        // Timing issues beginning at ESRI v4.26 made this necessary
     }
 
     /**
@@ -328,8 +330,9 @@ export class MapAPI extends CommonMapAPI {
         // as of ESRI v4.26, we need to marinate until .when() is done.
         // otherwise, something happens too fast and the initial calls to view.goTo() grouse quite a lot.
         this.esriView.when(() => {
-            this._viewPromise.resolveMe();
             this.created = true;
+            this.$iApi.event.emit(GlobalEvents.MAP_CREATED);
+            this._viewPromise.resolveMe();
         });
     }
 
