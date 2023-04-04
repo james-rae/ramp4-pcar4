@@ -23,11 +23,12 @@ export class HilightAPI extends FixtureInstance {
         console.log('HILIGHT - Constructor called');
         super(id, iApi);
         // create the hilight layer
+
         if (this.$iApi.geo.map.created) {
             console.log('HILIGHT - Map was already created');
             this.$iApi.geo.map.viewPromise.then(() => {
                 console.log('HILIGHT - Map view donethanks');
-                this.initHilightLayer();
+                //this.initHilightLayer();
             });
         } else {
             console.log('HILIGHT - Waiting for map');
@@ -35,10 +36,15 @@ export class HilightAPI extends FixtureInstance {
                 console.log('HILIGHT - Map created event seen');
                 this.$iApi.geo.map.viewPromise.then(() => {
                     console.log('HILIGHT - Map view donethanks');
-                    this.initHilightLayer();
+                    //this.initHilightLayer();
                 });
             });
         }
+    }
+
+    initialized(): void {
+        console.log('HILIGHT - Initialized Encountered');
+        this.initHilightLayer();
     }
 
     _parseConfig(hilightConfig?: HilightConfig) {
