@@ -15,6 +15,7 @@ import type {
 } from '@/api/internal';
 
 import {
+    AsyncQ,
     DataFormat,
     DefPromise,
     Extent,
@@ -59,6 +60,8 @@ export class FileLayer extends AttribLayer {
 
     tooltipField: string; // if we end up having more things that are shared with FeatureLayer, consider making a FeatureBaseLayer class for both to inherit from
 
+    protected graphicQ: AsyncQ<QueryFeaturesParams, Graphic>;
+
     constructor(rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
         super(rampConfig, $iApi);
         this.supportsIdentify = true;
@@ -66,6 +69,8 @@ export class FileLayer extends AttribLayer {
         this.dataFormat = DataFormat.ESRI_FEATURE;
         this.layerFormat = LayerFormat.FEATURE;
         this.tooltipField = '';
+
+        this.graphicQ = new AsyncQ(x => this.ggWorker(x));
 
         if (
             rampConfig.identifyMode &&
@@ -447,21 +452,7 @@ export class FileLayer extends AttribLayer {
             includeGeometry: !!opts.getGeom
         };
 
-        // TODO not sure how much we care about this. since local, result will always have attribs and geom,
-        //      regardless of what requester asked for.
-        //      if thats a problem, add some logic to pare off properties of the result (might need to clone
-        //      to avoid breaking original source in the layer)
-
-        const resultArr = await this.queryFeatures(gjOpt);
-        if (resultArr.length === 0) {
-            throw new Error(`Could not find object id ${objectId}`);
-        } else if (resultArr.length !== 1) {
-            console.warn(
-                'did not get a single result on a query for a specific object id'
-            );
-        }
-
-        const resGraphic = resultArr[0];
+        const resGraphic = await this.graphicQ.add(gjOpt);
 
         if (opts.getStyle) {
             const esriSymb = toRaw(
@@ -471,6 +462,30 @@ export class FileLayer extends AttribLayer {
         }
 
         return resGraphic;
+    }
+
+    /**
+     * Wraps ....
+     *
+     * @function ggWorker
+     * @param  {Integer} objectId      ID of object being searched for
+     * @param {Object} opts            object containing option parametrs
+     *                 - map           map wrapper object of current map. only required if requesting geometry
+     *                 - getGeom          boolean. indicates if return value should have geometry included. default to false
+     *                 - getAttribs       boolean. indicates if return value should have attributes included. default to false
+     * @returns {Promise} resolves with a Graphic
+     */
+    protected async ggWorker(gjOpt: QueryFeaturesParams): Promise<Graphic> {
+        const resultArr = await this.queryFeatures(gjOpt);
+        if (resultArr.length === 0) {
+            throw new Error(`Could not find object id ${gjOpt.filterSql}`);
+        } else if (resultArr.length !== 1) {
+            console.warn(
+                'did not get a single result on a query for a specific object id'
+            );
+        }
+
+        return resultArr[0];
     }
 
     /**
