@@ -38,3 +38,40 @@ export class DefPromise<T> {
         });
     }
 }
+
+export class AsyncQ<P, T> {
+    protected q: Array<{ param: P; prom: DefPromise<T> }> = [];
+
+    protected idx: number = 0;
+
+    protected processor: (param: P) => Promise<T>;
+
+    add(param: P): Promise<T> {
+        const defP = new DefPromise<T>();
+        this.q.push({ param, prom: defP });
+
+        if (this.q.length === 1) {
+            this.next();
+        }
+
+        return defP.getPromise();
+    }
+
+    protected next(): void {
+        if (this.idx === this.q.length) {
+            this.q = [];
+            this.idx = 0;
+        } else {
+            const nugget = this.q[this.idx];
+            this.processor(nugget.param).then(result => {
+                this.idx++;
+                nugget.prom.resolveMe(result);
+                this.next();
+            });
+        }
+    }
+
+    constructor(processor: (param: P) => Promise<T>) {
+        this.processor = processor;
+    }
+}
