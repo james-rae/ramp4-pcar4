@@ -207,7 +207,7 @@ export class WmsLayer extends MapLayer {
 
         // TODO prolly need to flush out the config interfaces for this badboy
 
-        const dProm = new DefPromise();
+        const dProm = new DefPromise<void>();
 
         const result: IdentifyResult = reactive({
             items: [],

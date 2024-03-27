@@ -59,7 +59,7 @@ export class CommonMapAPI extends APIScope {
      * Internal deferred managing the view promise
      * @private
      */
-    protected _viewPromise: DefPromise;
+    protected _viewPromise: DefPromise<void>;
 
     /**
      * A promise that resolves when the map view has been created
@@ -106,7 +106,7 @@ export class CommonMapAPI extends APIScope {
 
         this.esriMap = undefined;
         this._basemapStore = [];
-        this._viewPromise = new DefPromise();
+        this._viewPromise = new DefPromise<void>();
         this.handlers = [];
         this.pointZoomScale = 50000;
     }
@@ -243,7 +243,7 @@ export class CommonMapAPI extends APIScope {
             return;
         }
 
-        this._viewPromise = new DefPromise();
+        this._viewPromise = new DefPromise<void>();
         this.created = false;
 
         // Clean up map view

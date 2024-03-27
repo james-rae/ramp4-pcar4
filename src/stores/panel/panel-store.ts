@@ -11,7 +11,7 @@ export const usePanelStore = defineStore('panel', () => {
     const mobileView = ref(false);
     const reorderable = ref(true);
     const items = ref<{ [name: string]: PanelInstance }>({});
-    const regPromises = ref<{ [name: string]: DefPromise }>({});
+    const regPromises = ref<{ [name: string]: DefPromise<void> }>({});
     const orderedItems = ref<PanelInstance[]>([]);
     const teleported = ref<PanelInstance[]>([]);
     const visible = ref<PanelInstance[]>([]);
@@ -174,7 +174,7 @@ export const usePanelStore = defineStore('panel', () => {
         items.value = { ...items.value, [panel.id]: panel };
         // since panel has successfully registered, resolve its associated registration promise
         if (!(panel.id in regPromises.value)) {
-            const regPromise = new DefPromise();
+            const regPromise = new DefPromise<void>();
             regPromise.resolveMe();
             regPromises.value = {
                 ...regPromises.value,
@@ -260,7 +260,7 @@ export const usePanelStore = defineStore('panel', () => {
     function addRegPromise(panelId: string): void {
         regPromises.value = {
             ...regPromises.value,
-            [panelId]: new DefPromise()
+            [panelId]: new DefPromise<void>()
         };
     }
 

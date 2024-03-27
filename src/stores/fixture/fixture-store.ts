@@ -5,7 +5,7 @@ import { markRaw, ref } from 'vue';
 
 export const useFixtureStore = defineStore('fixture', () => {
     const items = ref<{ [name: string]: FixtureBase }>({});
-    const loadPromises = ref<{ [name: string]: DefPromise }>({});
+    const loadPromises = ref<{ [name: string]: DefPromise<void> }>({});
 
     function getLoadPromises(fixtureIds: string[]): Promise<void>[] {
         return fixtureIds.map(id => loadPromises.value[id].getPromise());
@@ -15,7 +15,7 @@ export const useFixtureStore = defineStore('fixture', () => {
         items.value = { ...items.value, [value.id]: markRaw(value) };
         // since fixture has successfully loaded, resolve its associated load promise
         if (!(value.id in loadPromises.value)) {
-            const loadPromise = new DefPromise();
+            const loadPromise = new DefPromise<void>();
             loadPromise.resolveMe();
             loadPromises.value = {
                 ...loadPromises.value,
@@ -44,7 +44,7 @@ export const useFixtureStore = defineStore('fixture', () => {
     function addLoadPromise(fixtureId: string) {
         loadPromises.value = {
             ...loadPromises.value,
-            [fixtureId]: new DefPromise()
+            [fixtureId]: new DefPromise<void>()
         };
     }
 

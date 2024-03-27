@@ -14,10 +14,10 @@ export interface PanelState {
 
     /**
      * A list of registration promises for all panels.
-     * @type {{ [name: string]: DefPromise }}
+     * @type {{ [name: string]: DefPromise<void> }}
      * @memberof PanelState
      */
-    regPromises: { [name: string]: DefPromise };
+    regPromises: { [name: string]: DefPromise<void> };
 
     /**
      * A list of all panels in the arrangement they would be put on screen.

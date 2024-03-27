@@ -49,7 +49,7 @@ export class CommonLayer extends LayerInstance {
 
     protected origRampConfig: RampLayerConfig;
 
-    protected loadDefProm: DefPromise; // a deferred promise that resolves when layer is fully ready and safe to use. for convenience of caller
+    protected loadDefProm: DefPromise<void>; // a deferred promise that resolves when layer is fully ready and safe to use. for convenience of caller
 
     protected loadPromFulfilled: boolean; // a boolean to track whether the promise has fulfilled or not
     protected layerTree: TreeNode;
@@ -88,7 +88,7 @@ export class CommonLayer extends LayerInstance {
         this.layerState = LayerState.NEW;
         this.initiationState = InitiationState.NEW;
         this.drawState = DrawState.NOT_LOADED;
-        this.loadDefProm = new DefPromise();
+        this.loadDefProm = new DefPromise<void>();
 
         this.loadPromFulfilled = false;
 
@@ -159,7 +159,7 @@ export class CommonLayer extends LayerInstance {
         this.updateInitiationState(InitiationState.TERMINATING);
         await Promise.all(this.sublayers.map(s => s.terminate()));
 
-        this.loadDefProm = new DefPromise();
+        this.loadDefProm = new DefPromise<void>();
         this.loadPromFulfilled = false;
 
         this.updateLayerState(LayerState.NEW);
@@ -197,7 +197,7 @@ export class CommonLayer extends LayerInstance {
                         // if promise was previously not in pending status, make a new one
                         // otherwise we're trying to resolve a resolved/rejected promise
                         if (this.loadPromFulfilled) {
-                            this.loadDefProm = new DefPromise();
+                            this.loadDefProm = new DefPromise<void>();
                         }
                         this.loadDefProm.resolveMe();
                         this.loadPromFulfilled = true;
@@ -229,7 +229,7 @@ export class CommonLayer extends LayerInstance {
         // if promise was previously not in pending status, make a new one
         // otherwise we're trying to reject a resolved promise
         if (this.loadPromFulfilled) {
-            this.loadDefProm = new DefPromise();
+            this.loadDefProm = new DefPromise<void>();
         }
         this.loadDefProm.rejectMe();
         this.loadPromFulfilled = true;
