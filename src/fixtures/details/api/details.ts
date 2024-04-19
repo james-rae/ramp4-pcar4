@@ -1,5 +1,11 @@
-import { AttribLayer, FixtureInstance, LayerInstance } from '@/api';
-import type { Graphic, IdentifyItem, IdentifyResult } from '@/geo/api';
+import {
+    AttribLayer,
+    FixtureInstance,
+    LayerInstance,
+    RawIdentifyItem
+} from '@/api';
+import type { IdentifyItem, IdentifyResult } from '@/api';
+import type { Graphic, IdentifyResultFormat } from '@/geo/api';
 import { DetailsItemInstance, useDetailsStore } from '../store';
 
 import type {
@@ -49,39 +55,31 @@ export class DetailsAPI extends FixtureInstance {
     }
 
     /**
-     * Provided with the data for a single feature, toggles the details panel directly with the feature screen.
+     * Provided with the data for a single feature, shows or hides details panel.
+     * If panel is closed or incoming data is different than current content, panel is shown.
+     * If panel open and incoming data is what is currently shown, panel closes.
+     * The `open` parameter can override the behavior.
+     * featureData payload (can be empty if forcing closed)
+     * - uid    : uid string of the layer hosting the feature
+     * - format : structure of the data. IdentifyResultFormat value.
+     * - data   : source information for the feature. Analogous to the data property of an IdentifyItem
      *
-     * @param {{data: any, uid: string, format: string}} featureData
-     * @param {boolean | undefined} open
+     * @param {{data: any, uid: string, format: IdentifyResultFormat}} featureData
+     * @param {boolean | undefined} open can force the panel to open (true) or close (false) regardless of current panel state
      * @memberof DetailsAPI
      */
     toggleFeature(
-        featureData: { data: any; uid: string; format: string },
+        featureData: { data: any; uid: string; format: IdentifyResultFormat },
         open: boolean | undefined
     ): void {
-        // Close the identified layers panel.
         const panel = this.$iApi.panel.get('details-panel');
-        if (panel.isOpen) {
-            this.$iApi.panel.close(panel);
-        }
 
-        // result: is IdentifyResult class
-        const props: any = {
-            result: {
-                items: [
-                    {
-                        data: featureData.data,
-                        format: featureData.format,
-                        loaded: true,
-                        loading: Promise.resolve()
-                    }
-                ],
-                uid: featureData.uid,
-                loading: Promise.resolve(),
-                loaded: true,
-                requestTime: Date.now()
-            }
-        };
+        if (open === false) {
+            // close panel and run away. allows a close without providing featureData
+            panel.close();
+            this.detailsStore.currentFeatureId = undefined;
+            return;
+        }
 
         // feature ids are composed of the layer uid and feature object id
         const layer: LayerInstance | undefined = this.$iApi.geo.layer.getLayer(
@@ -93,27 +91,38 @@ export class DetailsAPI extends FixtureInstance {
                 ? featureData.data[layer?.oidField ?? '']
                 : JSON.stringify(featureData.data)
         }`;
-        this.detailsStore.currentFeatureId = featureData.data
-            ? currFeatureId
-            : undefined;
+
+        if (
+            panel.isOpen &&
+            currFeatureId === this.detailsStore.currentFeatureId &&
+            !(open === true)
+        ) {
+            // panel is open, same request was fired at it, and not a force-open. Close it.
+            panel.close();
+            this.detailsStore.currentFeatureId = undefined;
+            return;
+        }
+
+        // at this point, we are showing the payload
+
+        this.detailsStore.currentFeatureId = currFeatureId;
 
         // Check to see if the layer has a fixture config in the store.
         this._loadDetailsConfig(layer);
 
-        // toggle rules based on last opened details panel
-        if (open === false) {
-            this.$iApi.panel!.close(panel);
-        } else if (!panel.isOpen) {
-            this.detailsStore.payload = [props.result];
+        const fakeResult: IdentifyResult = {
+            items: [new RawIdentifyItem(featureData.format, featureData.data)],
+            uid: featureData.uid,
+            loading: Promise.resolve(),
+            loaded: true,
+            errored: false,
+            requestTime: Date.now()
+        };
 
-            // open the items panel
-            this.$iApi.panel!.open({
-                id: 'details-panel',
-                screen: 'details-screen',
-                props: props
-            });
-        } else {
-            this.$iApi.panel!.close(panel);
+        this.detailsStore.payload = [fakeResult];
+
+        if (!panel.isOpen) {
+            panel.open();
         }
     }
 

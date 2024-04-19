@@ -135,6 +135,10 @@
 </template>
 
 <script setup lang="ts">
+// acts as the result container for a single layer's result set. Includes header controls,
+// and will render the list view if we're in that mode. If in single detail mode, it just
+// inserts a result-item under the header.
+
 import { useLayerStore } from '@/stores/layer';
 import { useDetailsStore } from '../store';
 import { useI18n } from 'vue-i18n';
@@ -150,10 +154,14 @@ import {
     watch
 } from 'vue';
 
-import type { InstanceAPI } from '@/api';
-import type { IdentifyResult, IdentifyItem } from '@/geo/api';
+import type {
+    IdentifyItem,
+    IdentifyResult,
+    InstanceAPI,
+    LayerInstance,
+    PanelInstance
+} from '@/api';
 import type { PropType } from 'vue';
-import type { LayerInstance, PanelInstance } from '@/api';
 import type { DetailsAPI } from '../api/details';
 import type { DetailsItemInstance } from '../store';
 

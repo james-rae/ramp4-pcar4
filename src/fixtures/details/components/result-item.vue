@@ -100,6 +100,9 @@
 </template>
 
 <script setup lang="ts">
+// handles the rendering of a single result item.
+// has support for the different supported formats, and applying vue templates
+
 import { useLayerStore } from '@/stores/layer';
 import { GeometryType, LayerType } from '@/geo/api';
 import {
@@ -121,8 +124,8 @@ import linkifyHtml from 'linkify-html';
 import ESRIDefault from '../templates/esri-default.vue';
 import HTMLDefault from '../templates/html-default.vue';
 
-import type { FieldDefinition, IdentifyItem } from '@/geo/api';
-import type { LayerInstance, InstanceAPI } from '@/api';
+import type { FieldDefinition } from '@/geo/api';
+import type { IdentifyItem, InstanceAPI, LayerInstance } from '@/api';
 import type { PropType } from 'vue';
 
 const layerStore = useLayerStore();
@@ -209,8 +212,14 @@ const itemChanged = () => {
     if (props.data.loaded) {
         fetchIcon();
     } else {
-        // wait for load.
-        props.data.loading.then(() => {
+        // request any details download and wait.
+        // innards of .load() are smart enough not to double-request.
+        // TODO revist when we implement pagination on the result-list.vue list mode.
+        //      if it only renders what is on current page, then only visible items should
+        //      hit this and make load requests. But need to ensure -- hitting everything
+        //      will cause issue #2156
+
+        props.data.load().then(() => {
             itemChanged();
         });
 
