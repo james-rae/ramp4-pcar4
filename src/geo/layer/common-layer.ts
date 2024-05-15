@@ -329,30 +329,14 @@ export class CommonLayer extends LayerInstance {
         });
     }
 
-    /**
-     * Requests that an attribute load request be aborted. Useful when encountering a massive dataset or a runaway process.
-     *
-     */
     abortAttributeLoad(): void {
         this.stubError();
     }
 
-    /**
-     * Requests that any downloaded attribute sets or cached geometry be removed from memory. The next requests will pull from the server again.
-     *
-     */
     clearFeatureCache(): void {
         this.stubError();
     }
 
-    // formerly known as getFormattedAttributes
-    /**
-     * Invokes the process to get the full set of attribute values for the layer,
-     * formatted in a tabular format. Additional data properties are also included.
-     * Repeat calls will re-use the downloaded values unless the values have been explicitly cleared.
-     *
-     * @returns {Promise} resolves with set of tabular attribute values
-     */
     getTabularAttributes(): Promise<TabularAttributeSet> {
         this.stubError();
 
@@ -380,46 +364,20 @@ export class CommonLayer extends LayerInstance {
         return Promise.resolve(new Graphic(new NoGeometry()));
     }
 
-    /**
-     * Gets the icon for a specific feature, as an SVG string.
-     *
-     * @param {Integer} objectId the object id of the feature to find
-     * @returns {Promise} resolves with an svg string encoding of the icon
-     */
     getIcon(objectId: number): Promise<string> {
         this.stubError();
         return Promise.resolve('');
     }
 
-    /**
-     * Returns the value of a named SQL filter on a layer.
-     *
-     * @param {String} filterKey the filter key / named filter to view
-     * @returns {String} the value of the where clause for the filter. Empty string if not defined.
-     */
     getSqlFilter(filterKey: string): string {
         this.stubError();
         return '';
     }
 
-    /**
-     * Applies an SQL filter to the layer. Will overwrite any existing filter for the given key.
-     * Use `1=2` for a "hide all" where clause.
-     *
-     * @param {String} filterKey the filter key / named filter to apply the SQL to
-     * @param {String} whereClause the WHERE clause of the filter
-     */
     setSqlFilter(filterKey: string, whereClause: string): void {
         this.stubError();
     }
 
-    /**
-     * Gets array of object ids that currently pass any filters for the layer
-     *
-     * @param {Array} [exclusions] list of any filters keys to exclude from the result. omission includes all filters
-     * @param {Extent} [extent] if provided, the result list will only include features intersecting the extent
-     * @returns {Promise} resolves with array of object ids that pass the filter. if no filters are active, resolves with undefined.
-     */
     getFilterOIDs(
         exclusions: Array<string> = [],
         extent: Extent | undefined = undefined
@@ -440,12 +398,6 @@ export class CommonLayer extends LayerInstance {
         return Promise.resolve(Extent.fromParams('fake', 0, 0, 0, 0));
     }
 
-    /**
-     * Applies the current filter settings to the physical map layer.
-     *
-     * @function applySqlFilter
-     * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
-     */
     applySqlFilter(exclusions: Array<string> = []): void {
         this.stubError();
     }

@@ -2569,7 +2569,7 @@
                             "enum": ["glow", "lift", "fog", "none"]
                         },
                         "options": {
-                            "description": "Options for the selected hilight mode.",
+                            "description": "Options for the selected hilight mode. The below schema is for fog mode. In glow mode, the options object should conform to an ESRI MapView HighlightOptions type.",
                             "type": "object",
                             "properties": {
                                 "onOpacity": {

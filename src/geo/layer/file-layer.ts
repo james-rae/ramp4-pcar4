@@ -434,18 +434,6 @@ export class FileLayer extends AttribLayer {
         );
     }
 
-    /**
-     * Fetches a graphic from the given layer.
-     * This overrides the baseclass method, as we are all local and dont need quick caches or server hits
-     *
-     * @function getGraphic
-     * @param  {Integer} objectId      ID of object being searched for
-     * @param {Object} opts            object containing option parametrs
-     *                 - map           map wrapper object of current map. only required if requesting geometry
-     *                 - getGeom          boolean. indicates if return value should have geometry included. default to false
-     *                 - getAttribs       boolean. indicates if return value should have attributes included. default to false
-     * @returns {Promise} resolves with a Graphic
-     */
     async getGraphic(
         objectId: number,
         opts: GetGraphicParams
@@ -539,12 +527,6 @@ export class FileLayer extends AttribLayer {
         );
     }
 
-    /**
-     * Applies the current filter settings to the physical map layer.
-     *
-     * @function applySqlFilter
-     * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
-     */
     applySqlFilter(exclusions: Array<string> = []): void {
         if (!this.esriView) {
             this.noLayerErr();

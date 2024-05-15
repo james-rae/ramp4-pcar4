@@ -521,13 +521,11 @@ export class LayerInstance extends APIScope {
 
     /**
      * Requests that an attribute load request be aborted. Useful when encountering a massive dataset or a runaway process.
-     *
      */
     abortAttributeLoad(): void {}
 
     /**
      * Requests that any downloaded attribute sets or cached geometry be removed from memory. The next requests will pull from the server again.
-     *
      */
     clearFeatureCache(): void {}
 
@@ -569,6 +567,9 @@ export class LayerInstance extends APIScope {
      * Gets information on a graphic in the most efficient way possible. Options object properties:
      * - getGeom ; a boolean to indicate if the result should include graphic geometry
      * - getAttribs ; a boolean to indicate if the result should include graphic attributes
+     * - getStyle ; a boolean to indicate if the result should graphical styling information
+     *
+     * All option properties are optional and default to false
      *
      * @param {Integer} objectId the object id of the graphic to find
      * @param {Object} options options object for the request, see above

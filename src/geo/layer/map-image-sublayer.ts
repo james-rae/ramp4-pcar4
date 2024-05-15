@@ -250,12 +250,6 @@ export class MapImageSublayer extends AttribLayer {
         this.parentLayer.touchTolerance = tolerance;
     }
 
-    /**
-     * Applies the current filter settings to the physical map layer.
-     *
-     * @function applySqlFilter
-     * @param {Array} [exclusions] list of any filters to exclude from the result. omission includes all keys
-     */
     applySqlFilter(exclusions: Array<string> = []): void {
         if (!this.parentLayer?.esriLayer || !this.esriSubLayer) {
             this.noLayerErr();
