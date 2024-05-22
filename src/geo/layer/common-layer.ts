@@ -68,6 +68,7 @@ export class CommonLayer extends LayerInstance {
         this.layerFormat = LayerFormat.UNKNOWN;
         this.expectedTime.draw = rampConfig.expectedDrawTime ?? 10000;
         this.expectedTime.load = rampConfig.expectedLoadTime ?? 4000;
+        this.phaseTime = { init: 0, cancel: 0 };
         this.timers = {
             draw: undefined,
             load: undefined
@@ -99,6 +100,7 @@ export class CommonLayer extends LayerInstance {
 
     updateInitiationState(newState: InitiationState): void {
         this.initiationState = newState;
+
         this.$iApi.event.emit(GlobalEvents.LAYER_INITIATIONSTATECHANGE, {
             state: newState,
             layer: this
@@ -107,6 +109,7 @@ export class CommonLayer extends LayerInstance {
 
     updateLayerState(newState: LayerState): void {
         this.layerState = newState;
+
         this.$iApi.event.emit(GlobalEvents.LAYER_LAYERSTATECHANGE, {
             state: newState,
             layer: this
@@ -130,15 +133,20 @@ export class CommonLayer extends LayerInstance {
     async initiate(): Promise<void> {
         this.updateInitiationState(InitiationState.INITIATING);
         this.startTimer(TimerType.LOAD);
+        const startTime = Date.now();
+
         const [initiateErr] = await to(this.onInitiate()); // Need this because some layers don't do error handling things
-        if (this.drawState !== DrawState.UP_TO_DATE) {
-            this.startTimer(TimerType.DRAW);
+
+        if (startTime > this.phaseTime.cancel) {
+            if (this.drawState !== DrawState.UP_TO_DATE) {
+                this.startTimer(TimerType.DRAW);
+            }
+            if (initiateErr) {
+                console.error(initiateErr.message);
+                this.onError();
+            }
+            this.updateInitiationState(InitiationState.INITIATED);
         }
-        if (initiateErr) {
-            console.error(initiateErr.message);
-            this.onError();
-        }
-        this.updateInitiationState(InitiationState.INITIATED);
     }
 
     protected async onInitiate(): Promise<void> {
@@ -175,6 +183,9 @@ export class CommonLayer extends LayerInstance {
     onLoad(): void {
         // magic happens here. other layers will override onLoadActions,
         // meaning this will run the function appropriate for the layer who inherited LayerBase
+
+        const startTime = Date.now();
+
         let timedOut = false;
         const loadTimeout = setTimeout(() => {
             // if timeout is not 0, layer will go into error state after loading past timeout
@@ -195,17 +206,26 @@ export class CommonLayer extends LayerInstance {
                 .then(() => {
                     clearTimeout(loadTimeout);
                     if (!timedOut) {
-                        // if promise was previously not in pending status, make a new one
-                        // otherwise we're trying to resolve a resolved/rejected promise
-                        if (this.loadPromFulfilled) {
-                            this.loadDefProm = new DefPromise();
-                        }
-                        this.loadDefProm.resolveMe();
-                        this.loadPromFulfilled = true;
                         this.stopTimer(TimerType.LOAD);
-                        // This will just trigger the above statements for each sublayer
-                        this.sublayers.forEach(sublayer => sublayer.onLoad());
-                        this.updateLayerState(LayerState.LOADED);
+
+                        // only finalize if this load was not cancelled
+                        if (startTime > this.phaseTime.cancel) {
+                            // if promise was previously not in pending status, make a new one
+                            // otherwise we're trying to resolve a resolved/rejected promise.
+                            // Anything watching the old promise already handled it. This ensures
+                            // anything looking at it going forward will get a resolved promise.
+                            if (this.loadPromFulfilled) {
+                                this.loadDefProm = new DefPromise();
+                            }
+                            this.loadDefProm.resolveMe();
+                            this.loadPromFulfilled = true;
+
+                            // This will just trigger the above statements for each sublayer
+                            this.sublayers.forEach(sublayer =>
+                                sublayer.onLoad()
+                            );
+                            this.updateLayerState(LayerState.LOADED);
+                        }
                     } else {
                         this.visibility = false;
                     }
@@ -226,7 +246,7 @@ export class CommonLayer extends LayerInstance {
     //      Probably ok (rejecting a resolved promise that nobody is listening for).
     //      Putting the layer in error status is what is important.
     // when esri layer load errors
-    onError(): void {
+    onError(genuineError: boolean = true): void {
         // if promise was previously not in pending status, make a new one
         // otherwise we're trying to reject a resolved promise
         if (this.loadPromFulfilled) {
@@ -235,12 +255,18 @@ export class CommonLayer extends LayerInstance {
         this.loadDefProm.rejectMe();
         this.loadPromFulfilled = true;
         this.sublayers.forEach(sublayer => sublayer.onError());
-        this.$iApi.notify.show(
-            NotificationType.ERROR,
-            this.$iApi.$i18n.t('layer.error', {
-                id: this.id
-            })
-        );
+
+        // manually cancelling a loading layer will put in error state. We don't
+        // want to ping the user; they did the cancel click.
+        if (genuineError) {
+            this.$iApi.notify.show(
+                NotificationType.ERROR,
+                this.$iApi.$i18n.t('layer.error', {
+                    id: this.id
+                })
+            );
+        }
+
         this.stopTimer(TimerType.DRAW);
         this.stopTimer(TimerType.LOAD);
         this.updateLayerState(LayerState.ERROR);
@@ -255,25 +281,34 @@ export class CommonLayer extends LayerInstance {
         return [];
     }
 
-    /**
-     * Provides a promise that resolves when the layer has finished loading. If accessing layer properties that
-     * depend on the layer being loaded, wait on this promise before accessing them.
-     *
-     * @method loadPromise
-     * @returns {Promise} resolves when the layer has finished loading
-     */
+    cancelLoad(): void {
+        if (
+            this.isLoaded ||
+            this.initiationState === InitiationState.NEW ||
+            this.initiationState === InitiationState.TERMINATING ||
+            this.initiationState === InitiationState.TERMINATED
+        ) {
+            // we are loaded, terminating, terminated, or never initiated.
+            // do nothing.
+            return;
+        }
+
+        // set flag for other async load stuff to see
+        this.phaseTime.cancel = Date.now();
+
+        if (this.esriLayer && this.esriLayer.loadStatus === 'loading') {
+            // ESRI API is doing something. stop it.
+            this.esriLayer.cancelLoad();
+        }
+
+        // put layer in Errorland, flag to stop notification from pinging
+        this.onError(false);
+    }
+
     loadPromise(): Promise<void> {
         return this.loadDefProm.getPromise();
     }
 
-    /**
-     * Indicates if the layer is in a state that is makes sense to interact with.
-     * I.e. False if layer has not done it's initial load, or is in error state.
-     * Acts as a handy shortcut to inspecting the layerState.
-     *
-     * @method isLoaded
-     * @returns {Boolean} true if layer is loaded
-     */
     get isLoaded(): boolean {
         return this.layerState === LayerState.LOADED;
     }

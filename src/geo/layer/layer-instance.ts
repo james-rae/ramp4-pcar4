@@ -145,6 +145,14 @@ export class LayerInstance extends APIScope {
     };
 
     /**
+     * Object that contains request timecode values for the start of layer init and cancel phases.
+     */
+    phaseTime: {
+        init: number;
+        cancel: number;
+    };
+
+    /**
      * If the layer has Sublayers
      */
     supportsSublayers: boolean;
@@ -285,6 +293,7 @@ export class LayerInstance extends APIScope {
         this.legend = [];
         this._sublayers = [];
         this.expectedTime = { draw: 0, load: 0 };
+        this.phaseTime = { init: 0, cancel: 0 };
         this.maxLoadTime = 0;
         this.canModifyLayer = true;
         this.canReload = true;
@@ -320,6 +329,12 @@ export class LayerInstance extends APIScope {
     }
 
     /**
+     * Cancels an in-progress initialize or load of the layer and places it in an Error state.
+     * Has no effect on a layer that is loaded, has been terminated, or never initiazed.
+     */
+    cancelLoad(): void {}
+
+    /**
      * Provides a promise that resolves when the layer has finished loading. If accessing layer properties that
      * depend on the layer being loaded, wait on this promise before accessing them.
      *
@@ -333,8 +348,10 @@ export class LayerInstance extends APIScope {
     /**
      * Indicates if the layer is in a state that is makes sense to interact with.
      * I.e. False if layer has not done it's initial load, or is in error state.
+     * Acts as a handy shortcut to inspecting the layerState.
      *
-     * @returns {Boolean} true if layer is in an interactive state
+     * @method isLoaded
+     * @returns {Boolean} true if layer is loaded
      */
     get isLoaded(): boolean {
         return false;

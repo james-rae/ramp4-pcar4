@@ -615,6 +615,7 @@ export class MapAPI extends CommonMapAPI {
             const layerStore = useLayerStore(this.$vApp.$pinia);
             layerStore.addLayer(layer, index);
 
+            const startTime = Date.now();
             let timeElapsed = 0;
             // This interval waits for layer initiation, and has a kickout for layers that initiate forever.
             // After it initiates the callback will start the next step in the loading pipeline.
@@ -628,8 +629,13 @@ export class MapAPI extends CommonMapAPI {
                     // Layer took too long to initiate. Move to error to avoid infinite load animation.
                     // Issue #1491 Ponders making the 20 second timeout configurable.
                     clearInterval(layerWatcher);
-                    layer.onError(); // need this thanks to an edge case where the legend sometimes doesnt update
-                    console.error(`Failed to add layer: ${layer.id}.`);
+
+                    if (layer.phaseTime.cancel < startTime) {
+                        // only do this if the layer wasn't cancelled.
+                        layer.onError(); // need this thanks to an edge case where the legend sometimes doesnt update
+                        console.error(`Failed to add layer: ${layer.id}.`);
+                    }
+
                     reject();
                 } else if (
                     layer.initiationState === InitiationState.INITIATED &&
@@ -637,6 +643,8 @@ export class MapAPI extends CommonMapAPI {
                 ) {
                     // we have initiated, and confirm either the map layer exists or layer doesn't live on the map.
                     // carry on with resolution steps.
+                    // Re: cancelling a load - would have gotten caught in error block above. if comes after, layer load
+                    //     process will handle it.
                     clearInterval(layerWatcher);
                     if (layer.mapLayer) {
                         // ramp layer is map ready, add it at the correct position
@@ -645,6 +653,7 @@ export class MapAPI extends CommonMapAPI {
                         // data layer
                         // there is no esri layer "load" first, so we trigger
                         // the data layer load now.
+
                         layer.onLoad();
                     }
 
@@ -953,8 +962,6 @@ export class MapAPI extends CommonMapAPI {
         }
 
         // Now we start the layer removal process
-        // Clean up layer
-        layerInstance.terminate();
 
         const layerStore = useLayerStore(this.$vApp.$pinia);
         layerStore.removeLayer(layerInstance);
@@ -963,9 +970,13 @@ export class MapAPI extends CommonMapAPI {
         layerStore.removeLayerConfig(layerInstance.id);
 
         // Remove the layer from the map
-        if (layerInstance.mapLayer) {
-            this.esriMap.remove(layerInstance.esriLayer!);
+        if (layerInstance.mapLayer && layerInstance.esriLayer) {
+            this.esriMap.remove(layerInstance.esriLayer);
         }
+
+        // Clean up layer.
+        // This removes the reference to .esriLayer so must happen after the esriMap.remove()
+        layerInstance.terminate();
 
         layerInstance.isRemoved = true;
 

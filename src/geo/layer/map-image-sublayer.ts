@@ -125,6 +125,10 @@ export class MapImageSublayer extends AttribLayer {
         this.parentLayer?.reload();
     }
 
+    cancelLoad(): void {
+        this.parentLayer?.cancelLoad();
+    }
+
     /**
      * Indicates if the Esri map sublayer and the parent's Esri map layer exist.
      */

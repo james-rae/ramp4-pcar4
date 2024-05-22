@@ -95,6 +95,7 @@ export class FeatureLayer extends AttribLayer {
      * @function onLoadActions
      */
     onLoadActions(): Array<Promise<void>> {
+        const startTime = Date.now();
         const loadPromises: Array<Promise<void>> = super.onLoadActions();
 
         // setting custom renderer here (if one is provided)
@@ -120,24 +121,26 @@ export class FeatureLayer extends AttribLayer {
         const pLD: Promise<void> = this.loadLayerMetadata(
             hasCustRed ? { customRenderer: this.esriLayer?.renderer } : {}
         ).then(() => {
-            // apply server visibility in case of missing visibility in config
-            this.visibility =
-                this.origRampConfig?.state?.visibility ??
-                this._serverVisibility ??
-                true;
+            if (startTime > this.phaseTime.cancel) {
+                // apply server visibility in case of missing visibility in config
+                this.visibility =
+                    this.origRampConfig?.state?.visibility ??
+                    this._serverVisibility ??
+                    true;
 
-            // apply any config based overrides to the data we just downloaded
-            // TODO should the final default be objectID field? Or will this turn off names / let something have no names?
-            this.nameField =
-                this.origRampConfig.nameField || this.nameField || '';
-            this.tooltipField =
-                this.origRampConfig.tooltipField || this.nameField;
+                // apply any config based overrides to the data we just downloaded
+                // TODO should the final default be objectID field? Or will this turn off names / let something have no names?
+                this.nameField =
+                    this.origRampConfig.nameField || this.nameField || '';
+                this.tooltipField =
+                    this.origRampConfig.tooltipField || this.nameField;
 
-            this.$iApi.geo.attributes.applyFieldMetadata(
-                this,
-                this.origRampConfig.fieldMetadata
-            );
-            this.attribs.attLoader.updateFieldList(this.fieldList);
+                this.$iApi.geo.attributes.applyFieldMetadata(
+                    this,
+                    this.origRampConfig.fieldMetadata
+                );
+                this.attribs.attLoader.updateFieldList(this.fieldList);
+            }
         });
 
         const pFC = this.$iApi.geo.layer
@@ -146,7 +149,9 @@ export class FeatureLayer extends AttribLayer {
                 this.getSqlFilter(CoreFilter.PERMANENT)
             )
             .then(count => {
-                this.featureCount = count;
+                if (startTime > this.phaseTime.cancel) {
+                    this.featureCount = count;
+                }
             });
 
         this.layerTree.name = this.name;

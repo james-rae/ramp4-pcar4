@@ -124,9 +124,12 @@ export class MapLayer extends CommonLayer {
                 };
 
                 if (newval === 'loaded') {
-                    // loaded is a special case. the Layer object (subclasses of BaseLayer) need to do
-                    // additional asynch work to fully set things up, so we delay firing the event until
-                    // that is done.
+                    // loaded is a special case. this layer may need to do
+                    // additional asynch work to fully set things up, so we
+                    // trigger that process now. it will fire the RAMP event
+                    // when it's done done.
+                    // Re: load cancel. If we cancelled earlier the esri layer shouldn't hit this state.
+                    //     If we cancelled later, the onLoad stuff will deal with it.
                     this.onLoad();
                 } else if (newval === 'failed') {
                     this.onError();
@@ -156,7 +159,7 @@ export class MapLayer extends CommonLayer {
     }
 
     async terminate(): Promise<void> {
-        // TODO null out esrilayer objects? or make orchestrator handle that stuff.
+        this.esriLayer = undefined;
 
         await super.terminate();
 
@@ -195,6 +198,8 @@ export class MapLayer extends CommonLayer {
         }
 
         await this.initiate();
+
+        // TODO cancel check here
 
         if (!this.esriLayer) {
             console.error('ESRI layer failed to re-create during reload.');

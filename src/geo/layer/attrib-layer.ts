@@ -106,9 +106,16 @@ export class AttribLayer extends MapLayer {
             return;
         }
 
+        const startTime = Date.now();
+
         const sData = await this.$iApi.geo.layer.loadLayerMetadata(
             this.serviceUrl
         );
+
+        if (startTime < this.phaseTime.cancel) {
+            // we cancelled and are already in error state.
+            return;
+        }
 
         // properties for all endpoints
         this.geomType = sData.geometryType;

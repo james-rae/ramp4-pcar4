@@ -846,6 +846,7 @@ const cancelOrRemoveLayer = () => {
 
         const removalWatcher = setInterval(() => {
             // layer is gone from everywhere, so we are done
+            // TODO this will spin forever if the layer never exists. E.g. failure on WFS initialize
             if (layerItem.layer && layerItem.layer.layerExists) {
                 // stop the interval
                 clearInterval(removalWatcher);
@@ -865,6 +866,8 @@ const cancelOrRemoveLayer = () => {
     } else {
         // layer in loading state, "cancel" layer
         // this puts it in error state. user can then reload or remove
+
+        // THIS CHANGES
         props.legendItem.error();
         (props.legendItem as LayerItem)._loadCancelled = true;
         // if a sublayer or parent layer was cancelled, cancel the parent layer and all other sublayers.
