@@ -71,8 +71,8 @@ export class MapLayer extends CommonLayer {
     }
 
     protected async onInitiate(): Promise<void> {
-        // NOTE MapLayer a superclass and this method should be called via super.initiate()
-        //      in subclass.initiate() at the appropriate time. A general rule is that at
+        // NOTE MapLayer is a superclass and this method should be called via super.initiate()
+        //      in subclass.onInitiate() at the appropriate time. A general rule is that at
         //      minimum the subclass should instantiate the Esri layer object and assign it
         //      to .esriLayer before calling this.
 
@@ -83,6 +83,7 @@ export class MapLayer extends CommonLayer {
         // NOTE current limitation: the event setup here only support one layer view. Any attempt to make
         //      RAMP have two map views rendering the same Layer will require some major refactoring.
 
+        // all this super call does is some safety checks.
         await super.onInitiate();
 
         if (!this.esriLayer) {
@@ -242,9 +243,6 @@ export class MapLayer extends CommonLayer {
 
     // ----------- LAYER LOAD -----------
 
-    // performs setup on the layer that needs to occur after the esri layer
-    // exists, but before we mark the layer as loaded. Any async tasks must
-    // include their promise in the return array.
     protected onLoadActions(): Array<Promise<void>> {
         const proms = super.onLoadActions();
         if (!this.name) {
@@ -259,7 +257,8 @@ export class MapLayer extends CommonLayer {
         }
 
         // layer base class doesnt have spatial ref, but we will assume all our layers do.
-        // consider adding fancy checks if its missing, and if so just promise.resolve
+        // consider adding fancy checks if its missing, and if so just promise.resolve .
+        // given the layer is dead without a success, we don't bother with any cancel-checking here.
         const lookupPromise = this.$iApi.geo.proj
             .checkProj(this.getSR())
             .then(goodSR => {

@@ -78,7 +78,7 @@ export class MapImageSublayer extends AttribLayer {
     /**
      * Load actions for a MapImage sublayer
      */
-    onLoadActions(): Array<Promise<void>> {
+    protected onLoadActions(): Array<Promise<void>> {
         // Note we do not call super.onLoadActions, which you would see happen in
         //      every other layer. We don't want to wire up the standard "top level"
         //      layer stuff for sublayers.

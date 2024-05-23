@@ -1,5 +1,7 @@
 # Guide for devs on how layer classes hang together
 
+## Inheritance Chain
+
 LayerInstance: RAMP's internal "base class" for layers. Any code dealing with generic layers should use this class.
 
 ~ CommonLayer: The generic class for layers that are implemented inside RAMP core.
@@ -32,8 +34,13 @@ LayerInstance: RAMP's internal "base class" for layers. Any code dealing with ge
 
 ~ ~ DataLayer: The generic class for layers that do not have a layer on the map.
 
-~ ~ ~ CsvDataLayer: Handles data layers populated by a CSV file.
+~ ~ ~ CsvDataLayer: Handles data layers populated by a CSV file. (Not created yet)
 
 ~ ~ ~ JsonDataLayer: Handles data layers populated by a Compact Json dataset
 
 ~ ~ ~ TableLayer: Handles data layers populated by an ArcGIS Table
+
+## Initiation Chain
+
+Useful for figuring out where to put checkpoints for "cancel load" kickouts.
+

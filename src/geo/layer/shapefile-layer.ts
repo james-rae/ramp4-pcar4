@@ -12,6 +12,7 @@ export class ShapefileLayer extends FileLayer {
 
     protected async onInitiate(): Promise<void> {
         let shapefileData: any; // data type is actually an ArrayBuffer
+        const startTime = Date.now();
 
         if (
             this.origRampConfig.rawData &&
@@ -38,9 +39,16 @@ export class ShapefileLayer extends FileLayer {
         }
 
         // convert shapefile to geojson, store in property for FileLayer to consume.
-        this.sourceGeoJson =
-            await this.$iApi.geo.layer.files.shapefileToGeoJson(shapefileData);
+        if (startTime > this.phaseTime.cancel) {
+            const gj = await this.$iApi.geo.layer.files.shapefileToGeoJson(
+                shapefileData
+            );
 
-        await super.onInitiate();
+            if (startTime > this.phaseTime.cancel) {
+                this.sourceGeoJson = gj;
+
+                await super.onInitiate();
+            }
+        }
     }
 }

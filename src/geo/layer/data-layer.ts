@@ -211,9 +211,6 @@ export class DataLayer extends CommonLayer {
         }, 300);
     }
 
-    // performs setup on the layer that needs to occur after server load but
-    // before we mark the layer as loaded. Any async tasks must
-    // include their promise in the return array.
     protected onLoadActions(): Array<Promise<void>> {
         const proms = super.onLoadActions();
 

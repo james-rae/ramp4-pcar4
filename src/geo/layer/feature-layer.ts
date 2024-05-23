@@ -89,12 +89,7 @@ export class FeatureLayer extends AttribLayer {
         return esriConfig;
     }
 
-    /**
-     * Triggers when the layer loads.
-     *
-     * @function onLoadActions
-     */
-    onLoadActions(): Array<Promise<void>> {
+    protected onLoadActions(): Array<Promise<void>> {
         const startTime = Date.now();
         const loadPromises: Array<Promise<void>> = super.onLoadActions();
 

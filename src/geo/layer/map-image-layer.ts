@@ -127,18 +127,15 @@ export class MapImageLayer extends MapLayer {
         return esriConfig;
     }
 
-    /**
-     * Triggers when the layer loads.
-     *
-     * @function onLoadActions
-     */
-    onLoadActions(): Array<Promise<void>> {
+    protected onLoadActions(): Array<Promise<void>> {
         const loadPromises: Array<Promise<void>> = super.onLoadActions();
 
         if (!this.esriLayer) {
             this.noLayerErr();
             return loadPromises;
         }
+
+        const startTime = Date.now();
 
         this.layerTree.name = this.name;
 
@@ -339,6 +336,11 @@ export class MapImageLayer extends MapLayer {
                         : {}
                 )
                 .then(() => {
+                    if (startTime < this.phaseTime.cancel) {
+                        // cancelled, kickout.
+                        return Promise.resolve();
+                    }
+
                     // apply any updates that were in the configuration snippets
                     const subC = subConfigs[miSL.layerIdx];
                     if (subC) {
@@ -397,7 +399,9 @@ export class MapImageLayer extends MapLayer {
                                 miSL.getSqlFilter(CoreFilter.PERMANENT)
                             )
                             .then(count => {
-                                miSL.featureCount = count;
+                                if (startTime > this.phaseTime.cancel) {
+                                    miSL.featureCount = count;
+                                }
                             });
                     } else {
                         return Promise.resolve();

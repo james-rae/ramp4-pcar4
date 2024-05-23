@@ -28,7 +28,7 @@ TODO if we have API docs that expose the payload interfaces, link to those defin
 | LAYER_INITIATIONSTATECHANGE<br>'layer/initiationStatechange' | _state_: new value, layer: LayerInstance object      | The layer layer state changed |
 | LAYER_LAYERSTATECHANGE<br>'layer/layerstatechange' | _state_: new value, layer: LayerInstance object                | The layer load state changed |                     |
 | LAYER_OPACITYCHANGE<br>'layer/opacitychange'       | _opacity_: new value, layer: LayerInstance object              | The layer opacity changed                        |
-| LAYER_REGISTERED<br>'layer/registered'             | LayerInstance object                                           | The layer was added to the map                   |
+| LAYER_REGISTERED<br>'layer/registered'             | LayerInstance object                                           | The layer was registered with the instance                   |
 | LAYER_RELOAD_END<br>'layer/reloadend'              | LayerInstance object                                           | The layer finished reloading                     |
 | LAYER_RELOAD_START<br>'layer/reloadstart'          | LayerInstance object                                           | The layer started reloading                      |
 | LAYER_REMOVE<br>'layer/remove'                     | LayerInstance object                                           | The layer was removed from the map               |

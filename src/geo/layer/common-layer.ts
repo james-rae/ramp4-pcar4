@@ -144,8 +144,10 @@ export class CommonLayer extends LayerInstance {
             if (initiateErr) {
                 console.error(initiateErr.message);
                 this.onError();
+                this.updateInitiationState(InitiationState.NEW);
+            } else {
+                this.updateInitiationState(InitiationState.INITIATED);
             }
-            this.updateInitiationState(InitiationState.INITIATED);
         }
     }
 
@@ -272,9 +274,14 @@ export class CommonLayer extends LayerInstance {
         this.updateLayerState(LayerState.ERROR);
     }
 
-    // performs setup on the layer that needs to occur after the esri layer
-    // exists, but before we mark the layer as loaded. Any async tasks must
-    // include their promise in the return array.
+    /**
+     * Performs setup on the layer that needs to occur after initialization and
+     * the esri layer (if a map layer) loads, but before we mark the layer as loaded.
+     * Any async tasks must include their promise in the return array.
+     *
+     * @private
+     * @returns {Array<Promise<void>>} List of things to wait on.
+     */
     protected onLoadActions(): Array<Promise<void>> {
         // currently nothing, but we have the option to insert
         // an async setup that is global for all layers
@@ -303,6 +310,10 @@ export class CommonLayer extends LayerInstance {
 
         // put layer in Errorland, flag to stop notification from pinging
         this.onError(false);
+        if (this.initiationState === InitiationState.INITIATING) {
+            // we cancelled while initiating. push back to New
+            this.updateInitiationState(InitiationState.NEW);
+        }
     }
 
     loadPromise(): Promise<void> {

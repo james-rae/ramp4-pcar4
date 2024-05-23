@@ -50,17 +50,13 @@ export class TableLayer extends DataLayer {
         // common layer stuff is done in .initiate()
     }
 
-    /**
-     * Triggers when the layer loads.
-     *
-     * @function onLoadActions
-     */
-    onLoadActions(): Array<Promise<void>> {
+    protected onLoadActions(): Array<Promise<void>> {
         // super call currently does nothing.
         // once data layers mature, we can decide to remove this, or
         // move it to the end of this method if super starts doing something.
         // whatever works best.
         const loadPromises: Array<Promise<void>> = super.onLoadActions();
+        const startTime = Date.now();
 
         const urlData = this.$iApi.geo.shared.parseUrlIndex(this.serviceUrl);
         const featIdx: number = urlData.index || 0;
@@ -69,6 +65,9 @@ export class TableLayer extends DataLayer {
         const pLD: Promise<void> = this.$iApi.geo.layer
             .loadLayerMetadata(this.serviceUrl)
             .then(sData => {
+                if (startTime < this.phaseTime.cancel) {
+                    return;
+                }
                 if (!this.name) {
                     this.name = sData.name;
                 }
@@ -115,7 +114,9 @@ export class TableLayer extends DataLayer {
                 this.getSqlFilter(CoreFilter.PERMANENT)
             )
             .then(count => {
-                this.featureCount = count;
+                if (startTime > this.phaseTime.cancel) {
+                    this.featureCount = count;
+                }
             });
 
         this.layerTree.layerIdx = featIdx;

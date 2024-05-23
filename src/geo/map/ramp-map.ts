@@ -615,6 +615,9 @@ export class MapAPI extends CommonMapAPI {
             const layerStore = useLayerStore(this.$vApp.$pinia);
             layerStore.addLayer(layer, index);
 
+            // layer is in the store, so is registered.
+            this.$iApi.event.emit(GlobalEvents.LAYER_REGISTERED, layer);
+
             const startTime = Date.now();
             let timeElapsed = 0;
             // This interval waits for layer initiation, and has a kickout for layers that initiate forever.
@@ -657,8 +660,7 @@ export class MapAPI extends CommonMapAPI {
                         layer.onLoad();
                     }
 
-                    // layer has been added to the map, fire layer registered event
-                    this.$iApi.event.emit(GlobalEvents.LAYER_REGISTERED, layer);
+                    // finish the promise result (indicates layer is inside the map or equivalent)
                     resolve();
                 }
             }, 250);
