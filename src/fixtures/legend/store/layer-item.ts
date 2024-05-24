@@ -83,7 +83,7 @@ export class LayerItem extends LegendItem {
         return this._layerUid;
     }
 
-    /** Returns BaseLayer associated with legend item. */
+    /** Returns Ramp Layer associated with legend item. */
     get layer(): LayerInstance {
         return this._layer!;
     }

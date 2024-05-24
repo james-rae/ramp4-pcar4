@@ -575,7 +575,7 @@
 <script setup lang="ts">
 import { GlobalEvents, InstanceAPI } from '@/api';
 import type { LegendSymbology, RampLayerConfig } from '@/geo/api';
-import { LayerControl } from '@/geo/api';
+import { InitiationState, LayerControl } from '@/geo/api';
 import { useLayerStore } from '@/stores/layer';
 import to from 'await-to-js';
 import { marked } from 'marked';
@@ -840,19 +840,38 @@ const cancelOrRemoveLayer = () => {
     const layerItem: LayerItem = toRaw(props.legendItem as LayerItem); // so that typescript doesn't yell in the whole method
     if (layerItem.type === LegendType.Error) {
         // layer in error state, remove layer permanently
-        // layer could appear in store later, so we need to keep checking if its there
+        // layer could appear later, so we need to keep checking if its there.
+        // It will typically be in the store (now happens soon as its added),
+        // but the ESRI layer may appear later if things get wacky.
+        // given we can also cancel prior to initiation finishing, we consider
+        // layers in that state.
 
         props.legendItem.toggleHidden(true); // temporarily hide item until we can remove it
 
+        let safteyCount = 0;
+
         const removalWatcher = setInterval(() => {
-            // layer is gone from everywhere, so we are done
-            // TODO this will spin forever if the layer never exists. E.g. failure on WFS initialize
-            if (layerItem.layer && layerItem.layer.layerExists) {
+            // test: we can find the Ramp layer, and the Esri layer exists OR layer is
+            //       not on the path to have an Esri layer
+            //       also if it's been 5 minutes, stop and try ur best (1200 * 250 === five mins)
+
+            const rampL = layerItem.layer;
+
+            if (
+                safteyCount > 1200 ||
+                (rampL &&
+                    (rampL.layerExists ||
+                        rampL.initiationState === InitiationState.NEW ||
+                        rampL.initiationState === InitiationState.TERMINATING ||
+                        rampL.initiationState === InitiationState.TERMINATED))
+            ) {
                 // stop the interval
                 clearInterval(removalWatcher);
 
-                // layer is now there, time to remove!
-                iApi.geo.map.removeLayer(layerItem.layer);
+                if (rampL) {
+                    // remove from the map, which will de-register and remove anything from the map
+                    iApi.geo.map.removeLayer(rampL);
+                }
 
                 // remove layer config from store
                 layerStore.removeLayerConfig(layerItem.layerId);
@@ -862,6 +881,8 @@ const cancelOrRemoveLayer = () => {
                     .get<LegendAPI>('legend')
                     ?.removeLayerItem(layerItem.layerId);
             }
+
+            safteyCount++;
         }, 250);
     } else {
         // layer in loading state, "cancel" layer

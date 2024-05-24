@@ -440,7 +440,7 @@ export class MapLayer extends CommonLayer {
      * Indicates if the Esri map layer exists
      */
     get layerExists(): boolean {
-        return this.esriLayer ? true : false;
+        return !!this.esriLayer;
     }
 
     /**

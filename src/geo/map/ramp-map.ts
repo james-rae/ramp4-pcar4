@@ -949,11 +949,14 @@ export class MapAPI extends CommonMapAPI {
             return;
         }
 
+        // now that we can cancel before an initiation finishes, this error will cause more problems than good
+        /*
         if (layerInstance.mapLayer && !layerInstance.esriLayer) {
             throw new Error(
                 'Attempted to remove layer from the map without an esri layer. Likely layer.initiate() was not called or had not finished.'
             );
         }
+        */
 
         // if layer is parent layer, then remove all its sublayers first if there is at least one active sublayer
         if (
@@ -978,7 +981,9 @@ export class MapAPI extends CommonMapAPI {
 
         // Clean up layer.
         // This removes the reference to .esriLayer so must happen after the esriMap.remove()
-        layerInstance.terminate();
+        if (layerInstance.initiationState === InitiationState.INITIATED) {
+            layerInstance.terminate();
+        }
 
         layerInstance.isRemoved = true;
 
