@@ -60,14 +60,14 @@ export class LayerItem extends LegendItem {
         });
     }
 
-    /** Returns the id of the parent layer (for MIL) */
+    /** Returns the id of the parent layer (for MIL child) */
     get parentLayerId(): string | undefined {
-        return this._layerIdx
-            ? this._layerId.slice(
+        return this._layerIdx === undefined
+            ? undefined
+            : this._layerId.slice(
                   0,
                   this._layerId.length - `-${this._layerIdx}`.length
-              )
-            : undefined;
+              );
     }
 
     /** Returns the id of the layer */

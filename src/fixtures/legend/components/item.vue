@@ -838,6 +838,8 @@ const recreateLayer = async (layerConfig: RampLayerConfig) => {
  */
 const cancelOrRemoveLayer = () => {
     const layerItem: LayerItem = toRaw(props.legendItem as LayerItem); // so that typescript doesn't yell in the whole method
+    let safteyCount = 0;
+
     if (layerItem.type === LegendType.Error) {
         // layer in error state, remove layer permanently
         // layer could appear later, so we need to keep checking if its there.
@@ -847,8 +849,6 @@ const cancelOrRemoveLayer = () => {
         // layers in that state.
 
         props.legendItem.toggleHidden(true); // temporarily hide item until we can remove it
-
-        let safteyCount = 0;
 
         const removalWatcher = setInterval(() => {
             // test: we can find the Ramp layer, and the Esri layer exists OR layer is
@@ -894,9 +894,8 @@ const cancelOrRemoveLayer = () => {
         // if a sublayer or parent layer was cancelled, cancel the parent layer and all other sublayers.
         // need to keep polling for the parent layer since some sublayers may not be in the config (stuff that came from a group)
 
-        // TODO: revisit the need for this watcher. Now that every registered layer is returned by allLayers, it should always
-        //       find the parent first find(). Unless I'm mis-understanding what parentLayerId is and that can be a
-        //       temporary group node thing. Possibly .parentLayerId on an MIL group isn't set until after load? Sorta makes sense.
+        // This should find stuff real quick now that layers are immediately registered. But keeping the watcher to handle
+        // any weird scenarios (e.g. RampMapAPI.addLayer had critical failure)
         const cancelWatcher = setInterval(() => {
             const parentLayer = iApi.geo.layer
                 .allLayers()
@@ -907,13 +906,36 @@ const cancelOrRemoveLayer = () => {
                 );
             if (parentLayer) {
                 clearInterval(cancelWatcher);
-                const layerItemToCancel = iApi.fixture
-                    .get<LegendAPI>('legend')
-                    ?.getLayerItem(parentLayer);
+                const legendAPI = iApi.fixture.get<LegendAPI>('legend');
+
+                // cancel the ramp layer
+                parentLayer.cancelLoad();
+
+                // cancel block tied to the layer that is esri bound, if exists
+                const layerItemToCancel = legendAPI?.getLayerItem(parentLayer);
                 if (layerItemToCancel) {
                     layerItemToCancel.error();
                     layerItemToCancel._loadCancelled = true;
                 }
+
+                // TODO this part sketchy. children won't exist prior to load
+                // is there a way to find sublayers without going through the layer? do legend items have layerid?
+                // see what legend api exposes. could crawl tree and find anything with parentLayerId
+
+                // cancel any blocks tied to sublayers. We cannot guarantee the layer generated sublayer objects
+                // at this point, so do a legend crawl.
+                const fullLegend = legendAPI?.getLegend() || [];
+
+                fullLegend.forEach(block => {
+                    if (
+                        block instanceof LayerItem &&
+                        block.parentLayerId === parentLayer.id
+                    ) {
+                        // is a layer block, and is a sublayer of the parent
+                        // run the stuff thats below
+                    }
+                });
+
                 parentLayer.sublayers?.forEach(sl => {
                     const sublayerItemToCancel = iApi.fixture
                         .get<LegendAPI>('legend')
@@ -924,6 +946,13 @@ const cancelOrRemoveLayer = () => {
                     }
                 });
             }
+
+            if (safteyCount > 1200) {
+                // 5 minutes
+                clearInterval(cancelWatcher);
+            }
+
+            safteyCount++;
         }, 250);
     }
 };
