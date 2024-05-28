@@ -1427,7 +1427,7 @@ export class MapAPI extends CommonMapAPI {
             return {
                 oid: topGraphic.getObjectId(),
                 layerId: hitLayer.id,
-                layerIdx: hitLayer.getLayerTree().layerIdx
+                layerIdx: hitLayer.layerIdx
             };
         }
     }

@@ -446,9 +446,20 @@ export interface IdentifyParameters {
 
 //TODO: Enhance this when a RAMP Graphic is properly defined
 export interface GraphicHitResult {
-    oid: number; // graphic OBJECTID
-    layerIdx: number; // layer index of the graphic
-    layerId: string; // graphic layer id
+    /**
+     * graphic Object ID value
+     */
+    oid: number;
+
+    /**
+     * layer index of the layer the graphic lives in
+     */
+    layerIdx: number;
+
+    /**
+     * layer id of layer the graphic lives in
+     */
+    layerId: string;
 }
 
 export interface MaptipProperties {

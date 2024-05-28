@@ -108,6 +108,7 @@ export class FeatureLayer extends AttribLayer {
         const layerUrl: string = (<any>this.esriLayer).parsedUrl.path;
         const urlData = this.$iApi.geo.shared.parseUrlIndex(layerUrl);
         const featIdx: number = urlData.index || 0;
+        this.layerIdx = featIdx;
 
         // feature has only one layer
         this.serviceUrl = layerUrl;

@@ -7,6 +7,7 @@ export class LayerItem extends LegendItem {
     _layerId: string;
     _layerIdx?: number | undefined;
     _layerUid: string = '';
+    _isSublayer: boolean = false;
 
     _layer: LayerInstance | undefined;
     _layerInitVis: boolean | undefined;
@@ -37,6 +38,7 @@ export class LayerItem extends LegendItem {
         this._type = LegendType.Placeholder;
         this._layerId = config.layerId;
         this._layerIdx = config.sublayerIndex;
+        this._isSublayer = config.sublayerIndex !== undefined;
         this._layerControls = config.layerControls ?? [];
         this._origLayerControls = config.layerControls;
         this._layerDisabledControls = config.disabledLayerControls ?? [];
@@ -60,14 +62,15 @@ export class LayerItem extends LegendItem {
         });
     }
 
-    /** Returns the id of the parent layer (for MIL child) */
+    /** Returns the id of the parent layer this item is a sublayer. Otherwise undefined */
     get parentLayerId(): string | undefined {
-        return this._layerIdx === undefined
-            ? undefined
-            : this._layerId.slice(
+        // layerid is the child id ( so <parentid>-<index> ). Need to math out the first part
+        return this._isSublayer
+            ? this._layerId.slice(
                   0,
                   this._layerId.length - `-${this._layerIdx}`.length
-              );
+              )
+            : undefined;
     }
 
     /** Returns the id of the layer */
@@ -75,10 +78,19 @@ export class LayerItem extends LegendItem {
         return this._layerId;
     }
 
+    /** Returns layer index only if the layer item is a sublayer. Otherwise returns undefined */
     get layerIdx(): number | undefined {
         return this._layerIdx;
     }
 
+    /** Returns if the layer is a sublayer */
+    get isSublayer(): boolean {
+        // prop is somewhat redundant, but saves us from always having to check
+        // for undefined on layerIdx (0 is valid so no falsey shortcuts)
+        return this._isSublayer;
+    }
+
+    /** Returns UID of the layer */
     get layerUid(): string {
         return this._layerUid;
     }
@@ -91,7 +103,7 @@ export class LayerItem extends LegendItem {
     set layer(layer: LayerInstance) {
         this._layer = layer;
         this._layerId = layer.id;
-        this._layerIdx = layer.layerIdx;
+        this._layerIdx = layer.isSublayer ? layer.layerIdx : undefined;
         this._layerUid = layer.uid;
         this._name = this._name || layer.name;
         this._symbologyStack = this._customSymbology
@@ -286,6 +298,13 @@ export class LayerItem extends LegendItem {
             this._layer
                 ?.loadPromise()
                 .then(() => {
+                    // TODO does this IF even make sense? Does parent layer or sublayer get bound?
+                    //      if parent layer gets bound, then the layerIdx check will fail if 0
+                    // it does get pinged but that might be my doing. doesnt happen on main
+                    console.log(
+                        'BIG DUMB. layer type ' + this._layer?.layerType
+                    );
+                    console.trace();
                     if (
                         this._layer?.layerType === LayerType.MAPIMAGE &&
                         !this._layerIdx

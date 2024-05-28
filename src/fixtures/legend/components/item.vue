@@ -931,6 +931,7 @@ const cancelOrRemoveLayer = () => {
                         block instanceof LayerItem &&
                         block.parentLayerId === parentLayer.id
                     ) {
+                        // TODO look at other spot with parentlayerid, see if it can be -1 in scenarios
                         // is a layer block, and is a sublayer of the parent
                         // run the stuff thats below
                     }

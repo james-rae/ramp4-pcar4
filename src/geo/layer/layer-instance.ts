@@ -77,7 +77,8 @@ export class LayerInstance extends APIScope {
     drawState: DrawState;
 
     /**
-     * Index of the layer. Aligns to index of arcgis server, or defaults to 0 on other layers
+     * Index of the layer. Aligns to index of arcgis server source, or defaults to 0 on other layers.
+     * Map Image Layers and layers that do not support attributes have a value of -1
      */
     layerIdx: number;
 

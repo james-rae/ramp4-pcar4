@@ -68,6 +68,7 @@ export class FileLayer extends AttribLayer {
         this.dataFormat = DataFormat.ESRI_FEATURE;
         this.layerFormat = LayerFormat.FEATURE;
         this.tooltipField = '';
+        this.layerIdx = 0;
 
         if (
             rampConfig.identifyMode &&

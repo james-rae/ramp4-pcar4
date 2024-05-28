@@ -129,8 +129,7 @@ export class LegendAPI extends FixtureInstance {
             this.$iApi,
             {
                 layerId: layer.id,
-                sublayerIndex:
-                    layer.layerIdx !== -1 ? layer.layerIdx : undefined,
+                sublayerIndex: layer.isSublayer ? layer.layerIdx : undefined,
                 name: layer.name
             },
             parent
@@ -691,8 +690,9 @@ export class LegendAPI extends FixtureInstance {
             currItem.layer = currLayer;
             currItem.name = currLayer.name;
             currItem.layerId = currLayer.id;
-            currItem.sublayerIndex =
-                layer.layerIdx === -1 ? undefined : layer.layerIdx;
+            currItem.sublayerIndex = layer.isSublayer
+                ? layer.layerIdx
+                : undefined;
         }
 
         return { ...currItem, ...extraConfig };
