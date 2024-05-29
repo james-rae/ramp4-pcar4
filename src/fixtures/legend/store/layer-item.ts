@@ -281,124 +281,106 @@ export class LayerItem extends LegendItem {
     // TS complaining as usual. Can maybe remove the parameter and expect caller to set the layer first?
     // @ts-ignore
     load(layer: LayerInstance | undefined) {
-        if (layer) {
-            this._layer =
-                layer instanceof LayerInstance
-                    ? layer
-                    : this.$iApi.geo.layer.getLayer(
-                          this._layerId ?? this._layerUid
-                      );
-            this.layer = layer;
-            this._layerRedrawing =
-                layer.mapLayer && layer.drawState !== DrawState.UP_TO_DATE;
-            if (this._loadCancelled) {
-                this.toggleVisibility(false, true, true);
-                return;
-            }
-            this._layer
-                ?.loadPromise()
-                .then(() => {
-                    // TODO does this IF even make sense? Does parent layer or sublayer get bound?
-                    //      if parent layer gets bound, then the layerIdx check will fail if 0
-                    // it does get pinged but that might be my doing. doesnt happen on main
-                    console.log(
-                        'BIG DUMB. layer type ' + this._layer?.layerType
-                    );
-                    console.trace();
-                    if (
-                        this._layer?.layerType === LayerType.MAPIMAGE &&
-                        !this._layerIdx
-                    ) {
-                        this.error();
-                        console.error(
-                            `MapImageLayer has no sublayerIndex defined for layer: ${this._layerId}.`
-                        );
-                    } else {
-                        this._layerInitVis =
-                            typeof this._layerInitVis !== 'undefined'
-                                ? this._visibility
-                                : layer.visibility;
-                        super.load();
+        // manage the variant param.
+        const layerInst =
+            layer instanceof LayerInstance
+                ? layer
+                : this.$iApi.geo.layer.getLayer(
+                      this._layerId ?? this._layerUid
+                  );
 
-                        // override layer item visibility in favour of layer visibility
-                        // need to store layer's initial visibility, otherwise it will get lost in the toggling from
-                        // visibility rule checking
-                        this.toggleVisibility(this._layerInitVis, true, true);
-                        if (!layer.visibility) {
-                            // if the layer is invisible, set all child symbols to invisible
-                            this.setSymbologyVisibility(undefined, false);
-                        }
-                    }
-
-                    // event listener must be added after the layer is loaded
-                    this.handlers.push(
-                        this.$iApi.event.on(
-                            GlobalEvents.LAYER_VISIBILITYCHANGE,
-                            (updatedLayer: any) => {
-                                if (
-                                    updatedLayer.layer.uid === this.layer.uid &&
-                                    this._type === LegendType.Item
-                                ) {
-                                    this.toggleVisibility(
-                                        updatedLayer.visibility,
-                                        true,
-                                        true
-                                    );
-                                }
-                            }
-                        )
-                    );
-
-                    this.handlers.push(
-                        this.$iApi.event.on(
-                            GlobalEvents.LAYER_DRAWSTATECHANGE,
-                            (payload: {
-                                layer: LayerInstance;
-                                state: string;
-                            }) => {
-                                if (this.layer.uid === payload.layer.uid) {
-                                    if (
-                                        payload.layer.drawState ===
-                                        DrawState.REFRESH
-                                    ) {
-                                        // if layer is redrawing, turn on the indicator right away
-                                        this.layerRedrawing = true;
-                                    } else {
-                                        // wait for a short duration and check draw state again
-                                        setTimeout(() => {
-                                            // check draw state again
-                                            this.layerRedrawing =
-                                                payload.layer.drawState ===
-                                                DrawState.REFRESH;
-                                        }, 500);
-                                    }
-                                }
-                            }
-                        )
-                    );
-
-                    this._layerOffscale = this.$iApi.geo.map.created
-                        ? this.layer?.isOffscale()
-                        : false;
-                    this.handlers.push(
-                        this.$iApi.event.on(
-                            GlobalEvents.MAP_SCALECHANGE,
-                            () => {
-                                // reason for this check is the scale likes to fire during a reprojection,
-                                // and if race condition aligns the map view will not exists (as the reprojected
-                                // view is getting built) when the offscale check is requested, causing a ruckus.
-                                if (this.$iApi.geo.map.created) {
-                                    this._layerOffscale =
-                                        this.layer?.isOffscale();
-                                }
-                            }
-                        )
-                    );
-                })
-                .catch(() => {
-                    this.error();
-                });
+        if (!layerInst) {
+            // layer wasn't passed, couldn't be found either. done.
+            return;
         }
+
+        this._layer = layerInst;
+        this.layer = layerInst;
+        this._layerRedrawing =
+            layerInst.mapLayer && layerInst.drawState !== DrawState.UP_TO_DATE;
+        if (this._loadCancelled) {
+            this.toggleVisibility(false, true, true);
+            return;
+        }
+        layerInst
+            .loadPromise()
+            .then(() => {
+                this._layerInitVis =
+                    typeof this._layerInitVis !== 'undefined'
+                        ? this._visibility
+                        : layerInst.visibility;
+                super.load();
+
+                // override layer item visibility in favour of layer visibility
+                // need to store layer's initial visibility, otherwise it will get lost in the toggling from
+                // visibility rule checking
+                this.toggleVisibility(this._layerInitVis, true, true);
+                if (!layerInst.visibility) {
+                    // if the layer is invisible, set all child symbols to invisible
+                    this.setSymbologyVisibility(undefined, false);
+                }
+
+                // event listener must be added after the layer is loaded
+                this.handlers.push(
+                    this.$iApi.event.on(
+                        GlobalEvents.LAYER_VISIBILITYCHANGE,
+                        (updatedLayer: any) => {
+                            if (
+                                updatedLayer.layer.uid === this.layer.uid &&
+                                this._type === LegendType.Item
+                            ) {
+                                this.toggleVisibility(
+                                    updatedLayer.visibility,
+                                    true,
+                                    true
+                                );
+                            }
+                        }
+                    )
+                );
+
+                this.handlers.push(
+                    this.$iApi.event.on(
+                        GlobalEvents.LAYER_DRAWSTATECHANGE,
+                        (payload: { layer: LayerInstance; state: string }) => {
+                            if (this.layer.uid === payload.layer.uid) {
+                                if (
+                                    payload.layer.drawState ===
+                                    DrawState.REFRESH
+                                ) {
+                                    // if layer is redrawing, turn on the indicator right away
+                                    this.layerRedrawing = true;
+                                } else {
+                                    // wait for a short duration and check draw state again
+                                    setTimeout(() => {
+                                        // check draw state again
+                                        this.layerRedrawing =
+                                            payload.layer.drawState ===
+                                            DrawState.REFRESH;
+                                    }, 500);
+                                }
+                            }
+                        }
+                    )
+                );
+
+                this._layerOffscale = this.$iApi.geo.map.created
+                    ? layerInst.isOffscale()
+                    : false;
+                this.handlers.push(
+                    this.$iApi.event.on(GlobalEvents.MAP_SCALECHANGE, () => {
+                        // reason for this check is the scale likes to fire during a reprojection,
+                        // and if race condition aligns the map view will not exists (as the reprojected
+                        // view is getting built) when the offscale check is requested, causing a ruckus.
+                        if (this.$iApi.geo.map.created) {
+                            this._layerOffscale = this.layer?.isOffscale();
+                        }
+                    })
+                );
+            })
+            .catch(() => {
+                this.error();
+            });
     }
 
     error(): void {

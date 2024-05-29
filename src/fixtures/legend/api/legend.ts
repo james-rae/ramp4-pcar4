@@ -303,35 +303,44 @@ export class LegendAPI extends FixtureInstance {
     // Update
 
     /**
-     * Update an existing layer item with data from the given layer
-     * Does nothing if the layer item is not found
+     * Update all layer items bound to the given layer.
+     * Does nothing if no layer items are found
      *
-     * @param {LayerInstance} layer the layer to update the layer item with
+     * @param {LayerInstance} layer the layer to update the legend with
      * @memberof LegendAPI
      */
     updateLegend(layer: LayerInstance): void {
         // helper function to link a layer into a layer item
         const updateLayerItem = (
-            layer: LayerInstance | string,
+            sourceLayer: LayerInstance | string,
             error: boolean
         ) => {
-            const layerItem: LayerItem | undefined = this.getLayerItem(layer);
+            const layerItem = this.getLayerItem(sourceLayer);
             if (error) {
-                if (layerItem && layer instanceof LayerInstance) {
-                    layerItem.layer = layer;
+                if (layerItem && sourceLayer instanceof LayerInstance) {
+                    layerItem.layer = sourceLayer;
                 }
                 layerItem?.error();
             } else {
                 layerItem?.load(
-                    layer instanceof LayerInstance ? layer : undefined
+                    sourceLayer instanceof LayerInstance
+                        ? sourceLayer
+                        : undefined
                 );
             }
         };
+
         layer
             .loadPromise()
             .then(() => {
-                let layerItem: LayerItem | undefined = this.getLayerItem(layer);
+                let layerItem = this.getLayerItem(layer);
                 // if load was cancelled, just update the parent and do not grow out tree
+                /*
+                TODO what happens if it was MIL? Legend could have single block tied to 
+                just a child; updateLayerItem will only find the parent.
+                also "dont grow the tree" won't matter if tree is already built in config.
+                Find out if updateLegend() gets called on all the children anyways.
+                */
                 if (layerItem?.loadCancelled) {
                     updateLayerItem(layer, false);
                     return;
