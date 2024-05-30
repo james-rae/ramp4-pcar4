@@ -59,6 +59,12 @@ export class MapAPI extends CommonMapAPI {
     private mapMouseThrottle: number;
 
     /**
+     * Timeout for when to give up on a layer loading
+     * @private
+     */
+    private layerLoadTimeout: number;
+
+    /**
      * @constructor
      * @param {InstanceAPI} iApi the RAMP instance
      */
@@ -67,7 +73,8 @@ export class MapAPI extends CommonMapAPI {
 
         this.maptip = new MaptipAPI(iApi);
         this.caption = new MapCaptionAPI(iApi);
-        this.mapMouseThrottle = 0; // default to 0 (no throttle)
+        this.mapMouseThrottle = 0; // default to 0 (no throttle);
+        this.layerLoadTimeout = 90000; // schema default (1.5 mins)
     }
 
     /**
@@ -79,6 +86,11 @@ export class MapAPI extends CommonMapAPI {
         this.setMapMouseThrottle(config.mapMouseThrottle ?? 0);
         this.trackFirstBasemap = true; // we do this here (in this class) to prevent the overview map from tracking
         super.createMap(config, targetDiv);
+
+        if (config.layerTimeout && config.layerTimeout > 0) {
+            // above IF is falsey on 0, but 0 would brick the loader anyways.
+            this.layerLoadTimeout = config.layerTimeout;
+        }
 
         this.viewPromise.then(() => {
             // Timing issues beginning at ESRI v4.26 make us need to wait until the initial view gets created.
@@ -626,7 +638,7 @@ export class MapAPI extends CommonMapAPI {
             const layerWatcher = setInterval(() => {
                 timeElapsed += 250;
                 if (
-                    timeElapsed >= 20000 ||
+                    timeElapsed >= this.layerLoadTimeout ||
                     layer.layerState === LayerState.ERROR
                 ) {
                     // Layer took too long to initiate. Move to error to avoid infinite load animation.
@@ -1252,9 +1264,8 @@ export class MapAPI extends CommonMapAPI {
      *
      * @param {MapClick | Point} targetPoint the place on the map to execute the identify
      * @memberof MapAPI
-     * @returns MapIdentifyResult
+     * @returns {MapIdentifyResult} results of the identify
      */
-
     runIdentify(targetPoint: MapClick | Point): MapIdentifyResult {
         const layers = this.$iApi.geo.layer
             .allLayersOnMap(false)

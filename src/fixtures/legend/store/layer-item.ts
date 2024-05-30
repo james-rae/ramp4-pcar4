@@ -324,13 +324,16 @@ export class LayerItem extends LegendItem {
                 this.handlers.push(
                     this.$iApi.event.on(
                         GlobalEvents.LAYER_VISIBILITYCHANGE,
-                        (updatedLayer: any) => {
+                        (payload: {
+                            layer: LayerInstance;
+                            visibility: boolean;
+                        }) => {
                             if (
-                                updatedLayer.layer.uid === this.layer.uid &&
+                                payload.layer.uid === this.layer.uid &&
                                 this._type === LegendType.Item
                             ) {
                                 this.toggleVisibility(
-                                    updatedLayer.visibility,
+                                    payload.visibility,
                                     true,
                                     true
                                 );

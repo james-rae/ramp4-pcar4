@@ -851,19 +851,20 @@ const cancelOrRemoveLayer = () => {
         props.legendItem.toggleHidden(true); // temporarily hide item until we can remove it
 
         const removalWatcher = setInterval(() => {
-            // test: we can find the Ramp layer, and the Esri layer exists OR layer is
-            //       not on the path to have an Esri layer
-            //       also if it's been 5 minutes, stop and try ur best (1200 * 250 === five mins)
+            // test: we can find the Ramp layer AND ...
+            //           the Esri layer exists OR layer is not on the path to have an Esri layer
+            //       OR if it's been 5 minutes, stop and try ur best (1200 * 250 === five mins)
 
             const rampL = layerItem.layer;
 
             if (
-                safteyCount > 1200 ||
                 (rampL &&
                     (rampL.layerExists ||
                         rampL.initiationState === InitiationState.NEW ||
                         rampL.initiationState === InitiationState.TERMINATING ||
-                        rampL.initiationState === InitiationState.TERMINATED))
+                        rampL.initiationState ===
+                            InitiationState.TERMINATED)) ||
+                safteyCount > 1200
             ) {
                 // stop the interval
                 clearInterval(removalWatcher);
@@ -888,7 +889,6 @@ const cancelOrRemoveLayer = () => {
         // layer in loading state, "cancel" layer
         // this puts it in error state. user can then reload or remove
 
-        // THIS CHANGES
         props.legendItem.error();
         (props.legendItem as LayerItem)._loadCancelled = true;
         // if a sublayer or parent layer was cancelled, cancel the parent layer and all other sublayers.
@@ -906,44 +906,27 @@ const cancelOrRemoveLayer = () => {
                 );
             if (parentLayer) {
                 clearInterval(cancelWatcher);
-                const legendAPI = iApi.fixture.get<LegendAPI>('legend');
+                const plId = parentLayer.id;
 
                 // cancel the ramp layer
                 parentLayer.cancelLoad();
 
-                // cancel block tied to the layer that is esri bound, if exists
-                const layerItemToCancel = legendAPI?.getLayerItem(parentLayer);
-                if (layerItemToCancel) {
-                    layerItemToCancel.error();
-                    layerItemToCancel._loadCancelled = true;
-                }
-
-                // TODO this part sketchy. children won't exist prior to load
-                // is there a way to find sublayers without going through the layer? do legend items have layerid?
-                // see what legend api exposes. could crawl tree and find anything with parentLayerId
-
-                // cancel any blocks tied to sublayers. We cannot guarantee the layer generated sublayer objects
-                // at this point, so do a legend crawl.
-                const fullLegend = legendAPI?.getLegend() || [];
+                // cancel any blocks tied to the layer or sublayers.
+                // We cannot guarantee the layer generated sublayer objects
+                // at this point, so can't use parentLayer.sublayers.
+                // Do a legend crawl instead.
+                const fullLegend =
+                    iApi.fixture.get<LegendAPI>('legend')?.getLegend() || [];
 
                 fullLegend.forEach(block => {
                     if (
                         block instanceof LayerItem &&
-                        block.parentLayerId === parentLayer.id
+                        (block.layerId === plId || block.parentLayerId === plId)
                     ) {
-                        // TODO look at other spot with parentlayerid, see if it can be -1 in scenarios
-                        // is a layer block, and is a sublayer of the parent
-                        // run the stuff thats below
-                    }
-                });
-
-                parentLayer.sublayers?.forEach(sl => {
-                    const sublayerItemToCancel = iApi.fixture
-                        .get<LegendAPI>('legend')
-                        ?.getLayerItem(sl);
-                    if (sublayerItemToCancel) {
-                        sublayerItemToCancel.error();
-                        sublayerItemToCancel._loadCancelled = true;
+                        // is a layer block, and is bound to the parent or one of its sublayers
+                        // cancel the block
+                        block.error();
+                        block._loadCancelled = true;
                     }
                 });
             }

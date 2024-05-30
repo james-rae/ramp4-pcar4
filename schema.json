@@ -2812,6 +2812,11 @@
                 "labelsDefault": {
                     "$ref": "#/$defs/labels",
                     "description": "If provided, will override any service defaults. Will not override values on a layer config."
+                },
+                "layerTimeout": {
+                    "type": "number",
+                    "description": "Time limit (in milliseconds) to wait for any added layer to load.",
+                    "default": 90000
                 }
             },
             "required": ["tileSchemas", "baseMaps"],

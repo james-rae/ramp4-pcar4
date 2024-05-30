@@ -30,7 +30,6 @@ export class WfsLayer extends FileLayer {
         );
         if (startTime > this.phaseTime.cancel) {
             this.sourceGeoJson = gj;
-            // TODO error handling? set layer state to error if above call fails?
             await super.onInitiate();
         }
     }

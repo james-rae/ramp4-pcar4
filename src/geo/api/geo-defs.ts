@@ -757,4 +757,5 @@ export interface RampMapConfig {
     pointZoomScale?: number;
     mapMouseThrottle?: number;
     labelsDefault?: RampLabelsConfig;
+    layerTimeout?: number;
 }
