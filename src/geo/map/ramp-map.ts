@@ -74,7 +74,7 @@ export class MapAPI extends CommonMapAPI {
         this.maptip = new MaptipAPI(iApi);
         this.caption = new MapCaptionAPI(iApi);
         this.mapMouseThrottle = 0; // default to 0 (no throttle);
-        this.layerLoadTimeout = 90000; // schema default (1.5 mins)
+        this.layerLoadTimeout = 90000; // schema default is 90 seconds.
     }
 
     /**

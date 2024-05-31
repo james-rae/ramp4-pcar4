@@ -95,7 +95,7 @@ export class CommonLayer extends LayerInstance {
         this.loadPromFulfilled = false;
 
         this.layerTree = new TreeNode(0, this.uid, this.name, true); // is a layer with layer index 0 by default. subclasses will change this when they load
-        this.maxLoadTime = rampConfig.maxLoadTime ?? 20000;
+        this.maxLoadTime = rampConfig.maxLoadTime ?? 0;
     }
 
     updateInitiationState(newState: InitiationState): void {
@@ -189,14 +189,15 @@ export class CommonLayer extends LayerInstance {
         const startTime = Date.now();
 
         let timedOut = false;
-        const loadTimeout = setTimeout(() => {
-            // if timeout is not 0, layer will go into error state after loading past timeout
-            // otherwise timeout is turned off (0), and layer can load forever
-            if (this.maxLoadTime) {
+        let loadTimeout: number | undefined;
+        if (this.maxLoadTime > 0) {
+            loadTimeout = setTimeout(() => {
+                // took too long to load, send layer into error state
+
                 timedOut = true;
                 this.onError();
-            }
-        }, this.maxLoadTime); // configurable time limit for actions to execute
+            }, this.maxLoadTime); // configurable time limit for actions to execute
+        }
 
         // handling for any errors that are thrown when executing layer onLoadActions call
         // For issue https://github.com/ramp4-pcar4/ramp4-pcar4/issues/2103, without proper error handling here any subsequent

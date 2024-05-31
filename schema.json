@@ -819,7 +819,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "metadata": {
@@ -895,7 +895,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "metadata": {
@@ -972,7 +972,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "metadata": {
@@ -1179,7 +1179,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "metadata": {
@@ -1304,7 +1304,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "layerType": {
@@ -1427,7 +1427,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "layerType": {
@@ -1524,7 +1524,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "colour": {
@@ -1644,7 +1644,7 @@
                 },
                 "maxLoadTime": {
                     "type": "number",
-                    "default": 20000,
+                    "default": 0,
                     "description": "The time span (in milliseconds) a layer can load for before entering the 'error' state. Zero will allow the layer to load forever"
                 },
                 "metadata": {
