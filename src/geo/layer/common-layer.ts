@@ -129,11 +129,22 @@ export class CommonLayer extends LayerInstance {
         });
     }
 
+    // TODO remove before pulling PR
+    async sleep(millsecs: number): Promise<void> {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve();
+            }, millsecs);
+        });
+    }
+
     // need this so initiate encapsulates the entire initiation process regardless of which inherited layer type is being initiated
     async initiate(): Promise<void> {
         this.updateInitiationState(InitiationState.INITIATING);
         this.startTimer(TimerType.LOAD);
         const startTime = Date.now();
+
+        await this.sleep(6000);
 
         const [initiateErr] = await to(this.onInitiate()); // Need this because some layers don't do error handling things
 

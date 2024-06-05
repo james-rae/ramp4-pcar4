@@ -444,7 +444,7 @@ export interface IdentifyParameters {
     hitTest?: Promise<Array<GraphicHitResult>>; // Optional results of local hits to incorporate in the identify
 }
 
-//TODO: Enhance this when a RAMP Graphic is properly defined
+// TODO this would need to expand if we start supporting hits from Graphic Layers (they have no concept of OID)
 export interface GraphicHitResult {
     /**
      * graphic Object ID value

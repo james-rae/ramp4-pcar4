@@ -47,6 +47,7 @@ LayerInstance: RAMP's internal "base class" for layers. Any code dealing with ge
 ## Initiation Chain
 
 Useful for figuring out where to put checkpoints for "cancel load" kickouts.
+This chain is the `onInitiate()` calls. They tend to go backwards (subclass --> superclass) with the exception of MapLayer calling CommonLayer as an early step.
 
 ~ CommonLayer: Just saftey checks.
 
