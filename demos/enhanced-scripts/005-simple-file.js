@@ -46,14 +46,35 @@ const runPreTest = (config, options, utils) => {
         ['#FFFF01', 2.5]
     ];
 
-    const cangrid = {
-        id: 'cangrid',
-        name: 'CanGrid GeoJson',
+    const cangridP1 = {
+        id: 'cangrid-p1',
+        name: 'CanGrid GeoJson Plus1',
         nameField: 'cellval',
         layerType: 'file-geojson',
-        url: '../file-layers/cangrid_1202213.json',
+        url: '../file-layers/cangrid_1202213_p1.json',
         state: {
-            opacity: 0.8
+            opacity: 0.7
+        },
+        caching: false,
+        customRenderer: {
+            type: 'classBreaks',
+            field: 'cellval',
+            // all possible values must be covered
+            minValue: -999,
+            classBreakInfos: colourRamp.map(nugget =>
+                shaderMcGhee(nugget[0], nugget[1])
+            )
+        }
+    };
+
+    const cangridM1 = {
+        id: 'cangrid-m1',
+        name: 'CanGrid GeoJson Minus1',
+        nameField: 'cellval',
+        layerType: 'file-geojson',
+        url: '../file-layers/cangrid_1202213_m1.json',
+        state: {
+            opacity: 0.7
         },
         caching: false,
         customRenderer: {
@@ -70,9 +91,7 @@ const runPreTest = (config, options, utils) => {
         controls: ['visibility', 'opacity', 'settings', 'symbology'],
         state: {
             opacity: 0.95,
-            visibility: true,
-            identify: true,
-            hovertips: true
+            identify: false
         },
         id: 'CanGRID_tmean_ANN_en',
         url: 'https://geo.weather.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0',
@@ -86,7 +105,8 @@ const runPreTest = (config, options, utils) => {
     };
 
     utils.addLayerLegend(toms);
-    utils.addLayerLegend(cangrid);
+    utils.addLayerLegend(cangridM1);
+    utils.addLayerLegend(cangridP1);
 
     return { config, options };
 };
