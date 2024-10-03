@@ -4,29 +4,13 @@ Test 05: Simple File Layers
  */
 
 const runPreTest = (config, options, utils) => {
-    const csv = {
-        id: 'CSV',
-        name: 'CSV',
-        layerType: 'file-csv',
-        url: '../file-layers/csv.csv',
-        latField: 'Y',
-        longField: 'X',
-        colour: '#FF0000' // So that its not the same colour as the shape one
-    };
-    const geoJson = {
-        id: 'GeoJson',
-        name: 'GeoJson',
-        layerType: 'file-geojson',
-        nameField: 'name',
-        url: '../file-layers/geojson.json',
-        caching: true
-    };
-    const shape = {
-        id: 'Shape',
-        name: 'Shape',
-        nameField: 'name',
-        layerType: 'file-shape',
-        url: '../file-layers/shape.zip'
+    const hex2esri = colourHex => {
+        const s = colourHex.substring(0, 1) === '#' ? colourHex.substring(1) : colourHex;
+
+        return [0, 2, 4, 6].map(i => {
+            const hex = s.substring(i, i + 2);
+            return hex.length === 0 ? 255 : parseInt(hex, 16);
+        });
     };
     const zipGeoJson = {
         id: 'GeoZipson',
@@ -37,21 +21,69 @@ const runPreTest = (config, options, utils) => {
         url: '../file-layers/zgeojson.zip'
     };
 
-    const zipFgb = {
-        id: 'zfgb',
-        name: 'Zipped FlatGeobeuf',
-        nameField: 'STATE_NAME',
-        colour: '#ff1493',
-        layerType: 'file-zip-fgb',
-        url: '../file-layers/states-fgb.zip',
-        state: { opacity: 0.6 }
+    const shaderMcGhee = (colour, maxVal) => {
+        return {
+            classMaxValue: maxVal,
+            symbol: {
+                type: 'esriSFS',
+                style: 'esriSFSSolid',
+                color: hex2esri(colour),
+                outline: {
+                    color: [255, 190, 124, 255],
+                    width: 1
+                }
+            },
+            label: 'Top range ' + maxVal
+        };
     };
 
-    utils.addLayerLegend(zipFgb);
-    utils.addLayerLegend(geoJson);
-    utils.addLayerLegend(csv);
-    utils.addLayerLegend(shape);
-    utils.addLayerLegend(zipGeoJson);
+    const colourRamp = [
+        ['#0000FF', 0],
+        ['#00FF00', 1],
+        ['#FF0000', 100]
+    ];
+
+    const cangrid = {
+        id: 'cangrid',
+        name: 'CanGrid GeoJson',
+        nameField: 'cellval',
+        layerType: 'file-geojson',
+        url: '../file-layers/cangrid_1202213.json',
+        state: {
+            opacity: 0.8
+        },
+        caching: false,
+        customRenderer: {
+            type: 'classBreaks',
+            field: 'cellval',
+            // all possible values must be covered
+            minValue: -999,
+            classBreakInfos: colourRamp.map(nugget => shaderMcGhee(nugget[0], nugget[1]))
+        }
+    };
+
+    const toms = {
+        name: 'CCCP CanGrid Service',
+        controls: ['visibility', 'opacity', 'settings', 'symbology'],
+        state: {
+            opacity: 0.95,
+            visibility: true,
+            identify: true,
+            hovertips: true
+        },
+        id: 'CanGRID_tmean_ANN_en',
+        url: 'https://geo.weather.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0',
+        layerType: 'ogc-wms',
+        featureInfoMimeType: 'application/json',
+        sublayers: [
+            {
+                id: 'CANGRD.TREND.TM_ANNUAL'
+            }
+        ]
+    };
+
+    utils.addLayerLegend(toms);
+    utils.addLayerLegend(cangrid);
 
     return { config, options };
 };

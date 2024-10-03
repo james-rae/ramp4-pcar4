@@ -87,6 +87,8 @@ export class FileLayer extends AttribLayer {
         // NOTE: we are not setting the source projection option. It will assume LatLong, or use projection
         //       contained in the geojson file. The option flag is only there in case other blocks of code
         //       want to utilize this method with fancy projection madness.
+
+        // TODO clean this up. horrendous.
         const opts: GeoJsonOptions = {
             layerId: this.origRampConfig.id || '',
             targetSR: this.$iApi.geo.map.getSR(),

@@ -462,6 +462,7 @@ export class FileUtils extends APIScope {
         // the field names
         cleanUpFields(geoJson, configPackage);
 
+        // TODO maybe normalize input as well
         const destProj = this.$iApi.geo.proj.normalizeProj(targetSR);
 
         // change latitude and longitude fields from esriFieldTypeString -> esriFieldTypeDouble if they exist
