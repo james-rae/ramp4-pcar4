@@ -25,7 +25,7 @@ const runPreTest = (config, options, utils) => {
                 color: hex2esri(colour),
                 outline: {
                     color: [255, 190, 124, 255],
-                    width: 1
+                    width: 0
                 }
             },
             label: 'Top range ' + maxVal
@@ -33,9 +33,12 @@ const runPreTest = (config, options, utils) => {
     };
 
     const colourRamp = [
-        ['#0000FF', 0],
-        ['#00FF00', 1],
-        ['#FF0000', 100]
+        ['#AAFFFF', -0.5],
+        ['#E7E5E6', 0.5],
+        ['#FFFFE5', 1],
+        ['#FFFDCA', 1.5],
+        ['#FFFF69', 2],
+        ['#FFFF01', 2.5]
     ];
 
     const cangrid = {
