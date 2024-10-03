@@ -433,13 +433,16 @@ export class FileUtils extends APIScope {
         );
 
         // attempt to get spatial reference from geoJson
+        // USE SpatialRef fromGeoJSON here
         if (geoJson.crs && geoJson.crs.type === 'name') {
+            console.log('Overriding CRS from geojson file');
             srcProj = geoJson.crs.properties.name;
         }
 
         // pluck treats from options parameter
         if (options) {
             if (options.sourceProjection) {
+                console.log('Overriding CRS from options');
                 srcProj = options.sourceProjection;
             }
 
@@ -502,6 +505,7 @@ export class FileUtils extends APIScope {
         // the field names
         cleanUpFields(geoJson, configPackage);
 
+        // TODO maybe normalize input as well
         const destProj = this.$iApi.geo.proj.normalizeProj(targetSR);
 
         // change latitude and longitude fields from esriFieldTypeString -> esriFieldTypeDouble if they exist
@@ -537,6 +541,7 @@ export class FileUtils extends APIScope {
 
         // TODO if we want/need, we can put an error handler on the promise to deal with incompatible projections.
         //      e.g. maybe we want to catch it and then build a dummy layer set to error state?
+        console.log('about to bomber this src: ', srcProj);
         await this.$iApi.geo.proj.checkProjBomber([srcProj, targetSR]);
 
         // generate a nicely formatted object that that esri feature layer constructor can accept to make a local layer

@@ -551,7 +551,7 @@ export interface GeoJsonOptions {
     fieldMetadata?: RampLayerFieldMetadataConfig;
     sourceProjection?: string;
     targetSR?: string | number | SpatialReference | Record<any, unknown>;
-    latField?: string;
+    latField?: string; // TODO how are these used?? csv incoming to gj, needs to be numberfied
     lonField?: string;
 }
 

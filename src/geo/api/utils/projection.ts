@@ -160,6 +160,8 @@ export class ProjectionAPI {
         let srcProj: string;
         let latestProj = ''; // falsey!
 
+        // should be checking string first.
+
         if (spatialReference.wkt) {
             // WKT is fine to use raw. quick exit.
             return true;
@@ -230,6 +232,9 @@ export class ProjectionAPI {
         }
     }
 
+    // TODO add JSDOC
+    //      needs a test to see if a raw string is just a WKT string. I.e. doesn't start with EPSG: whatever.
+
     // utility for checking a set of spatial references, and accepting an error bomb if they cannot be used
     async checkProjBomber(spatialReferences: Array<any>): Promise<void> {
         if (spatialReferences.length > 0) {
@@ -271,6 +276,8 @@ export class ProjectionAPI {
         let inSr: string = this.normalizeProj(inputSR);
         let outSr: string = this.normalizeProj(outputSR);
 
+        // use SpatialReference.fromGeoJSON here?
+        // maybe attempt this BEFORE trying to normalize inputSR?  that will error unless its empty string
         if (!inSr && geoJson.crs && geoJson.crs.type === 'name') {
             inSr = SpatialReference.parseGeoJsonCrs(geoJson.crs);
         }
