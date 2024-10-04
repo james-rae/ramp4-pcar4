@@ -41,33 +41,12 @@ const runPreTest = (config, options, utils) => {
         ['#FFFF01', 2.5]
     ];
 
-    const cangridP1 = {
-        id: 'cangrid-p1',
-        name: 'CanGrid GeoJson Plus1',
-        nameField: 'cellval',
+    const cangrid = {
+        id: 'cangrid',
+        name: 'CanGrid GeoJson',
+        nameField: 'keyval',
         layerType: 'file-geojson',
-        url: '../file-layers/cangrid_1202213_p1.json',
-        state: {
-            opacity: 0.7
-        },
-        caching: false,
-        customRenderer: {
-            type: 'classBreaks',
-            field: 'cellval',
-            // all possible values must be covered
-            minValue: -999,
-            classBreakInfos: colourRamp.map(nugget =>
-                shaderMcGhee(nugget[0], nugget[1])
-            )
-        }
-    };
-
-    const cangridM1 = {
-        id: 'cangrid-m1',
-        name: 'CanGrid GeoJson Minus1',
-        nameField: 'cellval',
-        layerType: 'file-geojson',
-        url: '../file-layers/cangrid_1202213_m1.json',
+        url: '../file-layers/cangrid_t202213.json',
         state: {
             opacity: 0.7
         },
@@ -84,7 +63,7 @@ const runPreTest = (config, options, utils) => {
     };
 
     const toms = {
-        name: 'CCCP CanGrid Service',
+        name: 'CCCS CanGrid Service',
         controls: ['visibility', 'opacity', 'settings', 'symbology'],
         state: {
             opacity: 0.95,
@@ -102,8 +81,8 @@ const runPreTest = (config, options, utils) => {
     };
 
     utils.addLayerLegend(toms);
-    utils.addLayerLegend(cangridM1);
-    utils.addLayerLegend(cangridP1);
+    utils.addLayerLegend(cangrid);
+    //   utils.addLayerLegend(cangridP1);
 
     return { config, options };
 };
