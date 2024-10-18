@@ -28,11 +28,6 @@ export const useDetailsStore = defineStore('details', () => {
     const currentFeatureId = ref<string>();
 
     /**
-     * Indicates whether greedy mode is still loading for current identify request after 500ms delay.
-     */
-    const slowLoadingFlag = ref<boolean>(false);
-
-    /**
      * Indicates whether greedy mode is off (0), or currently running for the last request timestamp.
      */
     const activeGreedy = ref<number>(0);
@@ -70,7 +65,6 @@ export const useDetailsStore = defineStore('details', () => {
         properties,
         defaultTemplates,
         currentFeatureId,
-        slowLoadingFlag,
         activeGreedy,
         lastHilight,
         hilightToggle,
