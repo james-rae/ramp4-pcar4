@@ -90,7 +90,7 @@ const changeLayerSelection = (uid: string) => {
 const findLayerResult = (uid: string): IdentifyResult | undefined => layerResults.value.find(item => item.uid === uid);
 
 /**
- * Load identify result items after all item's load promise has resolved
+ * Intake a new identify result set, initiate auto-open logic.
  */
 const loadPayloadItems = (newPayload: Array<IdentifyResult>): void => {
     // NOTE: the incoming payload array needs to be made reactive at the source,
@@ -174,6 +174,17 @@ const autoOpen = (newPayload: Array<IdentifyResult>): void => {
  * the active layer in the details view.
  */
 const autoOpenAny = (newPayload: Array<IdentifyResult>): void => {
+    // TODO GETTER DONE
+    /*
+    add 2nd param, array of priority sorted high to low, optionally missing
+    if missing, read the priorities from the store for our layers in payload.
+    use Set to make the array
+    then we start doing our promise magic for priorities that match the last element.
+    and if they all expire, we pop and recurse.
+    if empty array after pop, run our current "done" block
+
+    */
+
     const loadingResults = newPayload.map(item =>
         item.loading.then(() => (item.items.length > 0 ? Promise.resolve(item) : Promise.reject()))
     );
