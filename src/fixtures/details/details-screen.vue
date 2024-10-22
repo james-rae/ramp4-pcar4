@@ -172,22 +172,44 @@ const autoOpen = (newPayload: Array<IdentifyResult>): void => {
 /**
  * Will watch all the result items. First layer to resolve with a valid result will become
  * the active layer in the details view.
+ *
+ * @param newPayload the identify result payload we're watching
+ * @param priorityStack helper param for priority recursion. Is omitted on initial call
  */
-const autoOpenAny = (newPayload: Array<IdentifyResult>): void => {
-    // TODO GETTER DONE
-    /*
-    add 2nd param, array of priority sorted high to low, optionally missing
-    if missing, read the priorities from the store for our layers in payload.
-    use Set to make the array
-    then we start doing our promise magic for priorities that match the last element.
-    and if they all expire, we pop and recurse.
-    if empty array after pop, run our current "done" block
+const autoOpenAny = (newPayload: Array<IdentifyResult>, priorityStack?: Array<[number, Array<string>]>): void => {
+    /**
+     * Array of [priority, [layerIds]], sorted by highest to lowest priority value (low number goes first)
+     */
+    let priStack: Array<[number, Array<string>]>;
+    if (priorityStack) {
+        priStack = priorityStack;
+    } else {
+        const layerDetailsConfigs = detailsStore.properties;
 
-    */
+        // list of [priority, layerId]
+        const layerPriorities = newPayload.map((idRes): [number, string] => [
+            (layerDetailsConfigs[idRes.layerId]?.priority as number) ?? 50,
+            idRes.layerId
+        ]);
+        // unique priorities
+        const setMagic = new Set(layerPriorities.map(lp => lp[0]));
+        priStack = [];
+        // layers into unique buckets
+        setMagic.forEach(uniquePriority => {
+            const matchingLayerIds = layerPriorities.filter(lp => lp[0] === uniquePriority).map(lp => lp[1]);
+            priStack.push([uniquePriority, matchingLayerIds]);
+        });
+        // sort in descending order
+        priStack.sort((a, b) => b[0] - a[0]);
+    }
 
-    const loadingResults = newPayload.map(item =>
-        item.loading.then(() => (item.items.length > 0 ? Promise.resolve(item) : Promise.reject()))
-    );
+    // watch the priority layers
+    const currentPriorites = priStack[priStack.length - 1][1];
+    const loadingResults = newPayload
+        .filter(payloadIR => currentPriorites.includes(payloadIR.layerId))
+        .map(payloadIR =>
+            payloadIR.loading.then(() => (payloadIR.items.length > 0 ? Promise.resolve(payloadIR) : Promise.reject()))
+        );
     const lastTime = newPayload.length === 0 ? 0 : newPayload[0].requestTime;
 
     // wait on any layer promise to resolve first with new identify results
@@ -212,9 +234,16 @@ const autoOpenAny = (newPayload: Array<IdentifyResult>): void => {
                 return;
             }
 
-            // no promise resolved, clicked on empty map point with no identify results.
-            detailsStore.activeGreedy = 0;
-            noResults.value = true;
+            if (priStack.length === 1) {
+                // this was our last priority bucket, and no promise resolved.
+                // turn off greed algo and display no results UI.
+                detailsStore.activeGreedy = 0;
+                noResults.value = true;
+            } else {
+                // try next priority bucket
+                priStack.pop();
+                autoOpenAny(newPayload, priStack);
+            }
         });
 };
 

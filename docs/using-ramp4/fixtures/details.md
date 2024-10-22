@@ -9,9 +9,13 @@ The details fixture consists of three sections:
 2. The __Feature Info__ view displays information about a single result item. This screen will look different depending on the format of the information returned by the identify query. This is also the screen that can be customized using custom templates (see below). Scroll controls can move the view to other results in the layer. The "See List" button will switch to __List View__.
 3. The __List View__ contains a list of all results found for the selected layer. Clicking on an item in this list will bring you to the __Feature Info__ screen.
 
+## Configuration
+
+TODO add the darn documentation
+
 ## Creating a Custom Template
 
-If you don't want to use the provided templates for your layer results, you can create your own. The process is simple. All you need to do is create a Vue component and then add the layer-to-template binding to the RAMP configuration file.
+If you don't want to use the provided templates for your layer results, you can create your own. All you need to do is create a template Vue component on the RAMP instance, and then add the layer-to-template binding to the RAMP configuration file.
 
 The example below explains how to create a basic template for the details panel.
 
@@ -43,7 +47,7 @@ rInstance.$element.component('My_Custom_Component', {
 });
 ```
 
-__Note:__ it is important that you include the `identifyData` prop in the component since the details fixture will populate it with the results from the identify query. The `identifyData` prop is necessary in order to access the results.
+__Note:__ it is important that you include the `identifyData` prop in the component since the details fixture will populate it with the results from the identify query. The `identifyData` prop is necessary in order to access the results. The property will be an [IdentifyItem](https://ramp4-pcar4.github.io/ramp4-pcar4/main/docs/api-tech-docs/interfaces/geo_layer_support_identify.IdentifyItem.html).
 
 
 __2.__ Once the custom component has been created, you will want to add your layer to RAMP and set the new component as a custom template in the details fixture. You can do both of these in the configuration file:
