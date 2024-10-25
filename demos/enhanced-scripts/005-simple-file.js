@@ -4,48 +4,6 @@ Test 05: Simple File Layers
  */
 
 const runPreTest = (config, options, utils) => {
-    const hex2esri = colourHex => {
-        const s = colourHex.substring(0, 1) === '#' ? colourHex.substring(1) : colourHex;
-
-        return [0, 2, 4, 6].map(i => {
-            const hex = s.substring(i, i + 2);
-            return hex.length === 0 ? 255 : parseInt(hex, 16);
-        });
-    };
-    const zipGeoJson = {
-        id: 'GeoZipson',
-        name: 'Zipped GeoJson',
-        nameField: 'zappy_name',
-        colour: '#FF6E00',
-        layerType: 'file-zip-geojson',
-        url: '../file-layers/zgeojson.zip'
-    };
-
-    const shaderMcGhee = (colour, maxVal) => {
-        return {
-            classMaxValue: maxVal,
-            symbol: {
-                type: 'esriSFS',
-                style: 'esriSFSSolid',
-                color: hex2esri(colour),
-                outline: {
-                    color: [255, 190, 124, 255],
-                    width: 0
-                }
-            },
-            label: 'Top range ' + maxVal
-        };
-    };
-
-    const colourRamp = [
-        ['#AAFFFF', -0.5],
-        ['#E7E5E6', 0.5],
-        ['#FFFFE5', 1],
-        ['#FFFDCA', 1.5],
-        ['#FFFF69', 2],
-        ['#FFFF01', 2.5]
-    ];
-
     const cangrid = {
         id: 'cangrid',
         name: 'CanGrid GeoJson',
@@ -53,15 +11,21 @@ const runPreTest = (config, options, utils) => {
         layerType: 'file-geojson',
         url: '../file-layers/cangrid_t202213.json',
         state: {
-            opacity: 0.7
+            opacity: 1,
+            hovertips: false
         },
         caching: false,
         customRenderer: {
-            type: 'classBreaks',
-            field: 'cellval',
-            // all possible values must be covered
-            minValue: -999,
-            classBreakInfos: colourRamp.map(nugget => shaderMcGhee(nugget[0], nugget[1]))
+            type: 'simple',
+            symbol: {
+                type: 'esriSFS',
+                style: 'esriSFSSolid',
+                color: [255, 255, 255, 1], // transparent
+                outline: {
+                    color: [5, 5, 5, 255],
+                    width: 1
+                }
+            }
         }
     };
 
@@ -83,9 +47,20 @@ const runPreTest = (config, options, utils) => {
         ]
     };
 
+    const bailley = {
+        name: 'Bailley ESRIfied GRD',
+        id: 'Bailley',
+        layerType: 'esri-map-image',
+        url: 'https://ecqcj8ywvwsd025.ncr.int.ec.gc.ca:6443/arcgis/rest/services/CESI_Temp/MapServer',
+        state: {
+            opacity: 0.95
+        },
+        sublayers: [{ index: 1 }]
+    };
+
     utils.addLayerLegend(toms);
+    utils.addLayerLegend(bailley);
     utils.addLayerLegend(cangrid);
-    //   utils.addLayerLegend(cangridP1);
 
     return { config, options };
 };
