@@ -29,8 +29,18 @@ const runPreTest = (config, options, utils) => {
         }
     };
 
+    const cangridRef = {
+        id: 'cangridref',
+        name: 'CanGrid Centers (Reference)',
+        nameField: 'cell_center',
+        layerType: 'file-geojson',
+        url: '../file-layers/cangrid_ref.json',
+        caching: false,
+        colour: '#d73fe8'
+    };
+
     const toms = {
-        name: 'CCCS CanGrid Service',
+        name: 'GeoMet CanGrid Service',
         controls: ['visibility', 'opacity', 'settings', 'symbology'],
         state: {
             opacity: 0.95,
@@ -55,12 +65,16 @@ const runPreTest = (config, options, utils) => {
         state: {
             opacity: 0.95
         },
-        sublayers: [{ index: 1 }]
+        sublayers: [{ index: 0 }]
     };
 
     utils.addLayerLegend(toms);
     utils.addLayerLegend(bailley);
     utils.addLayerLegend(cangrid);
+    utils.addLayerLegend(cangridRef);
+
+    // set formatter on map
+    config.configs.en.map.caption.mapCoords.formatter = 'LAT_LONG_DD';
 
     return { config, options };
 };
