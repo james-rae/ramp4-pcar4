@@ -76,6 +76,9 @@ const runPreTest = (config, options, utils) => {
     // set formatter on map
     config.configs.en.map.caption.mapCoords.formatter = 'LAT_LONG_DD';
 
+    // basemap that doesn't interfere
+    config.configs.en.map.initialBasemapId = 'baseSimple';
+
     return { config, options };
 };
 
