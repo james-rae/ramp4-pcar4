@@ -1,0 +1,277 @@
+const I = [["(", ")"], [")", "("], ["<", ">"], [">", "<"], ["[", "]"], ["]", "["], ["{", "}"], ["}", "{"], ["«", "»"], ["»", "«"], ["‹", "›"], ["›", "‹"], ["⁽", "⁾"], ["⁾", "⁽"], ["₍", "₎"], ["₎", "₍"], ["≤", "≥"], ["≥", "≤"], ["〈", "〉"], ["〉", "〈"], ["﹙", "﹚"], ["﹚", "﹙"], ["﹛", "﹜"], ["﹜", "﹛"], ["﹝", "﹞"], ["﹞", "﹝"], ["﹤", "﹥"], ["﹥", "﹤"]], V = ["آ", "أ", "إ", "ا"], $ = ["ﻵ", "ﻷ", "ﻹ", "ﻻ"], tt = ["ﻶ", "ﻸ", "ﻺ", "ﻼ"], k = ["ا", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي", "إ", "أ", "آ", "ة", "ى", "ل", "م", "ن", "ه", "و", "ي", "إ", "أ", "آ", "ة", "ى", "ی", "ئ", "ؤ"], rt = ["ﺍ", "ﺏ", "ﺕ", "ﺙ", "ﺝ", "ﺡ", "ﺥ", "ﺩ", "ﺫ", "ﺭ", "ﺯ", "ﺱ", "ﺵ", "ﺹ", "ﺽ", "ﻁ", "ﻅ", "ﻉ", "ﻍ", "ﻑ", "ﻕ", "ﻙ", "ﻝ", "ﻡ", "ﻥ", "ﻩ", "ﻭ", "ﻱ", "ﺇ", "ﺃ", "ﺁ", "ﺓ", "ﻯ", "ﯼ", "ﺉ", "ﺅ", "ﹰ", "ﹲ", "ﹴ", "ﹶ", "ﹸ", "ﹺ", "ﹼ", "ﹾ", "ﺀ", "ﺉ", "ﺅ"], et = ["ﺎ", "ﺐ", "ﺖ", "ﺚ", "ﺞ", "ﺢ", "ﺦ", "ﺪ", "ﺬ", "ﺮ", "ﺰ", "ﺲ", "ﺶ", "ﺺ", "ﺾ", "ﻂ", "ﻆ", "ﻊ", "ﻎ", "ﻒ", "ﻖ", "ﻚ", "ﻞ", "ﻢ", "ﻦ", "ﻪ", "ﻮ", "ﻲ", "ﺈ", "ﺄ", "ﺂ", "ﺔ", "ﻰ", "ﯽ", "ﺊ", "ﺆ", "ﹰ", "ﹲ", "ﹴ", "ﹶ", "ﹸ", "ﹺ", "ﹼ", "ﹾ", "ﺀ", "ﺊ", "ﺆ"], nt = ["ﺎ", "ﺒ", "ﺘ", "ﺜ", "ﺠ", "ﺤ", "ﺨ", "ﺪ", "ﺬ", "ﺮ", "ﺰ", "ﺴ", "ﺸ", "ﺼ", "ﻀ", "ﻄ", "ﻈ", "ﻌ", "ﻐ", "ﻔ", "ﻘ", "ﻜ", "ﻠ", "ﻤ", "ﻨ", "ﻬ", "ﻮ", "ﻴ", "ﺈ", "ﺄ", "ﺂ", "ﺔ", "ﻰ", "ﯿ", "ﺌ", "ﺆ", "ﹱ", "ﹲ", "ﹴ", "ﹷ", "ﹹ", "ﹻ", "ﹽ", "ﹿ", "ﺀ", "ﺌ", "ﺆ"], ot = ["ﺍ", "ﺑ", "ﺗ", "ﺛ", "ﺟ", "ﺣ", "ﺧ", "ﺩ", "ﺫ", "ﺭ", "ﺯ", "ﺳ", "ﺷ", "ﺻ", "ﺿ", "ﻃ", "ﻇ", "ﻋ", "ﻏ", "ﻓ", "ﻗ", "ﻛ", "ﻟ", "ﻣ", "ﻧ", "ﻫ", "ﻭ", "ﻳ", "ﺇ", "ﺃ", "ﺁ", "ﺓ", "ﻯ", "ﯾ", "ﺋ", "ﺅ", "ﹰ", "ﹲ", "ﹴ", "ﹶ", "ﹸ", "ﹺ", "ﹼ", "ﹾ", "ﺀ", "ﺋ", "ﺅ"], z = ["ء", "آ", "أ", "ؤ", "إ", "ا", "ة", "د", "ذ", "ر", "ز", "و", "ى"], it = ["ً", "ً", "ٌ", "؟", "ٍ", "؟", "َ", "َ", "ُ", "ُ", "ِ", "ِ", "ّ", "ّ", "ْ", "ْ", "ء", "آ", "آ", "أ", "أ", "ؤ", "ؤ", "إ", "إ", "ئ", "ئ", "ئ", "ئ", "ا", "ا", "ب", "ب", "ب", "ب", "ة", "ة", "ت", "ت", "ت", "ت", "ث", "ث", "ث", "ث", "ج", "ج", "ج", "ج", "ح", "ح", "ح", "ح", "خ", "خ", "خ", "خ", "د", "د", "ذ", "ذ", "ر", "ر", "ز", "ز", "س", "س", "س", "س", "ش", "ش", "ش", "ش", "ص", "ص", "ص", "ص", "ض", "ض", "ض", "ض", "ط", "ط", "ط", "ط", "ظ", "ظ", "ظ", "ظ", "ع", "ع", "ع", "ع", "غ", "غ", "غ", "غ", "ف", "ف", "ف", "ف", "ق", "ق", "ق", "ق", "ك", "ك", "ك", "ك", "ل", "ل", "ل", "ل", "م", "م", "م", "م", "ن", "ن", "ن", "ن", "ه", "ه", "ه", "ه", "و", "و", "ى", "ى", "ي", "ي", "ي", "ي", "ﻵ", "ﻶ", "ﻷ", "ﻸ", "ﻹ", "ﻺ", "ﻻ", "ﻼ", "؟", "؟", "؟"], q = ["ء", "ف"], at = ["غ", "ي"], ut = [[0, 3, 0, 1, 0, 0, 0], [0, 3, 0, 1, 2, 2, 0], [0, 3, 0, 17, 2, 0, 1], [0, 3, 5, 5, 4, 1, 0], [0, 3, 21, 21, 4, 0, 1], [0, 3, 5, 5, 4, 2, 0]], st = [[2, 0, 1, 1, 0, 1, 0], [2, 0, 1, 1, 0, 2, 0], [2, 0, 2, 1, 3, 2, 0], [2, 0, 2, 33, 3, 1, 1]], e = 0, a = 1, h = 2, B = 3, t = 4, S = 5, j = 6, r = 7, m = 8, R = 9, p = 10, T = 11, n = 12, ct = 13, ft = 14, lt = 15, ht = 16, Tt = 17, l = 18, At = ["UBAT_L", "UBAT_R", "UBAT_EN", "UBAT_AN", "UBAT_ON", "UBAT_B", "UBAT_S", "UBAT_AL", "UBAT_WS", "UBAT_CS", "UBAT_ES", "UBAT_ET", "UBAT_NSM", "UBAT_LRE", "UBAT_RLE", "UBAT_PDF", "UBAT_LRO", "UBAT_RLO", "UBAT_BN"], _ = 100, Lt = [_ + 0, e, e, e, e, _ + 1, _ + 2, _ + 3, a, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, _ + 4, t, t, t, e, t, e, t, e, t, t, t, e, e, t, t, e, e, e, e, e, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, e, e, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, e, e, t, t, e, e, t, t, e, e, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, e, e, e, _ + 5, r, r, _ + 6, _ + 7], dt = [[l, l, l, l, l, l, l, l, l, j, S, j, m, S, l, l, l, l, l, l, l, l, l, l, l, l, l, l, S, S, S, j, m, t, t, T, T, T, t, t, t, t, t, p, R, p, R, R, h, h, h, h, h, h, h, h, h, h, R, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, l, l, l, l, l, l, S, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, R, t, T, T, T, T, t, t, t, t, e, t, t, l, t, t, T, T, h, h, t, e, t, t, t, h, e, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, e, e, e, e, e, e, e, e], [e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, e, e, e, e, e, e, e, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, e, t, t, t, t, t, t, t, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, a, n, a, n, n, a, n, n, a, n, t, t, t, t, t, t, t, t, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, t, t, t, t, t, a, a, a, a, a, t, t, t, t, t, t, t, t, t, t, t], [B, B, B, B, t, t, t, t, r, T, T, r, R, r, t, t, n, n, n, n, n, n, n, n, n, n, n, r, t, t, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, B, B, B, B, B, B, B, B, B, B, T, B, B, r, r, r, n, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, n, n, n, n, n, n, n, B, t, n, n, n, n, n, n, r, r, n, n, t, n, n, n, n, r, r, h, h, h, h, h, h, h, h, h, h, r, r, r, r, r, r], [r, r, r, r, r, r, r, r, r, r, r, r, r, r, t, r, r, n, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, t, t, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, n, n, n, n, n, n, n, n, n, n, n, r, t, t, t, t, t, t, t, t, t, t, t, t, t, t, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, n, n, n, n, n, n, n, n, n, a, a, t, t, t, t, a, t, t, t, t, t], [m, m, m, m, m, m, m, m, m, m, m, l, l, l, e, a, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, m, S, ct, ft, lt, ht, Tt, R, T, T, T, T, T, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, R, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, m, l, l, l, l, l, t, t, t, t, t, l, l, l, l, l, l, h, e, t, t, h, h, h, h, h, h, p, p, t, t, t, e, h, h, h, h, h, h, h, h, h, h, p, p, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t], [e, e, e, e, e, e, e, t, t, t, t, t, t, t, t, t, t, t, t, e, e, e, e, e, t, t, t, t, t, a, n, a, a, a, a, a, a, a, a, a, a, p, a, a, a, a, a, a, a, a, a, a, a, a, a, t, a, a, a, a, a, t, a, t, a, a, t, a, a, t, a, a, a, a, a, a, a, a, a, a, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r], [n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, n, n, n, n, n, n, n, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, R, t, R, t, t, R, t, t, t, t, t, t, t, t, t, T, t, t, p, p, t, t, t, t, t, T, T, t, t, t, t, t, r, r, r, r, r, t, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, r, t, t, l], [t, t, t, T, T, T, t, t, t, t, t, p, R, p, R, R, h, h, h, h, h, h, h, h, h, h, R, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, t, t, t, t, t, t, t, t, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, t, t, t, e, e, e, e, e, e, t, t, e, e, e, e, e, e, t, t, e, e, e, e, e, e, t, t, e, e, e, t, t, t, T, T, t, t, t, T, T, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t, t]];
+class Pt {
+  constructor() {
+    this.inputFormat = "ILYNN", this.outputFormat = "VLNNN", this.sourceToTarget = [], this.targetToSource = [], this.levels = [];
+  }
+  bidiTransform(o, u, s) {
+    if (this.sourceToTarget = [], this.targetToSource = [], !o) return "";
+    if (Ot(this.sourceToTarget, this.targetToSource, o.length), !this.checkParameters(u, s)) return o;
+    u = this.inputFormat, s = this.outputFormat;
+    let c = o;
+    const f = It, L = H(u.charAt(1)), A = H(s.charAt(1)), d = (u.charAt(0) === "I" ? "L" : u.charAt(0)) + L, g = (s.charAt(0) === "I" ? "L" : s.charAt(0)) + A, U = u.charAt(2) + s.charAt(2);
+    f.defInFormat = d, f.defOutFormat = g, f.defSwap = U;
+    const w = E(o, d, g, U, f);
+    let N = !1;
+    return s.charAt(1) === "R" ? N = !0 : s.charAt(1) !== "C" && s.charAt(1) !== "D" || (N = this.checkContextual(w) === "rtl"), this.sourceToTarget = F, this.targetToSource = xt(this.sourceToTarget), P = this.targetToSource, c = u.charAt(3) === s.charAt(3) ? w : s.charAt(3) === "S" ? Bt(N, w) : Rt(w, N, !0), this.sourceToTarget = F, this.targetToSource = P, this.levels = y, c;
+  }
+  _inputFormatSetter(o) {
+    if (!J.test(o)) throw new Error("dojox/string/BidiEngine: the bidi layout string is wrong!");
+    this.inputFormat = o;
+  }
+  _outputFormatSetter(o) {
+    if (!J.test(o)) throw new Error("dojox/string/BidiEngine: the bidi layout string is wrong!");
+    this.outputFormat = o;
+  }
+  checkParameters(o, u) {
+    return o ? this._inputFormatSetter(o) : o = this.inputFormat, u ? this._outputFormatSetter(u) : u = this.outputFormat, o !== u;
+  }
+  checkContextual(o) {
+    let u = D(o);
+    if (u !== "ltr" && u !== "rtl") {
+      try {
+        u = document.dir.toLowerCase();
+      } catch {
+      }
+      u !== "ltr" && u !== "rtl" && (u = "ltr");
+    }
+    return u;
+  }
+  hasBidiChar(o) {
+    return Dt.test(o);
+  }
+}
+function E(i, o, u, s, c) {
+  const f = gt(i, { inFormat: o, outFormat: u, swap: s }, c);
+  if (f.inFormat === f.outFormat) return i;
+  o = f.inFormat, u = f.outFormat, s = f.swap;
+  const L = o.slice(0, 1), A = o.slice(1, 4), d = u.slice(0, 1), g = u.slice(1, 4);
+  if (c.inFormat = o, c.outFormat = u, c.swap = s, L === "L" && u === "VLTR") {
+    if (A === "LTR") return c.dir = v, b(i, c);
+    if (A === "RTL") return c.dir = O, b(i, c);
+  }
+  if (L === "V" && d === "V") return c.dir = A === "RTL" ? O : v, Y(i, c);
+  if (L === "L" && u === "VRTL") return A === "LTR" ? (c.dir = v, i = b(i, c)) : (c.dir = O, i = b(i, c)), Y(i);
+  if (o === "VLTR" && u === "LLTR") return c.dir = v, b(i, c);
+  if (L === "V" && d === "L" && A !== g) return i = Y(i), A === "RTL" ? E(i, "LLTR", "VLTR", s, c) : E(i, "LRTL", "VRTL", s, c);
+  if (o === "VRTL" && u === "LRTL") return E(i, "LRTL", "VRTL", s, c);
+  if (L === "L" && d === "L") {
+    const U = c.swap;
+    return c.swap = U.slice(0, 1) + "N", A === "RTL" ? (c.dir = O, i = b(i, c), c.swap = "N" + U.slice(1, 3), c.dir = v, i = b(i, c)) : (c.dir = v, i = b(i, c), c.swap = "N" + U.slice(1, 3), i = E(i, "VLTR", "LRTL", c.swap, c)), i;
+  }
+  return i;
+}
+function gt(i, o, u) {
+  if (o.inFormat === void 0 && (o.inFormat = u.defInFormat), o.outFormat === void 0 && (o.outFormat = u.defOutFormat), o.swap === void 0 && (o.swap = u.defSwap), o.inFormat === o.outFormat) return o;
+  const s = o.inFormat.slice(0, 1), c = o.outFormat.slice(0, 1);
+  let f, L = o.inFormat.slice(1, 4), A = o.outFormat.slice(1, 4);
+  return L.charAt(0) === "C" && (f = D(i), L = f === "ltr" || f === "rtl" ? f.toUpperCase() : o.inFormat.charAt(2) === "L" ? "LTR" : "RTL", o.inFormat = s + L), A.charAt(0) === "C" && (f = D(i), f === "rtl" ? A = "RTL" : f === "ltr" ? (f = mt(i), A = f.toUpperCase()) : A = o.outFormat.charAt(2) === "L" ? "LTR" : "RTL", o.outFormat = c + A), o;
+}
+function Bt(i, o, u) {
+  if (o.length === 0) return "";
+  i === void 0 && (i = !0);
+  const s = (o = String(o)).split("");
+  let c = 0, f = 1, L = s.length;
+  i || (c = s.length - 1, f = -1, L = 1);
+  const A = Ut(s, c, f, L);
+  let d = "";
+  for (let g = 0; g < s.length; g++) St(A, A.length, g) > -1 ? (X(P, g, !i, -1), F.splice(g, 1)) : d += s[g];
+  return d;
+}
+function Ut(i, o, u, s, c) {
+  let f = 0;
+  const L = [];
+  let A = 0;
+  for (let d = o; d * u < s; d += u) if (Q(i[d]) || x(i[d])) {
+    if (i[d] === "ل" && bt(i, d + u, u, s)) {
+      i[d] = Et(i[d + u], f === 0 ? $ : tt), d += u, Vt(i, d, u, s), L[A] = d, A++, f = 0;
+      continue;
+    }
+    const g = i[d];
+    f === 1 ? i[d] = Z(i, d + u, u, s) ? vt(i[d]) : W(i[d], et) : Z(i, d + u, u, s) === !0 ? i[d] = W(i[d], ot) : i[d] = W(i[d], rt), x(g) || (f = 1), Ct(g) === !0 && (f = 0);
+  } else f = 0;
+  return L;
+}
+function D(i) {
+  const o = /[A-Za-z\u05d0-\u065f\u066a-\u06ef\u06fa-\u07ff\ufb1d-\ufdff\ufe70-\ufefc]/.exec(i);
+  return o ? o[0] <= "z" ? "ltr" : "rtl" : "";
+}
+function mt(i) {
+  const o = i.split("");
+  return o.reverse(), D(o.join(""));
+}
+function Rt(i, o, u) {
+  if (i.length === 0) return "";
+  o === void 0 && (o = !0);
+  let s = "";
+  const c = (i = String(i)).split("");
+  for (let f = 0; f < i.length; f++) {
+    let L = !1;
+    if (c[f] >= "ﹰ" && c[f] < "\uFEFF") {
+      const A = i.charCodeAt(f);
+      c[f] >= "ﻵ" && c[f] <= "ﻼ" ? (o ? (f > 0 && u && c[f - 1] === " " ? s = s.slice(0, -1) + "ل" : (s += "ل", L = !0), s += V[(A - 65269) / 2]) : (s += V[(A - 65269) / 2], s += "ل", f + 1 < i.length && u && c[f + 1] === " " ? f++ : L = !0), L && (X(P, f, !0, 1), F.splice(f, 0, F[f]))) : s += it[A - 65136];
+    } else s += c[f];
+  }
+  return s;
+}
+function b(i, o) {
+  const u = i.split(""), s = [];
+  return K(u, s, o), pt(u, s, o), G(2, u, s, o), G(1, u, s, o), y = s, u.join("");
+}
+function K(i, o, u) {
+  const s = i.length, c = u.dir ? st : ut;
+  let f = 0, L = -1;
+  const A = [], d = [];
+  u.hiLevel = u.dir, u.lastArabic = !1, u.hasUbatAl = !1, u.hasUbatB = !1, u.hasUbatS = !1;
+  for (let g = 0; g < s; g++) A[g] = _t(i[g]);
+  for (let g = 0; g < s; g++) {
+    const U = f, w = wt(i, A, d, g, u);
+    d[g] = w, f = c[U][w];
+    const N = 240 & f;
+    f &= 15;
+    const M = c[f][jt];
+    if (o[g] = M, N > 0) if (N === 16) {
+      for (let C = L; C < g; C++) o[C] = 1;
+      L = -1;
+    } else L = -1;
+    if (c[f][kt]) L === -1 && (L = g);
+    else if (L > -1) {
+      for (let C = L; C < g; C++) o[C] = M;
+      L = -1;
+    }
+    A[g] === S && (o[g] = 0), u.hiLevel |= M;
+  }
+  u.hasUbatS && Ft(A, o, s, u);
+}
+function Ft(i, o, u, s) {
+  for (let c = 0; c < u; c++) if (i[c] === j) {
+    o[c] = s.dir;
+    for (let f = c - 1; f >= 0 && i[f] === m; f--) o[f] = s.dir;
+  }
+}
+function pt(i, o, u) {
+  if (u.hiLevel !== 0 && u.swap[0] !== u.swap[1]) for (let s = 0; s < i.length; s++) o[s] === 1 && (i[s] = Nt(i[s]));
+}
+function _t(i) {
+  const o = i.charCodeAt(0), u = Lt[o >> 8];
+  return u < _ ? u : dt[u - _][255 & o];
+}
+function Y(i, o) {
+  const u = i.split("");
+  if (o) {
+    const s = [];
+    K(u, s, o), y = s;
+  }
+  return u.reverse(), F.reverse(), u.join("");
+}
+function St(i, o, u) {
+  for (let s = 0; s < o; s++) if (i[s] === u) return s;
+  return -1;
+}
+function Q(i) {
+  for (let o = 0; o < q.length; o++) if (i >= q[o] && i <= at[o]) return !0;
+  return !1;
+}
+function Z(i, o, u, s) {
+  for (; o * u < s && x(i[o]); ) o += u;
+  return !!(o * u < s && Q(i[o]));
+}
+function bt(i, o, u, s) {
+  for (; o * u < s && x(i[o]); ) o += u;
+  let c = " ";
+  if (!(o * u < s)) return !1;
+  c = i[o];
+  for (let f = 0; f < V.length; f++) if (V[f] === c) return !0;
+  return !1;
+}
+function G(i, o, u, s) {
+  if (s.hiLevel < i) return;
+  if (i === 1 && s.dir === O && !s.hasUbatB) return o.reverse(), void F.reverse();
+  const c = o.length;
+  let f, L, A, d, g, U = 0;
+  for (; U < c; ) {
+    if (u[U] >= i) {
+      for (f = U + 1; f < c && u[f] >= i; ) f++;
+      for (L = U, A = f - 1; L < A; L++, A--) d = o[L], o[L] = o[A], o[A] = d, g = F[L], F[L] = F[A], F[A] = g;
+      U = f;
+    }
+    U++;
+  }
+}
+function wt(i, o, u, s, c) {
+  const f = o[s];
+  return { UBAT_L: () => (c.lastArabic = !1, e), UBAT_R: () => (c.lastArabic = !1, a), UBAT_ON: () => t, UBAT_AN: () => B, UBAT_EN: () => c.lastArabic ? B : h, UBAT_AL: () => (c.lastArabic = !0, c.hasUbatAl = !0, a), UBAT_WS: () => t, UBAT_CS: () => {
+    let L, A;
+    return s < 1 || s + 1 >= o.length || (L = u[s - 1]) !== h && L !== B || (A = o[s + 1]) !== h && A !== B ? t : (c.lastArabic && (A = B), A === L ? A : t);
+  }, UBAT_ES: () => (s > 0 ? u[s - 1] : S) === h && s + 1 < o.length && o[s + 1] === h ? h : t, UBAT_ET: () => {
+    if (s > 0 && u[s - 1] === h) return h;
+    if (c.lastArabic) return t;
+    let L = s + 1;
+    const A = o.length;
+    for (; L < A && o[L] === T; ) L++;
+    return L < A && o[L] === h ? h : t;
+  }, UBAT_NSM: () => {
+    if (c.inFormat === "VLTR") {
+      const L = o.length;
+      let A = s + 1;
+      for (; A < L && o[A] === n; ) A++;
+      if (A < L) {
+        const d = i[s].charCodeAt(0), g = d >= 1425 && d <= 2303 || d === 64286, U = o[A];
+        if (g && (U === a || U === r)) return a;
+      }
+    }
+    return s < 1 || o[s - 1] === S ? t : u[s - 1];
+  }, UBAT_B: () => (c.lastArabic = !0, c.hasUbatB = !0, c.dir), UBAT_S: () => (c.hasUbatS = !0, t), UBAT_LRE: () => (c.lastArabic = !1, t), UBAT_RLE: () => (c.lastArabic = !1, t), UBAT_LRO: () => (c.lastArabic = !1, t), UBAT_RLO: () => (c.lastArabic = !1, t), UBAT_PDF: () => (c.lastArabic = !1, t), UBAT_BN: () => t }[At[f]]();
+}
+function Nt(i) {
+  let o, u = 0, s = I.length - 1;
+  for (; u <= s; ) if (o = Math.floor((u + s) / 2), i < I[o][0]) s = o - 1;
+  else {
+    if (!(i > I[o][0])) return I[o][1];
+    u = o + 1;
+  }
+  return i;
+}
+function Ct(i) {
+  for (let o = 0; o < z.length; o++) if (z[o] === i) return !0;
+  return !1;
+}
+function vt(i) {
+  for (let o = 0; o < k.length; o++) if (i === k[o]) return nt[o];
+  return i;
+}
+function W(i, o) {
+  for (let u = 0; u < k.length; u++) if (i === k[u]) return o[u];
+  return i;
+}
+function x(i) {
+  return i >= "ً" && i <= "ٕ";
+}
+function H(i) {
+  return i === "L" ? "LTR" : i === "R" ? "RTL" : i === "C" ? "CLR" : i === "D" ? "CRL" : "";
+}
+function Vt(i, o, u, s) {
+  for (; o * u < s && x(i[o]); ) o += u;
+  return o * u < s && (i[o] = " ", !0);
+}
+function Et(i, o) {
+  for (let u = 0; u < V.length; u++) if (i === V[u]) return o[u];
+  return i;
+}
+function Ot(i, o, u) {
+  F = [], y = [];
+  for (let s = 0; s < u; s++) i[s] = s, o[s] = s, F[s] = s;
+}
+function xt(i) {
+  const o = new Array(i.length);
+  for (let u = 0; u < i.length; u++) o[i[u]] = u;
+  return o;
+}
+function X(i, o, u, s) {
+  for (let c = 0; c < i.length; c++) (i[c] > o || !u && i[c] === o) && (i[c] += s);
+}
+let F = [], P = [], y = [];
+const It = { dir: 0, defInFormat: "LLTR", defoutFormat: "VLTR", defSwap: "YN", inFormat: "LLTR", outFormat: "VLTR", swap: "YN", hiLevel: 0, lastArabic: !1, hasUbatAl: !1, hasBlockSep: !1, hasSegSep: !1, defOutFormat: "" }, jt = 5, kt = 6, v = 0, O = 1, J = /^[(I|V)][(L|R|C|D)][(Y|N)][(S|N)][N]$/, Dt = /[\u0591-\u06ff\ufb1d-\ufefc]/;
+export {
+  Pt as C
+};
+//# sourceMappingURL=BidiEngine-Bdqv5H5j.js.map

@@ -1,0 +1,32 @@
+import { ex as u$2, jL as o, bT as r, bU as m, D as j$1, gi as s, i8 as a, jM as a$1, bV as a$2, jN as l$1, a1 as V, d7 as t, cC as d$1, hL as A, d6 as n$1, jO as X, aA as w$1, f_ as s$1, b6 as r$1, eC as b$1, eF as S$1, fc as r$2, eP as f$1 } from './main-jdFDoOPu.js';
+import { c, b } from './featureReferenceUtils-CZRtAuV2.js';
+import { c as c$1 } from './Analysis-Dcq3wCjb.js';
+import './preload-helper-dJJaZANz.js';
+import './sphere-CvWAdV_f.js';
+import './mat3f64-DKAwfC1r.js';
+import './plane-CBOt8dOS.js';
+import './mat4f64-Cw8nJbLB.js';
+import './quatf64-CvJnKmwc.js';
+import './IntersectorInterfaces-DPeWXlfT.js';
+import './boundedPlane-_F0novMl.js';
+import './lineSegment-mPW8N6M_.js';
+
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.31/esri/copyright.txt for details.
+*/
+let u$1=class u extends(u$2(l$1)){constructor(e){super(e),this.observer=null,this.farDistance=1e3,this.heading=0,this.tilt=90,this.horizontalFieldOfView=45,this.verticalFieldOfView=45,this.feature=null;}isValid(){return null!=this.observer&&this.farDistance>0}equals(e){return o(this.observer,e.observer)&&this.farDistance===e.farDistance&&this.heading===e.heading&&this.tilt===e.tilt&&this.horizontalFieldOfView===e.horizontalFieldOfView&&this.verticalFieldOfView===e.verticalFieldOfView&&c(this.feature,e.feature)}};r([m({type:j$1,json:{write:!0}})],u$1.prototype,"observer",void 0),r([m({type:Number,nonNullable:!0,range:{min:0},json:{write:{isRequired:!0}}})],u$1.prototype,"farDistance",void 0),r([m({type:Number,nonNullable:!0,json:{write:{isRequired:!0}}}),s((e=>a.normalize(a$1(e),void 0,!0)))],u$1.prototype,"heading",void 0),r([m({type:Number,nonNullable:!0,range:{min:0,max:180},json:{write:{isRequired:!0}}})],u$1.prototype,"tilt",void 0),r([m({type:Number,nonNullable:!0,range:{min:0,max:360},json:{write:{isRequired:!0}}})],u$1.prototype,"horizontalFieldOfView",void 0),r([m({type:Number,nonNullable:!0,range:{min:0,max:180},json:{write:{isRequired:!0}}})],u$1.prototype,"verticalFieldOfView",void 0),r([m(b)],u$1.prototype,"feature",void 0),r([m({json:{read:!1}})],u$1.prototype,"isValid",null),u$1=r([a$2("esri.analysis.Viewshed")],u$1);const d=u$1;
+
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.31/esri/copyright.txt for details.
+*/
+const f=V.ofType(d);let y$1=class y extends c$1{constructor(e){super(e),this.type="viewshed",this._extent=null;}initialize(){this.addHandles(d$1((()=>this._computeExtent()),(e=>{null==e.pending&&(this._extent=e.extent);}),A));}get viewsheds(){return this._get("viewsheds")||new f}set viewsheds(e){this._set("viewsheds",n$1(e,this.viewsheds,f));}get spatialReference(){for(const e of this.viewsheds)if(null!=e.observer)return e.observer.spatialReference;return null}get extent(){return this._extent}get requiredPropertiesForEditing(){return this.viewsheds.items.map((({observer:e})=>e))}async waitComputeExtent(){const e=this._computeExtent();null!=e.pending&&await e.pending;}_computeExtent(){const{spatialReference:e}=this;if(null==e)return {pending:null,extent:null};const t=this.viewsheds.filter((e=>null!=e.observer)),r=t.map((e=>e.observer)).toArray(),n=X(r,e);if(null!=n.pending)return {pending:n.pending,extent:null};return {pending:null,extent:n.geometries.map(((e,r)=>{const n=t.at(r);return null!=e&&null!=n?this._computeViewshedExtent(this.viewsheds.at(r),e):null})).filter((e=>null!=e)).reduce(((e,t)=>x(e,t)),null)}}_computeViewshedExtent(e,t){const{farDistance:r,heading:n,tilt:s,horizontalFieldOfView:i,verticalFieldOfView:p}=e,{spatialReference:c}=t,u=i/2,m=p/2,d=r/c.metersPerUnit,f=[a.normalize(n-u),n,a.normalize(n+u)],y=w$1.fromPoint(t),x=e=>{const t=f.map((t=>a.normalize(t-e)));if(t[0]>t[2]||360===i)return d;const r=t.map((e=>Math.abs(e>180?360-e:e))).reduce(((e,t)=>e>t?t:e));return r>90?0:d*Math.cos(s$1(r))};y.xmax+=x(90),y.xmin-=x(-90),y.ymax+=x(0),y.ymin-=x(180);const w=t.z;if(null!=w){let e=w,t=w;const n=s-90,i=r$1(n+m,-90,90),o=r$1(n-m,-90,90),l=c?.isGeographic?r:d;e+=l*v(i),t+=l*v(o);const p=g(m)*l,h=v(n)*p*(1-g(u));s<90&&(e-=h),s>90&&(t-=h),y.zmax=Math.max(e,w),y.zmin=Math.min(t,w);}return y}clear(){this.viewsheds.removeAll();}};function x(e,t){return null==e?t:null==t?e:e.union(t)}function g(e){return Math.cos(s$1(e))}function v(e){return Math.sin(s$1(e))}r([m({type:["viewshed"]})],y$1.prototype,"type",void 0),r([m({cast:t,type:f,nonNullable:!0})],y$1.prototype,"viewsheds",null),r([m({readOnly:!0})],y$1.prototype,"spatialReference",null),r([m()],y$1.prototype,"_extent",void 0),r([m({readOnly:!0})],y$1.prototype,"extent",null),r([m({readOnly:!0})],y$1.prototype,"requiredPropertiesForEditing",null),y$1=r([a$2("esri.analysis.ViewshedAnalysis")],y$1);const w=y$1;
+
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.31/esri/copyright.txt for details.
+*/
+let u=class extends(b$1(S$1(f$1))){constructor(e){super(e),this.type="viewshed",this.operationalLayerType="ViewshedLayer",this.source=new w,this.opacity=1;}initialize(){this.addHandles(d$1((()=>this.source),((e,r)=>{null!=r&&r.parent===this&&(r.parent=null),null!=e&&(e.parent=this);}),A));}async load(){return this.addResolvingPromise(this.source.waitComputeExtent()),this}get spatialReference(){return this.source.spatialReference}get fullExtent(){return this.source.extent}releaseAnalysis(e){this.source===e&&(this.source=new w);}get analysis(){return this.source}set analysis(e){this.source=e;}get viewsheds(){return this.source.viewsheds}set viewsheds(e){this.source.viewsheds=e;}writeViewsheds(e,r,s,t){r.viewsheds=e.filter((e=>e.isValid())).map((e=>e.toJSON(t))).toJSON();}};r([m({json:{read:!1},readOnly:!0})],u.prototype,"type",void 0),r([m({type:["ViewshedLayer"]})],u.prototype,"operationalLayerType",void 0),r([m({nonNullable:!0})],u.prototype,"source",void 0),r([m({readOnly:!0})],u.prototype,"spatialReference",null),r([m({readOnly:!0})],u.prototype,"fullExtent",null),r([m({readOnly:!0,json:{read:!1,write:!1,origins:{service:{read:!1,write:!1},"portal-item":{read:!1,write:!1},"web-document":{read:!1,write:!1}}}})],u.prototype,"opacity",void 0),r([m({type:["show","hide"]})],u.prototype,"listMode",void 0),r([m({type:V.ofType(d),json:{write:{ignoreOrigin:!0},origins:{"web-scene":{write:{ignoreOrigin:!0}}}}})],u.prototype,"viewsheds",null),r([r$2("web-scene","viewsheds")],u.prototype,"writeViewsheds",null),u=r([a$2("esri.layers.ViewshedLayer")],u);const y=u;
+
+export { y as default };
