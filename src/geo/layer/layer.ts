@@ -442,7 +442,7 @@ export class LayerAPI extends APIScope {
             // however I cannot find the ArcGIS Rest documentation on what the value actually is, and our
             // old sample is MIA. So using an ELSE for now to catch it.
             // If anyone finds the value, please update and make the Else block a "unknown/unsupported found" error place.
-            md.dataFormat = DataFormat.ESRI_RASTER;
+            md.dataFormat = DataFormat.ESRI_RASTER; // <!>
         }
 
         return md;

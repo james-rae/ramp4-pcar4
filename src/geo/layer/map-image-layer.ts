@@ -448,6 +448,12 @@ export class MapImageLayer extends MapLayer {
             return [];
         }
 
+        // <!>
+        // probably need to split this into two sections.
+        // Section 1 is original code: doing point buffer intersect against feature sources
+        // Section 2 will be new: raster ping against the pixel, packaging the weird json result appropriately.
+        // Then join the two section results in an await or something.
+
         // prepare a query
 
         let pointBuffer: Extent;

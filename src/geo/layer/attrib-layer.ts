@@ -174,7 +174,7 @@ export class AttribLayer extends MapLayer {
         } else {
             // raster layer
             this.supportsFeatures = false;
-            this.supportsIdentify = false;
+            this.supportsIdentify = false; // <!>
         }
     }
 
