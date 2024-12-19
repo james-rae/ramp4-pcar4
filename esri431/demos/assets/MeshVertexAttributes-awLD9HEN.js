@@ -1,0 +1,15 @@
+import { bT as r$1, bU as m, gi as s, bV as a, bW as f$1, G as n$1, T as a$1 } from './main-jdFDoOPu.js';
+
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.31/esri/copyright.txt for details.
+*/
+function e(e,n,r,t){const{loggerTag:o,stride:f}=n;return e.length%f!=0?(t.error(o,`Invalid array length, expected a multiple of ${f}`),new r([])):e}function n(n,r,t,o,f){if(!n)return n;if(n instanceof r)return e(n,o,r,f);for(const i of t)if(n instanceof i)return e(new r(n),o,r,f);if(Array.isArray(n))return e(new r(n),o,r,f);{const e=t.map((e=>`'${e.name}'`));return f.error(`Failed to set property, expected one of ${e}, but got ${n.constructor.name}`),new r([])}}function r(e,n,r){n[r]=t(e);}function t(e){const n=new Array(e.length);for(let r=0;r<e.length;r++)n[r]=e[r];return n}
+
+/*
+All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+See https://js.arcgis.com/4.31/esri/copyright.txt for details.
+*/
+var g;let p=g=class extends f$1{constructor(t){super(t),this.color=null,this.position=new Float64Array(0),this.uv=null,this.normal=null,this.tangent=null;}castColor(t){return n(t,Uint8Array,[Uint8ClampedArray],{loggerTag:".color=",stride:4},n$1.getLogger(this))}castPosition(t){t&&t instanceof Float32Array&&n$1.getLogger(this).warn(".position=","Setting position attribute from a Float32Array may cause precision problems. Consider storing data in a Float64Array or a regular number array");return n(t,Float64Array,[Float32Array],{loggerTag:".position=",stride:3},n$1.getLogger(this))}castUv(t){return n(t,Float32Array,[Float64Array],{loggerTag:".uv=",stride:2},n$1.getLogger(this))}castNormal(t){return n(t,Float32Array,[Float64Array],{loggerTag:".normal=",stride:3},n$1.getLogger(this))}castTangent(t){return n(t,Float32Array,[Float64Array],{loggerTag:".tangent=",stride:4},n$1.getLogger(this))}clone(){const t={position:a$1(this.position),uv:a$1(this.uv),normal:a$1(this.normal),tangent:a$1(this.tangent),color:a$1(this.color)};return new g(t)}clonePositional(){const t={position:a$1(this.position),normal:a$1(this.normal),tangent:a$1(this.tangent),uv:this.uv,color:this.color};return new g(t)}get memoryUsage(){let t=0;return t+=this.position.byteLength,null!=this.uv&&(t+=this.uv.byteLength),null!=this.normal&&(t+=this.normal.byteLength),null!=this.tangent&&(t+=this.tangent.byteLength),null!=this.color&&(t+=this.color.byteLength),t}};r$1([m({json:{write:r}})],p.prototype,"color",void 0),r$1([s("color")],p.prototype,"castColor",null),r$1([m({nonNullable:!0,json:{write:r}})],p.prototype,"position",void 0),r$1([s("position")],p.prototype,"castPosition",null),r$1([m({json:{write:r}})],p.prototype,"uv",void 0),r$1([s("uv")],p.prototype,"castUv",null),r$1([m({json:{write:r}})],p.prototype,"normal",void 0),r$1([s("normal")],p.prototype,"castNormal",null),r$1([m({json:{write:r}})],p.prototype,"tangent",void 0),r$1([s("tangent")],p.prototype,"castTangent",null),p=g=r$1([a("esri.geometry.support.MeshVertexAttributes")],p);
+
+export { n, p, r };
