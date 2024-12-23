@@ -12,6 +12,7 @@ import type { IdentifyResult } from '@/api/internal';
 
 import {
     CoreFilter,
+    DataFormat,
     DefPromise,
     DrawState,
     Extent,
@@ -33,6 +34,10 @@ import type {
 import { EsriAPI } from '@/geo/esri';
 import type { EsriMapImageLayer } from '@/geo/esri';
 import { markRaw, reactive } from 'vue';
+
+// <!> move to esri file if we adopt
+import * as EsriIdentify from '@arcgis/core/rest/identify.js';
+import EsriIdentifyParameters from '@arcgis/core/rest/support/IdentifyParameters.js';
 
 // Formerly known as DynamicLayer
 /**
@@ -448,65 +453,143 @@ export class MapImageLayer extends MapLayer {
             return [];
         }
 
+        const featureSublayers = activeSublayers.filter(sl => sl.dataFormat === DataFormat.ESRI_FEATURE);
+        const rasterSublayers = activeSublayers.filter(sl => sl.dataFormat === DataFormat.ESRI_RASTER);
+        let featureResults: Array<IdentifyResult> = [];
+        let rasterResults: Array<IdentifyResult> = [];
+
+        const requestTime = Date.now();
+
         // <!>
         // probably need to split this into two sections.
         // Section 1 is original code: doing point buffer intersect against feature sources
         // Section 2 will be new: raster ping against the pixel, packaging the weird json result appropriately.
         // Then join the two section results in an await or something.
 
-        // prepare a query
+        if (featureSublayers.length > 0) {
+            // prepare a query
 
-        let pointBuffer: Extent;
-        if (options.geometry.type === GeometryType.POINT) {
-            pointBuffer = this.$iApi.geo.query.makeClickBuffer(<Point>options.geometry, options.tolerance);
-        }
-
-        // loop over active sublayers. call query on each and generate an IdentifyItem to track it
-        return activeSublayers.map(sublayer => {
-            const dProm = new DefPromise<void>();
-            const qOpts: QueryFeaturesParams = {};
-
-            const result: IdentifyResult = reactive({
-                items: [],
-                loading: dProm.getPromise(),
-                loaded: false,
-                errored: false,
-                uid: sublayer.uid,
-                layerId: sublayer.id,
-                requestTime: Date.now()
-            });
-
-            if (sublayer.geomType !== GeometryType.POLYGON && pointBuffer) {
-                // we want to use a point buffer if
-                // - a point was used as identify input (aka a pointBuffer exists in the var)
-                // - the sublayer is not a polygon layer
-                qOpts.filterGeometry = pointBuffer;
-            } else {
-                qOpts.filterGeometry = options.geometry;
+            let pointBuffer: Extent;
+            if (options.geometry.type === GeometryType.POINT) {
+                pointBuffer = this.$iApi.geo.query.makeClickBuffer(<Point>options.geometry, options.tolerance);
             }
 
-            qOpts.filterSql = sublayer.getCombinedSqlFilter();
-            qOpts.sourceSR = sublayer.sourceSR;
+            // loop over active feature sublayers. call query on each and generate an IdentifyItem to track it
+            featureResults = featureSublayers.map(sublayer => {
+                const dProm = new DefPromise<void>();
+                const qOpts: QueryFeaturesParams = {};
 
-            sublayer
-                .queryOIDs(qOpts)
-                .then(results => {
-                    results.forEach(hitOid => {
-                        // push, incase something was bound to the array
-                        result.items.push(ReactiveIdentifyFactory.makeOidItem(hitOid, sublayer));
-                    });
-
-                    // Resolve the loading promise, set the flag
-                    // This promise only indicates we have an array of results (each may still be loading their internals)
-                    result.loaded = true;
-                    dProm.resolveMe();
-                })
-                .catch(() => {
-                    result.errored = true;
-                    dProm.resolveMe(); // keeping it this way so that we don't need to make annoying changes
+                const result: IdentifyResult = reactive({
+                    items: [],
+                    loading: dProm.getPromise(),
+                    loaded: false,
+                    errored: false,
+                    uid: sublayer.uid,
+                    layerId: sublayer.id,
+                    requestTime
                 });
 
-            return result;
-        });
+                if (sublayer.geomType !== GeometryType.POLYGON && pointBuffer) {
+                    // we want to use a point buffer if
+                    // - a point was used as identify input (aka a pointBuffer exists in the var)
+                    // - the sublayer is not a polygon layer
+                    qOpts.filterGeometry = pointBuffer;
+                } else {
+                    qOpts.filterGeometry = options.geometry;
+                }
+
+                qOpts.filterSql = sublayer.getCombinedSqlFilter();
+                qOpts.sourceSR = sublayer.sourceSR;
+
+                sublayer
+                    .queryOIDs(qOpts)
+                    .then(results => {
+                        results.forEach(hitOid => {
+                            // push, incase something was bound to the array
+                            result.items.push(ReactiveIdentifyFactory.makeOidItem(hitOid, sublayer));
+                        });
+
+                        // Resolve the loading promise, set the flag
+                        // This promise only indicates we have an array of results (each may still be loading their internals)
+                        result.loaded = true;
+                        dProm.resolveMe();
+                    })
+                    .catch(() => {
+                        result.errored = true;
+                        dProm.resolveMe(); // keeping it this way so that we don't need to make annoying changes
+                    });
+
+                return result;
+            });
+        }
+
+        if (rasterSublayers.length > 0) {
+            // prepare a server identify
+
+            const mainmap = this.$iApi.geo.map;
+
+            const restParam = new EsriIdentifyParameters({
+                returnGeometry: false,
+                layerIds: rasterSublayers.map(rsl => rsl.layerIdx),
+                tolerance: 1,
+                spatialReference: mainmap.getSR().toESRI(),
+                height: mainmap.getPixelHeight(),
+                width: mainmap.getPixelWidth(),
+                mapExtent: mainmap.getExtent().toESRI(),
+                geometry: options.geometry.toESRI()
+            });
+
+            const rasterProms: Array<DefPromise<void>> = [];
+
+            // loop over active raster sublayers. generate empty result and promise blocker.
+            // we will fill in the items after the Rest Identify call finishes
+            rasterSublayers.forEach(sublayer => {
+                const dProm = new DefPromise<void>();
+
+                const result: IdentifyResult = reactive({
+                    items: [],
+                    loading: dProm.getPromise(),
+                    loaded: false,
+                    errored: false,
+                    uid: sublayer.uid,
+                    layerId: sublayer.id,
+                    requestTime
+                });
+
+                rasterProms.push(dProm);
+                rasterResults.push(result);
+            });
+
+            EsriIdentify.identify(this.url, restParam).then((idRestResult: any) => {
+                //if (idRestResult.results){
+                if (idRestResult) {
+                    console.log('got a Rest Result');
+                    console.log(idRestResult);
+                }
+
+                // for now, clean up promises
+            });
+
+            /* 
+                        results.forEach(hitOid => {
+                            // push, incase something was bound to the array
+                            result.items.push(ReactiveIdentifyFactory.makeOidItem(hitOid, sublayer));
+                        });
+
+                        // Resolve the loading promise, set the flag
+                        // This promise only indicates we have an array of results (each may still be loading their internals)
+                        result.loaded = true;
+                        dProm.resolveMe();
+                    })
+                    .catch(() => {
+                        result.errored = true;
+                        dProm.resolveMe(); // keeping it this way so that we don't need to make annoying changes
+                    });
+
+                */
+        }
+
+        // mash the two variants together
+        return featureResults.concat(rasterResults);
     }
 }
