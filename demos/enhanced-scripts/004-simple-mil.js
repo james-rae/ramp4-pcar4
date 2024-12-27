@@ -8,6 +8,9 @@ Test 04: Simple Map Image Layers
 // ask on STB storylines what happened to it
 // https://maps-cartes.ec.gc.ca/arcgis/rest/services/STB_AST_Dec2016/
 
+//
+// https://section917.canadacentral.cloudapp.azure.com/arcgis/rest/services/TestData/OilsandsLambert/MapServer
+
 const runPreTest = (config, options, utils) => {
     const bailley = {
         name: 'Bailley ESRIfied GRD',
@@ -17,12 +20,16 @@ const runPreTest = (config, options, utils) => {
         state: {
             opacity: 0.95
         },
-        sublayers: [{ index: 1 }],
-        fixtures: {
-            details: {
-                template: 'RasterGRD'
+        sublayers: [
+            {
+                index: 0,
+                fixtures: {
+                    details: {
+                        template: 'RasterGRD'
+                    }
+                }
             }
-        }
+        ]
     };
 
     utils.addLayerLegend(bailley);
@@ -49,14 +56,44 @@ const runPostTest = (instance, utils) => {
 
     instance.$element.component('RasterGRD', {
         props: ['identifyData'],
+        data() {
+            return {
+                result: { value: '' },
+                loaded: false,
+                watchers: []
+            };
+        },
         template: `
             <div>
                 <span>This is the data.</span>
                  
-                <p v-if="this.identifyData.loaded" >{{JSON.stringify(this.identifyData.data)}} </p>
+                <p v-if="this.loaded" >{{this.result.value}}</p>
                 <p v-else>Loading...</p>
             </div>
-        `
+        `,
+        created() {
+            this.watchers.push(
+                this.$watch('identifyData', () => {
+                    this.parseData();
+                })
+            );
+
+            this.parseData();
+        },
+        beforeUnmount() {
+            this.watchers.forEach(unwatch => unwatch());
+        },
+        methods: {
+            async parseData() {
+                this.loaded = false;
+                await this.identifyData.loading;
+                this.result = {
+                    value: JSON.stringify(this.identifyData.data)
+                };
+
+                this.loaded = true;
+            }
+        }
     });
 };
 

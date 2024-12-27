@@ -462,6 +462,30 @@ export class MapImageLayer extends MapLayer {
 
         const requestTime = Date.now();
 
+        /*
+        if (this.id === 'Bailley') {
+            // fake party
+            const subby = this.sublayers[0];
+
+            const fakePayload = {
+                pixel: '1.560000',
+                class: '13'
+            };
+
+            const resultB: IdentifyResult = reactive({
+                items: [ReactiveIdentifyFactory.makeRawItem(IdentifyResultFormat.JSON, fakePayload)],
+                loading: Promise.resolve(),
+                loaded: true,
+                errored: false,
+                uid: subby.uid,
+                layerId: subby.id,
+                requestTime
+            });
+
+            return [resultB];
+        }
+        */
+
         // <!>
         // probably need to split this into two sections.
         // Section 1 is original code: doing point buffer intersect against feature sources
@@ -564,36 +588,45 @@ export class MapImageLayer extends MapLayer {
 
             EsriIdentify.identify(this.url, restParam).then((idRestResult: any) => {
                 if (idRestResult?.results && Array.isArray(idRestResult.results) && idRestResult.results.length > 0) {
-                    idRestResult.results.forEach((restNugget: any) => {
-                        // see if we have a matching layer
+                    // mystery. the rest result's array items seem to have some kind of stealth tech.
+                    // In debug console, you'll just see prototypes and some Symbol vars. The code here will
+                    // be able to match on layerId, but `attributes` property will be undefined.
+                    // Doing a json clone breaks the magic spell.
+                    idRestResult.results
+                        .map((r: any) => JSON.parse(JSON.stringify(r)))
+                        .forEach((restNugget: any) => {
+                            // see if we have a matching layer
 
-                        const rasterMatchSublayer = rasterSublayers.find(
-                            rasterSL => rasterSL.layerIdx === restNugget.layerId
-                        );
-                        if (rasterMatchSublayer) {
-                            // put data into our identify result items and bonk the promise
-                            const resultIndex = rasterResults.findIndex(
-                                rastResult => rastResult.layerId === rasterMatchSublayer.id
+                            const rasterMatchSublayer = rasterSublayers.find(
+                                rasterSL => rasterSL.layerIdx === restNugget.layerId
                             );
-                            if (resultIndex > -1 && restNugget.attributes) {
-                                // the rest result item matches something we are interested in, and rest result item has data we can parse
-                                // TODO could make properties bilingual, but pixel is same and class is classe
-                                // TODO decide if missing stuff should be null, undefined, filler value (tricky since we dont know datatype).
-                                //      Unsure if this can even happen
-                                const rasterDataPayload = {
-                                    pixel: restNugget.attributes['Classify.Pixel Value'] ?? null,
-                                    class: restNugget.attributes['Classify.Class value'] ?? null
-                                };
-
-                                const targetResult = rasterResults[resultIndex];
-                                targetResult.items.push(
-                                    ReactiveIdentifyFactory.makeRawItem(IdentifyResultFormat.JSON, rasterDataPayload)
+                            if (rasterMatchSublayer) {
+                                // put data into our identify result items and bonk the promise
+                                const resultIndex = rasterResults.findIndex(
+                                    rastResult => rastResult.layerId === rasterMatchSublayer.id
                                 );
-                                targetResult.loaded = true;
-                                rasterProms[resultIndex].resolveMe();
+                                if (resultIndex > -1 && restNugget.attributes) {
+                                    // the rest result item matches something we are interested in, and rest result item has data we can parse
+                                    // TODO could make properties bilingual, but pixel is same and class is classe
+                                    // TODO decide if missing stuff should be null, undefined, filler value (tricky since we dont know datatype).
+                                    //      Unsure if this can even happen
+                                    const rasterDataPayload = {
+                                        pixel: restNugget.attributes['Classify.Pixel Value'] ?? null,
+                                        class: restNugget.attributes['Classify.Class value'] ?? null
+                                    };
+
+                                    const targetResult = rasterResults[resultIndex];
+                                    targetResult.items.push(
+                                        ReactiveIdentifyFactory.makeRawItem(
+                                            IdentifyResultFormat.JSON,
+                                            rasterDataPayload
+                                        )
+                                    );
+                                    targetResult.loaded = true;
+                                    rasterProms[resultIndex].resolveMe();
+                                }
                             }
-                        }
-                    });
+                        });
                 }
 
                 // clean up any layers that had no results
