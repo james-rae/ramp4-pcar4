@@ -17,6 +17,7 @@ import {
     DrawState,
     Extent,
     GeometryType,
+    IdentifyResultFormat,
     LayerFormat,
     LayerIdentifyMode,
     LayerState,
@@ -38,6 +39,7 @@ import { markRaw, reactive } from 'vue';
 // <!> move to esri file if we adopt
 import * as EsriIdentify from '@arcgis/core/rest/identify.js';
 import EsriIdentifyParameters from '@arcgis/core/rest/support/IdentifyParameters.js';
+import { transpileModule } from 'typescript';
 
 // Formerly known as DynamicLayer
 /**
@@ -561,32 +563,47 @@ export class MapImageLayer extends MapLayer {
             });
 
             EsriIdentify.identify(this.url, restParam).then((idRestResult: any) => {
-                //if (idRestResult.results){
-                if (idRestResult) {
-                    console.log('got a Rest Result');
-                    console.log(idRestResult);
+                if (idRestResult?.results && Array.isArray(idRestResult.results) && idRestResult.results.length > 0) {
+                    idRestResult.results.forEach((restNugget: any) => {
+                        // see if we have a matching layer
+
+                        const rasterMatchSublayer = rasterSublayers.find(
+                            rasterSL => rasterSL.layerIdx === restNugget.layerId
+                        );
+                        if (rasterMatchSublayer) {
+                            // put data into our identify result items and bonk the promise
+                            const resultIndex = rasterResults.findIndex(
+                                rastResult => rastResult.layerId === rasterMatchSublayer.id
+                            );
+                            if (resultIndex > -1 && restNugget.attributes) {
+                                // the rest result item matches something we are interested in, and rest result item has data we can parse
+                                // TODO could make properties bilingual, but pixel is same and class is classe
+                                // TODO decide if missing stuff should be null, undefined, filler value (tricky since we dont know datatype).
+                                //      Unsure if this can even happen
+                                const rasterDataPayload = {
+                                    pixel: restNugget.attributes['Classify.Pixel Value'] ?? null,
+                                    class: restNugget.attributes['Classify.Class value'] ?? null
+                                };
+
+                                const targetResult = rasterResults[resultIndex];
+                                targetResult.items.push(
+                                    ReactiveIdentifyFactory.makeRawItem(IdentifyResultFormat.JSON, rasterDataPayload)
+                                );
+                                targetResult.loaded = true;
+                                rasterProms[resultIndex].resolveMe();
+                            }
+                        }
+                    });
                 }
 
-                // for now, clean up promises
+                // clean up any layers that had no results
+                rasterResults.forEach((rastResult, i) => {
+                    if (!rastResult.loaded) {
+                        rastResult.loaded = true;
+                        rasterProms[i].resolveMe();
+                    }
+                });
             });
-
-            /* 
-                        results.forEach(hitOid => {
-                            // push, incase something was bound to the array
-                            result.items.push(ReactiveIdentifyFactory.makeOidItem(hitOid, sublayer));
-                        });
-
-                        // Resolve the loading promise, set the flag
-                        // This promise only indicates we have an array of results (each may still be loading their internals)
-                        result.loaded = true;
-                        dProm.resolveMe();
-                    })
-                    .catch(() => {
-                        result.errored = true;
-                        dProm.resolveMe(); // keeping it this way so that we don't need to make annoying changes
-                    });
-
-                */
         }
 
         // mash the two variants together
