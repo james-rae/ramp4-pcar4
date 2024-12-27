@@ -39,7 +39,6 @@ import { markRaw, reactive } from 'vue';
 // <!> move to esri file if we adopt
 import * as EsriIdentify from '@arcgis/core/rest/identify.js';
 import EsriIdentifyParameters from '@arcgis/core/rest/support/IdentifyParameters.js';
-import { transpileModule } from 'typescript';
 
 // Formerly known as DynamicLayer
 /**
