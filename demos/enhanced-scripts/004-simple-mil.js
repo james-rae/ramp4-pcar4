@@ -35,7 +35,7 @@ const runPostTest = (instance, utils) => {
         props: ['identifyData'],
         data() {
             return {
-                result: { value: '' },
+                result: { value: '', internet: '' },
                 loaded: false,
                 watchers: []
             };
@@ -44,7 +44,7 @@ const runPostTest = (instance, utils) => {
             <div>
                 <span>This is the data.</span>
                  
-                <p v-if="this.loaded" >{{this.result.value}}</p>
+                <p v-if="this.loaded" >{{this.result.value}}. And from the internet: {{this.internet}}</p>
                 <p v-else>Loading...</p>
             </div>
         `,
@@ -65,8 +65,16 @@ const runPostTest = (instance, utils) => {
                 this.loaded = false;
                 await this.identifyData.loading;
                 this.result = {
-                    value: JSON.stringify(this.identifyData.data)
+                    value: JSON.stringify(this.identifyData.data),
+                    internet: ''
                 };
+
+                const request = new Request(
+                    'https://section917.canadacentral.cloudapp.azure.com/arcgis/rest/services/TestData/EcoAction/MapServer/6/1?f=json'
+                );
+                const answer = await fetch(request);
+                const jsonanswer = await answer.json();
+                this.result.internet = jsonanswer?.feature?.attributes?.Name ?? 'Something goofed';
 
                 this.loaded = true;
             }
