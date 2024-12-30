@@ -16,6 +16,7 @@ import {
     DrawState,
     Extent,
     GeometryType,
+    IdentifyResultFormat,
     LayerFormat,
     LayerIdentifyMode,
     LayerState,
@@ -419,6 +420,28 @@ export class MapImageLayer extends MapLayer {
         if (!this.canIdentify()) {
             // return empty result.
             return [];
+        }
+
+        if (this.id === 'Bailley') {
+            // fake party
+            const subby = this.sublayers[0];
+
+            const fakePayload = {
+                pixel: '1.560000',
+                class: '13'
+            };
+
+            const resultB: IdentifyResult = reactive({
+                items: [ReactiveIdentifyFactory.makeRawItem(IdentifyResultFormat.JSON, fakePayload)],
+                loading: Promise.resolve(),
+                loaded: true,
+                errored: false,
+                uid: subby.uid,
+                layerId: subby.id,
+                requestTime: Date.now()
+            });
+
+            return [resultB];
         }
 
         // change any sublayer ids that are server indices to sublayer uids.
