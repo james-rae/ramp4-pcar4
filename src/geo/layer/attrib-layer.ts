@@ -116,7 +116,7 @@ export class AttribLayer extends MapLayer {
 
         // stuff for Feature vs Raster
         if (this.dataFormat === DataFormat.ESRI_FEATURE) {
-            this.supportsFeatures = true;
+            this.supportsFeatures = !this.id.startsWith('Bailley');
 
             // Only MILs have sublayers and their filtering is exclusively impacted by the canModifyLayer server flag
             this.canModifyLayer = this.layerType === LayerType.SUBLAYER ? sData.canModifyLayer : true;
