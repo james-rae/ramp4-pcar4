@@ -9,7 +9,7 @@ const runPreTest = (config, options, utils) => {
         name: 'Bailley ESRIfied GRD',
         id: 'Bailley',
         layerType: 'esri-map-image',
-        url: 'https://section917.canadacentral.cloudapp.azure.com/arcgis/rest/services/TestData/OilsandsLambert/MapServer',
+        url: 'https://ecqcj8ywvwsd025.ncr.int.ec.gc.ca:6443/arcgis/rest/services/CESI_Temp/MapServer',
         state: {
             opacity: 0.95
         },
