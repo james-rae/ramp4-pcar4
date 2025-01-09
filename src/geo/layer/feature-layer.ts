@@ -89,6 +89,11 @@ export class FeatureLayer extends AttribLayer {
         // feature has only one layer
         this.serviceUrl = layerUrl;
 
+        if (this.esriLayer) {
+            console.log('original esri renderer');
+            console.log(this.esriLayer.renderer.toJSON());
+        }
+
         // renderer generation and metadata load are tied.
         // sub-method to orchestrate the two with async goodness.
         const serviceLoader = async () => {
@@ -97,6 +102,8 @@ export class FeatureLayer extends AttribLayer {
             let metadataPram: LoadLayerMetadataOptions;
             if (this.esriLayer && this.origRampConfig.customRenderer?.type) {
                 const esriRenderer = await EsriAPI.RendererFromJson(this.origRampConfig.customRenderer);
+                console.log('custom renderer in esri form');
+                console.log(esriRenderer.toJSON());
                 this.esriLayer!.renderer = esriRenderer;
                 metadataPram = { customRenderer: esriRenderer };
             } else {

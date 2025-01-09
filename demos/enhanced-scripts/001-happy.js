@@ -6,14 +6,20 @@ Test 01: Happy
 const runPreTest = (config, options, utils) => {
     const happy = {
         id: 'Happy',
-        name: 'Happy Tester',
-        layerType: 'file-geojson',
-        url: '../file-layers/geojson.json',
-        colour: '#4ef542',
-        nameField: 'name'
+        name: 'Bailley Spikes',
+        layerType: 'esri-feature',
+        url: 'https://ecqcj8ywvwsd025.ncr.int.ec.gc.ca:6443/arcgis/rest/services/WQMS_Test/MapServer/1'
     };
-
     utils.addLayerLegend(happy);
+
+    const milparty = {
+        id: 'milparty',
+        name: 'Bailley Spikes MIL',
+        layerType: 'esri-map-image',
+        url: 'https://ecqcj8ywvwsd025.ncr.int.ec.gc.ca:6443/arcgis/rest/services/WQMS_Test/MapServer/',
+        sublayers: [{ index: 1, name: 'Lovely and Spikey' }]
+    };
+    utils.addLayerLegend(milparty);
 
     return { config, options };
 };

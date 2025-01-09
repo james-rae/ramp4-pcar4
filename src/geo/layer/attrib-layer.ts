@@ -151,6 +151,9 @@ export class AttribLayer extends MapLayer {
                     ? options.customRenderer
                     : sData.renderer!;
 
+            console.log('renderer from rest ping');
+            console.log(esriRenderer.toJSON());
+
             this.renderer = this.$iApi.geo.symbology.makeRenderer(esriRenderer, this.fields);
 
             // this array will have a set of promises that resolve when all the legend svg has drawn.
