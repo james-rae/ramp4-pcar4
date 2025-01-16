@@ -386,3 +386,35 @@ rInstance.fixture.add('export');
 // rInstance.start();
 
 window.debugInstance = rInstance;
+
+// bailley fun
+
+const round2 = val => Math.round(100 * val) / 100;
+
+var data_min = 0.601;
+
+var data_max = 24.48;
+
+// SYMBOL PARAMETERS
+// Populate the values below with the radius of the regular polygon effect
+// and the desired min/max output symbol range.
+var reg_poly_effect_radius = 2.5;
+
+var min_pt = 3;
+var max_pt = 100;
+
+const data = [
+    0.6, 0.9, 1.3, 3.4, 3.9, 4.8, 5.9, 6.6, 6.7, 6.8, 7, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.9, 8, 8.1, 8.2, 8.3, 8.5,
+    8.6, 8.9, 9.2, 9.5, 9.7, 10.8, 11, 11.1, 11.8, 12.9, 16.9, 24.5
+];
+
+const result = data.map(pfas => {
+    var new_pt = round2(100 * (((max_pt - min_pt) * (pfas - data_min)) / (data_max - data_min)) + min_pt);
+
+    // We now need to determine how large to scale our original symbol in order to achieve the desire pt size.
+    var scale_factor = round2(new_pt / (reg_poly_effect_radius * 1.5));
+    var offset_y = round2(new_pt / 2 - (reg_poly_effect_radius * 1.5) / 2);
+    return [pfas, scale_factor, offset_y].join('~');
+});
+
+console.log(result.join('^'));
