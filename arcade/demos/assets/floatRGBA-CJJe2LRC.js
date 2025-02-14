@@ -1,0 +1,1 @@
+import{an as f}from"./main-CqBQFa0O.js";function p(r,e,o=0){const n=f(r,0,c);for(let t=0;t<4;t++)e[o+t]=Math.floor(256*u(n*a[t]))}function l(r,e=0){let o=0;for(let n=0;n<4;n++)o+=r[e+n]*i[n];return o}const a=[1,256,65536,16777216],i=[1/256,1/65536,1/16777216,1/4294967296],c=l(new Uint8ClampedArray([255,255,255,255]));function u(r){return r-Math.floor(r)}export{p as o,l as r};

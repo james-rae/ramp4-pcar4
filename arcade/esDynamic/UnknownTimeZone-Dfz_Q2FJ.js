@@ -1,0 +1,1 @@
+import{a$ as o,b4 as r}from"./main-Buuj46IZ.js";class t{}function e(n){return n instanceof r?n===t.instance:n?.toString().toLowerCase()==="unknown"}function a(n){return e(n)?t.instance:n}t.instance=new o("Etc/UTC");export{a as i,e as r,t};
