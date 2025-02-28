@@ -1,0 +1,5 @@
+import{L as o,d as t}from"./loader-DzDGT5WA.js";import"./themeUtils-Bz94WYkF.js";import"./main-CfDM7uUa.js";import"./preload-helper-ExcqyqRp.js";import"./uuid-Cl5lrJ4c.js";import"./guid-BxSjQh8J.js";import"./locale-BlwezJXN.js";import"./dom-BveoWHh2.js";import"./key-D63ExP77.js";import"./observers-CauLY8zH.js";/*!
+ * All material copyright ESRI, All Rights Reserved, unless otherwise specified.
+ * See https://github.com/Esri/calcite-design-system/blob/dev/LICENSE.md for details.
+ * v2.13.2
+ */const f=o,l=t;export{f as CalciteLoader,l as defineCustomElement};
