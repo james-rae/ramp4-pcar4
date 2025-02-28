@@ -28,7 +28,6 @@ import type {
     IdentifyParameters,
     LayerTimes,
     LegendSymbology,
-    RampLayerFieldMetadataConfig,
     TabularAttributeSet
 } from '@/geo/api';
 
@@ -136,7 +135,7 @@ export class LayerInstance extends APIScope {
     nameField: string;
 
     /**
-     * Arcade formula to derive name of feature. Empty string to turn off. Not applicable for attribute-less layers.
+     * Arcade formula to derive name of feature. Empty string indicates no formula in use. Not applicable for attribute-less layers.
      */
     get nameArcade(): string {
         return '';
@@ -149,6 +148,29 @@ export class LayerInstance extends APIScope {
      * @returns Promise that resolves when the arcade executor has been generated.
      */
     async setNameArcade(formula: string): Promise<void> {
+        // instance interface does nothing.
+    }
+
+    /**
+     * Field name that contains value considered the maptip of a feature. Not applicable for attribute-less layers.
+     * Ignored if tooltipArcade is set. nameValue is used if neither are set.
+     */
+    tooltipField: string;
+
+    /**
+     * Arcade formula to derive maptip of the feature. Empty string indicates no formula in use. Not applicable for attribute-less layers.
+     */
+    get tooltipArcade(): string {
+        return '';
+    }
+
+    /**
+     * Sets a new arcade formula for the maptip value.
+     *
+     * @param formula
+     * @returns Promise that resolves when the arcade executor has been generated.
+     */
+    async setTooltipArcade(formula: string): Promise<void> {
         // instance interface does nothing.
     }
 
@@ -296,6 +318,7 @@ export class LayerInstance extends APIScope {
         this.fields = [];
         this.fieldList = '';
         this.nameField = '';
+        this.tooltipField = '';
         this.oidField = '';
         this.supportsSublayers = false;
         this.isSublayer = false;
@@ -544,6 +567,17 @@ export class LayerInstance extends APIScope {
      * @returns the name
      */
     nameValue(attributes: Attributes): string {
+        return '';
+    }
+
+    /**
+     * Given the attributes of a feature of this layer, returns the maptip of that feature.
+     * Valid only for layers that support attributes.
+     *
+     * @param attributes attribute values
+     * @returns the name
+     */
+    tooltipValue(attributes: Attributes): string {
         return '';
     }
 

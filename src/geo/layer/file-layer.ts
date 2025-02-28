@@ -172,18 +172,24 @@ export class FileLayer extends AttribLayer {
 
             this.attribs.attLoader.updateFieldList(this.fieldList);
 
-            // NOTE this needs to be called after fields are set. With files, they are set in layer generation.
-            //      .nameField will already contain any systemy overrides if the config has nothing.
-            //      use it for the "service" value
-            await this.nameInitializer(this.origRampConfig, this.nameField);
+            // With files, .nameField is already populated and cleaned due to extractLayerMetadata()
+            // We only run the initializer to account for any arcade formulas. So a bit of fakery.
 
-            if (this.origRampConfig.tooltipField) {
-                this.tooltipField =
-                    this.$iApi.geo.attributes.fieldValidator(this.fields, this.origRampConfig.tooltipField) ||
-                    this.nameField;
-            } else {
-                this.tooltipField = this.nameField;
-            }
+            await this.nameInitializer(
+                { nameArcade: this.origRampConfig.nameArcade } as RampLayerConfig,
+                this.nameField
+            );
+
+            // and more trickery here. Just because we don't like to mess with the orig config.
+            // so clean up data, and pass a faked config to the tooltip initializer
+            const cleanedTooltip = this.origRampConfig.tooltipField
+                ? this.$iApi.geo.attributes.fieldValidator(this.fields, this.origRampConfig.tooltipField)
+                : '';
+
+            await this.tooltipInitializer({
+                tooltipArcade: this.origRampConfig.tooltipArcade,
+                tooltipField: cleanedTooltip
+            } as RampLayerConfig);
 
             this.featureCount = this.esriLayer?.source.length || 0;
         };

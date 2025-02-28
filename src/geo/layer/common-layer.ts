@@ -69,6 +69,16 @@ export class CommonLayer extends LayerInstance {
      */
     protected nameArcadeExecutor: __esri.ArcadeExecutor | undefined;
 
+    /**
+     * Internally tracks any arcade formula for the name value.
+     */
+    protected tooltipArcadeFormula: string;
+
+    /**
+     * The name arcade executor if a name formula is defined
+     */
+    protected tooltipArcadeExecutor: __esri.ArcadeExecutor | undefined;
+
     // ----------- LAYER CONSTRUCTION AND INITIALIZAION -----------
 
     protected constructor(rampConfig: RampLayerConfig, $iApi: InstanceAPI) {
@@ -115,6 +125,7 @@ export class CommonLayer extends LayerInstance {
         this.canReload = !!(this.url || this.origRampConfig.caching);
         this.loadPromDone = false;
         this.nameArcadeFormula = '';
+        this.tooltipArcadeFormula = '';
 
         this.layerTree = new TreeNode(0, this.uid, this.name, true); // is a layer with layer index 0 by default. subclasses will change this when they load
     }
@@ -552,6 +563,30 @@ export class CommonLayer extends LayerInstance {
         }
     }
 
+    private async arcadeGenerator(formula: string): Promise<__esri.ArcadeExecutor> {
+        const arcadeProfile: __esri.Profile = {
+            variables: [
+                {
+                    name: '$Attr',
+                    type: 'dictionary',
+                    properties: this.fields
+                        .map(fd => {
+                            const arcardeType = this.$iApi.geo.attributes.fieldTypeToArcade(fd.type);
+                            if (arcardeType) {
+                                return { name: fd.name, type: arcardeType };
+                            } else {
+                                console.error(`Encountered field type with no arcade support: ${fd.type} [${fd.name}]`);
+                                return arcardeType; // <-- will be undefined
+                            }
+                        })
+                        .filter(f => !!f)
+                }
+            ]
+        };
+
+        return EsriAPI.ArcadeExecutor(formula, arcadeProfile);
+    }
+
     get nameArcade(): string {
         return this.nameArcadeFormula;
     }
@@ -564,29 +599,7 @@ export class CommonLayer extends LayerInstance {
             } else {
                 this.nameArcadeFormula = formula;
 
-                const arcadeProfile: __esri.Profile = {
-                    variables: [
-                        {
-                            name: '$Attr',
-                            type: 'dictionary',
-                            properties: this.fields
-                                .map(fd => {
-                                    const arcardeType = this.$iApi.geo.attributes.fieldTypeToArcade(fd.type);
-                                    if (arcardeType) {
-                                        return { name: fd.name, type: arcardeType };
-                                    } else {
-                                        console.error(
-                                            `Encountered field type with no arcade support: ${fd.type} [${fd.name}]`
-                                        );
-                                        return arcardeType; // <-- will be undefined
-                                    }
-                                })
-                                .filter(f => !!f)
-                        }
-                    ]
-                };
-
-                this.nameArcadeExecutor = await EsriAPI.ArcadeExecutor(formula, arcadeProfile);
+                this.nameArcadeExecutor = await this.arcadeGenerator(formula);
             }
         } else {
             console.error("Attempted to set a name arcade function on a layer that doesn't support it.");
@@ -640,6 +653,64 @@ export class CommonLayer extends LayerInstance {
                 return this.nameArcadeExecutor?.execute(arcadePayload) ?? 'Arcade Error';
             } else {
                 return this.nameField ? (attributes[this.nameField] ?? 'Name Field Error') : '';
+            }
+        } else {
+            return '';
+        }
+    }
+
+    async setTooltipArcade(formula: string): Promise<void> {
+        if (this.supportsFeatures) {
+            if (formula.trim() === '') {
+                this.tooltipArcadeFormula = '';
+                this.tooltipArcadeExecutor = undefined;
+            } else {
+                this.tooltipArcadeFormula = formula;
+                this.tooltipArcadeExecutor = await this.arcadeGenerator(formula);
+            }
+        } else {
+            console.error("Attempted to set a tooltip arcade function on a layer that doesn't support it.");
+        }
+    }
+
+    /**
+     * Handles initialization logic for feature tooltips. Only valid for
+     * layers that support attributes.
+     * Needs to be called after nameInitializer to ensure fallback defaults
+     * Typically called by internal processes.
+     *
+     * @param config a ramp layer configuration object. Can pass empty object if n/a.
+     */
+    async tooltipInitializer(config: RampLayerConfig | RampLayerMapImageSublayerConfig): Promise<void> {
+        if (this.supportsFeatures) {
+            const trimArcade = (config?.tooltipArcade || '').trim();
+            if (trimArcade) {
+                // build executor, store formula
+                await this.setTooltipArcade(trimArcade);
+            }
+
+            // we still assign tooltip field even if an arcade exists. This is for
+            // fallback support of any old templates/custom fixtures that are not using
+            // tooltipValue(). Any `attribute[tooltipField]` code will still work / not explode.
+
+            this.tooltipField = (config?.tooltipField || '').trim() || this.nameField;
+        } else {
+            console.error('Attempted to init a tooltip field on an unsupported layer.');
+        }
+    }
+
+    tooltipValue(attributes: Attributes): string {
+        if (attributes) {
+            // TODO decide if we return error strings (to make visually obvious)
+            //      or return empty string + console errors
+            if (this.tooltipArcade) {
+                const arcadePayload = {
+                    $Attr: attributes
+                };
+
+                return this.tooltipArcadeExecutor?.execute(arcadePayload) ?? 'Arcade Error';
+            } else {
+                return this.tooltipField ? (attributes[this.tooltipField] ?? this.nameValue(attributes)) : '';
             }
         } else {
             return '';

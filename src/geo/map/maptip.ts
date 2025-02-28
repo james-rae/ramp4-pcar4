@@ -108,14 +108,11 @@ export class MaptipAPI extends APIScope {
         screenPoint: Point;
     }) {
         this.setContent(
-            `<div class="flex items-center space-x-5"><span>${info.icon}</span><span class="line-clamp-3">${
-                info.attributes[info.layer.config.tooltipField || info.layer.nameField]
-            }</span></div>`
+            `<div class="flex items-center space-x-5"><span>${info.icon}</span><span class="line-clamp-3">${info.layer.tooltipValue(
+                info.attributes
+            )}</span></div>`
         );
     }
-
-    // TODO ^^^ should not be referincing config.tooltipField.  Should be the layer value.
-    //          If we make a general "getter" to handle complexity this might become moot
 
     /**
      * Clears the maptip from the map

@@ -116,8 +116,7 @@ export class FeatureLayer extends AttribLayer {
                 // NOTE must be called after fields are defined.
                 //      .nameField will already contian any server-based definitions
                 await this.nameInitializer(this.origRampConfig, this.nameField);
-
-                this.tooltipField = this.origRampConfig.tooltipField || this.nameField;
+                await this.tooltipInitializer(this.origRampConfig);
             }
         };
 
