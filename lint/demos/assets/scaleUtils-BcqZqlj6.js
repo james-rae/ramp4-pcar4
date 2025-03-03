@@ -1,0 +1,1 @@
+import{bq as i,br as u,bs as c}from"./main-COW1-tZE.js";const e=96;function b(n,t){const r=n.extent,o=n.width,f=i(r?.spatialReference);return r&&o?r.width/o*f*u*e:0}function d(n,t){return n/(i(t)*u*e)}function m(n,t,r){return s(n,t)&&a(n,r)}function s(n,t){return t===0||c(n,t)||n<t}function a(n,t){return t===0||c(n,t)||n>t}export{m as d,b as i,d as o};
