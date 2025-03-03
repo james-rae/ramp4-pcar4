@@ -70,12 +70,12 @@ export class CommonLayer extends LayerInstance {
     protected nameArcadeExecutor: __esri.ArcadeExecutor | undefined;
 
     /**
-     * Internally tracks any arcade formula for the name value.
+     * Internally tracks any arcade formula for the maptip value.
      */
     protected tooltipArcadeFormula: string;
 
     /**
-     * The name arcade executor if a name formula is defined
+     * The maptip arcade executor if a maptip formula is defined
      */
     protected tooltipArcadeExecutor: __esri.ArcadeExecutor | undefined;
 
@@ -563,6 +563,12 @@ export class CommonLayer extends LayerInstance {
         }
     }
 
+    /**
+     * Will create an arcade formula executor valid for this layer
+     *
+     * @param formula an arcade formula
+     * @returns resolves with an arcade executor object
+     */
     private async arcadeGenerator(formula: string): Promise<__esri.ArcadeExecutor> {
         const arcadeProfile: __esri.Profile = {
             variables: [
@@ -607,8 +613,8 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Handles initialization logic for feature names. Only valid for
-     * layers that support attributes.
+     * Handles initialization logic for feature names.
+     * Only valid for layers that support attributes.
      * Typically called by internal processes.
      *
      * @param config a ramp layer configuration object. Can pass empty object if n/a.
@@ -659,6 +665,10 @@ export class CommonLayer extends LayerInstance {
         }
     }
 
+    get tooltipArcade(): string {
+        return this.tooltipArcadeFormula;
+    }
+
     async setTooltipArcade(formula: string): Promise<void> {
         if (this.supportsFeatures) {
             if (formula.trim() === '') {
@@ -674,9 +684,9 @@ export class CommonLayer extends LayerInstance {
     }
 
     /**
-     * Handles initialization logic for feature tooltips. Only valid for
-     * layers that support attributes.
-     * Needs to be called after nameInitializer to ensure fallback defaults
+     * Handles initialization logic for feature tooltips.
+     * Only valid for layers that support attributes.
+     * Needs to be called after nameInitializer to ensure correct fallback defaults.
      * Typically called by internal processes.
      *
      * @param config a ramp layer configuration object. Can pass empty object if n/a.

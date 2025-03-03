@@ -36,7 +36,9 @@ const runPreTest = (config, options, utils) => {
         url: '../file-layers/duffers.json',
         caching: true,
         colour: '#008CAA',
-        nameField: 'name'
+        nameField: 'name',
+        nameArcade: ` 'Welcome to ' + $Attr.name `,
+        tooltipArcade: `'I work at ' + $Attr.name`
     };
 
     const latlonFL = {

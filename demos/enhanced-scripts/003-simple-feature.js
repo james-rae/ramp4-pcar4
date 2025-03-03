@@ -7,8 +7,7 @@ const runPreTest = (config, options, utils) => {
     const nature = {
         id: 'Nature',
         layerType: 'esri-feature',
-        url: 'https://maps-cartes.qa.ec.gc.ca/arcgis/rest/services/TestData/EcoAction/MapServer/6',
-        nameArcade: `'I went to ' + $Attr.Name + ' in ' + $Attr.Year_`
+        url: 'https://maps-cartes.qa.ec.gc.ca/arcgis/rest/services/TestData/EcoAction/MapServer/6'
     };
 
     const water = {
