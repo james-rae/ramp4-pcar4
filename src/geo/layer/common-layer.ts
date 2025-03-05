@@ -573,7 +573,7 @@ export class CommonLayer extends LayerInstance {
         const arcadeProfile: __esri.Profile = {
             variables: [
                 {
-                    name: '$Attr',
+                    name: '$attr',
                     type: 'dictionary',
                     properties: this.fields
                         .map(fd => {
@@ -653,7 +653,7 @@ export class CommonLayer extends LayerInstance {
             //      or return empty string + console errors
             if (this.nameArcade) {
                 const arcadePayload = {
-                    $Attr: attributes
+                    $attr: attributes
                 };
 
                 return this.nameArcadeExecutor?.execute(arcadePayload) ?? 'Arcade Error';
@@ -715,7 +715,7 @@ export class CommonLayer extends LayerInstance {
             //      or return empty string + console errors
             if (this.tooltipArcade) {
                 const arcadePayload = {
-                    $Attr: attributes
+                    $attr: attributes
                 };
 
                 return this.tooltipArcadeExecutor?.execute(arcadePayload) ?? 'Arcade Error';
