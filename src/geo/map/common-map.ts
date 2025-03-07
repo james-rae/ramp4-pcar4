@@ -411,7 +411,8 @@ export class CommonMapAPI extends APIScope {
             if (g.type === GeometryType.POINT) {
                 zoomP.scale = scale || this.pointZoomScale;
             }
-            const opts: __esri.GoToOptions2D = { animate, duration, easing };
+            // TODO if duration is defined, change speedFactor back to 1
+            const opts: __esri.GoToOptions2D = { animate, duration, easing, speedFactor: 1.5 };
 
             return this.viewPromise.then(() => {
                 return this.esriView!.goTo(zoomP, opts);
