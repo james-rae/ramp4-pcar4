@@ -394,7 +394,7 @@ export class CommonMapAPI extends APIScope {
         geom: BaseGeometry,
         scale?: number,
         animate = true,
-        duration = 200,
+        duration: number | undefined = undefined, // TODO update JSDoc if adopted
         easing: ZoomEasing = 'ease'
     ): Promise<void> {
         if (this.esriView) {
