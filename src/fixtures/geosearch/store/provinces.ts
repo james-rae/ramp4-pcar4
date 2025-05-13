@@ -1,7 +1,7 @@
 import type { IGenericObjectType, IProvinces } from '../definitions';
 import axios from 'redaxios';
 
-const fsaToProv = <any>{
+const fsaToProv: { [key: string]: number | Array<number> } = {
     A: 10,
     B: 12,
     C: 11,
@@ -22,7 +22,10 @@ const fsaToProv = <any>{
     Y: 60
 };
 
-const provs: any = {
+/**
+ * Language keys with values that are lookup objects of prov keys to prov descriptions
+ */
+const provs: { [key: string]: { [key: string]: string } } = {
     en: {},
     fr: {}
 };
@@ -34,7 +37,9 @@ class Provinces {
     constructor(language: string, url: string) {
         axios.get(url).then((res: any) => {
             // Update the provinces array.
-            res.data.definitions.forEach((type: any) => (provs[language][type.code] = type.description));
+            res.data.definitions.forEach(
+                (type: { code: string; description: string }) => (provs[language][type.code] = type.description)
+            );
 
             Object.keys(provs[language]).forEach(provKey => {
                 this.list[provKey] = (<any>provs[language])[provKey];

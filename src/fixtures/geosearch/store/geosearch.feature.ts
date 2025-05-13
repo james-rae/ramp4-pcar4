@@ -4,8 +4,8 @@
  */
 import Provinces from './provinces';
 import Types from './types';
-import * as Q from './query';
-import type { IGeosearchConfig } from '../definitions';
+import * as GeoSearchQuery from './query';
+import type { IGeosearchConfig, ILatLon } from '../definitions';
 import type { Query } from './query';
 
 // geosearch query services
@@ -33,6 +33,20 @@ const CODE_TO_ABBR = {
     72: 'UF',
     73: 'IW'
 };
+
+/**
+ * Makes a bbox around a latlon
+ *
+ * @param ll the latlon object
+ * @param expand factor (in degrees) to push out each side
+ * @returns four number bbox array
+ */
+const fakeBBox = (ll: ILatLon, expand: number): Array<number> => [
+    ll.lon + expand,
+    ll.lat - expand,
+    ll.lon - expand,
+    ll.lat + expand
+];
 
 /**
  * A class/interface that wraps around a GeoSearch object and provides additional services.
@@ -176,7 +190,7 @@ export class GeoSearchUI {
      */
     query(q: string) {
         // run query based on search string input
-        return Q.make(this.config, q.toUpperCase()).onComplete.then((q: Query) => {
+        return GeoSearchQuery.make(this.config, q.toUpperCase()).onComplete.then((q: Query) => {
             // any feature result requires a manual first entry
             let featureResult: any[] = [];
             if (q.featureResults.length > 0) {
@@ -184,12 +198,7 @@ export class GeoSearchUI {
                     // add first geosearch result as location of FSA itself
                     featureResult = q.featureResults.map((fsa: any) => ({
                         name: fsa.fsa,
-                        bbox: [
-                            fsa.LatLon.lon + 0.02,
-                            fsa.LatLon.lat - 0.02,
-                            fsa.LatLon.lon - 0.02,
-                            fsa.LatLon.lat + 0.02
-                        ],
+                        bbox: fakeBBox(fsa.LatLon, 0.02),
                         type: fsa.desc,
                         position: [fsa.LatLon.lon, fsa.LatLon.lat],
                         location: {
@@ -203,12 +212,7 @@ export class GeoSearchUI {
                     // add first geosearch result as location of NTS map number
                     featureResult = q.featureResults.map((nts: any) => ({
                         name: nts.nts,
-                        bbox: nts.bbox ?? [
-                            nts.LatLon.lon + 0.02,
-                            nts.LatLon.lat - 0.02,
-                            nts.LatLon.lon - 0.02,
-                            nts.LatLon.lat + 0.02
-                        ],
+                        bbox: nts.bbox ?? fakeBBox(nts.LatLon, 0.02),
                         type: nts.desc,
                         position: [nts.LatLon.lon, nts.LatLon.lat],
                         location: {
@@ -221,12 +225,7 @@ export class GeoSearchUI {
                 } else if (q.resultType === 'address') {
                     featureResult = q.featureResults.map((address: any) => ({
                         name: address.name,
-                        bbox: [
-                            address.LatLon.lon + 0.002,
-                            address.LatLon.lat - 0.002,
-                            address.LatLon.lon - 0.002,
-                            address.LatLon.lat + 0.002
-                        ],
+                        bbox: fakeBBox(address.LatLon, 0.002),
                         type: address.desc,
                         position: [address.LatLon.lon, address.LatLon.lat],
                         location: {

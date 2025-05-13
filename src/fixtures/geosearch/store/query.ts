@@ -39,16 +39,26 @@ export class Query {
     query: string | undefined;
     failedServs: string[] = [];
     results: ResultList = [];
-    onComplete: any;
+
+    /**
+     * A promise that resolves when this object is done searching.
+     */
+    onComplete: Promise<Query>;
     latLongResult: any;
     featureResults: queryFeatureResults[] = [];
     resultType: string = 'geoname';
 
     constructor(config: IGeosearchConfig, query?: string) {
+        // note this gets overrided by subclasses. set here to appease typescript.
+        this.onComplete = Promise.resolve(this);
         this.query = query;
         this.config = config;
     }
 
+    /**
+     * Runs a geoname search
+     * @returns
+     */
     search(): Promise<NameResultList> {
         return (<Promise<IRawNameResult>>this.jsonRequest(this.getUrl()))
             .then(r => this.normalizeNameItems(r.items))
@@ -59,7 +69,16 @@ export class Query {
             });
     }
 
-    private getUrl(useLocate?: boolean, restrict?: number[], lat?: number, lon?: number): string {
+    /**
+     * Generate a search url.
+     * Lat / Lon params are ignored if useLocate is true
+     *
+     * @param useLocate if true, uses the GeoLocation service. Otherwise uses the GeoName service
+     * @param lat if provided, does a search based on co-ords instead of name.
+     * @param lon if provided, does a search based on co-ords instead of name.
+     * @returns the url
+     */
+    private getUrl(useLocate?: boolean, lat?: number, lon?: number): string {
         let url = '';
         if (useLocate) {
             // URL for FSA and NFA search
@@ -104,7 +123,12 @@ export class Query {
             });
     }
 
-    jsonRequest(url: string) {
+    /**
+     * Runs a url that expects a JSON return value. Returns the result when it arrives
+     * @param url
+     * @returns
+     */
+    jsonRequest(url: string): Promise<any> {
         return new Promise((resolve, reject) => {
             const xobj = new XMLHttpRequest();
             xobj.open('GET', url, true);
@@ -122,11 +146,11 @@ export class Query {
     }
 
     locateByQuery(): Promise<LocateResponseList> {
-        return <Promise<LocateResponseList>>this.jsonRequest(this.getUrl(true, undefined));
+        return <Promise<LocateResponseList>>this.jsonRequest(this.getUrl(true));
     }
 
-    nameByLatLon(lat: number, lon: number, restrict?: number[]): any {
-        return (<Promise<IRawNameResult>>this.jsonRequest(this.getUrl(false, restrict, lat, lon)))
+    nameByLatLon(lat: number, lon: number): any {
+        return (<Promise<IRawNameResult>>this.jsonRequest(this.getUrl(false, lat, lon)))
             .then(r => {
                 return this.normalizeNameItems(r.items);
             })
@@ -190,11 +214,7 @@ export class FSAQuery extends Query {
             this.formatLocationResult().then(fLR => {
                 if (fLR) {
                     this.featureResults.push(fLR);
-                    this.nameByLatLon(
-                        fLR.LatLon.lat,
-                        fLR.LatLon.lon,
-                        Object.keys(fLR._provinces).map(x => parseInt(x))
-                    ).then((r: any) => {
+                    this.nameByLatLon(fLR.LatLon.lat, fLR.LatLon.lon).then((r: any) => {
                         this.results = r;
                         resolve(this);
                     });
@@ -321,6 +341,9 @@ export class AddressQuery extends Query {
         super(config, query);
         this.resultType = 'address';
 
+        // Steps:
+        // 1. Run the geolocation search for addresses.
+        // 2.
         this.onComplete = new Promise(resolve => {
             this.locateByQuery()
                 .then(lr => {

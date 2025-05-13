@@ -88,11 +88,15 @@ const clearFilters = () => {
     setType({});
 };
 
-// Fetches the most up to date provinces and types.
-// Because of the way the GSservice is structured, on language switch, we need to make a new GSservice in the updated language
-// and then re fetch all the provinces and types again.
-// TODO: In the future, we should look to refactor the code for this fixture to improve clarity and reduce the number of API calls.
+/**
+ * Fetches the most up to date province and result types from geogratis.
+ * Mainly used to get values in the current language
+ */
 const updateProvincesAndTypes = () => {
+    // Because of the way the GSservice is structured, on language switch, we need to make a new GSservice in the updated language
+    // and then re fetch all the provinces and types again.
+    // TODO: In the future, we should look to refactor the code for this fixture to improve clarity and reduce the number of API calls.
+
     geosearchStore.initService(iApi.language, iApi.fixture.get<GeosearchAPI>('geosearch').config);
 
     // convert current province and type selection to new lang
@@ -117,6 +121,7 @@ const updateProvincesAndTypes = () => {
 };
 
 onBeforeMount(() => {
+    // do initial load, and setup reload when app language changes
     updateProvincesAndTypes();
     watchers.value.push(watch(language, updateProvincesAndTypes));
 });

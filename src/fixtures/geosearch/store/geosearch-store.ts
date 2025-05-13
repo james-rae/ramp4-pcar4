@@ -32,6 +32,7 @@ function filter(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>
 }
 
 export const useGeosearchStore = defineStore('geosearch', () => {
+    // NOTE this is just defining the reactive instance of GSUI. The lang gets properly set in .initService()
     const GSservice = ref<GeoSearchUI>(new GeoSearchUI('en', undefined));
     const queryParams = ref<QueryParams>({
         type: '',
@@ -42,8 +43,21 @@ export const useGeosearchStore = defineStore('geosearch', () => {
     const searchVal = ref<string>('');
     const searchRegex = ref<string>('');
     const lastSearchVal = ref<string>('');
+
+    /**
+     * This represents the active, visible search (typed words and any filters)
+     */
     const searchResults = ref<Array<any>>([]);
+
+    /**
+     * This is the contents of the last server search result from the current search term.
+     * Is used as input for local filters (like bounding box, province, etc) without re-querying the services.
+     */
     const savedResults = ref<Array<any>>([]);
+
+    /**
+     * When true, shows the loading indicator
+     */
     const loadingResults = ref<boolean>(false);
     const failedServices = ref<Array<string>>([]);
 
@@ -88,10 +102,10 @@ export const useGeosearchStore = defineStore('geosearch', () => {
     }
 
     /**
-     * Runs geosearch query to update search and saved results.
+     * Runs the geosearch query to update visible search and the saved results.
      *
      * @function runQuery
-     * @param {boolean} forceReRun whether to force the query to run again
+     * @param {boolean} forceReRun whether to force the server query (i.e. the typed-in search) to run again
      */
     function runQuery(forceReRun?: boolean): void {
         // set loading flag to true and turn off when reach return
