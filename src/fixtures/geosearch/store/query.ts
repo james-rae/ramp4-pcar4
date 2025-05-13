@@ -9,7 +9,7 @@ import type {
     LocateResponseList,
     NameResultList,
     NTSResultList,
-    queryFeatureResults,
+    QueryFeatureResults,
     ResultList
 } from '../definitions';
 
@@ -34,6 +34,29 @@ export function make(config: IGeosearchConfig, query: string): Query {
     }
 }
 
+/**
+ * Runs a url that expects a JSON return value. Returns the result when it arrives
+ * @param url
+ * @returns
+ */
+export const jsonRequest = (url: string): Promise<any> => {
+    // TODO any reason for XMLHR? use axios? Is there a common web requester in ramp?
+    return new Promise((resolve, reject) => {
+        const xobj = new XMLHttpRequest();
+        xobj.open('GET', url, true);
+        xobj.responseType = 'json';
+        xobj.onload = () => {
+            if (xobj.status === 200) {
+                const rawResponse = typeof xobj.response === 'string' ? JSON.parse(xobj.response) : xobj.response;
+                resolve(rawResponse);
+            } else {
+                reject('Could not load results from remote service.');
+            }
+        };
+        xobj.send();
+    });
+};
+
 export class Query {
     config: IGeosearchConfig;
     query: string | undefined;
@@ -45,7 +68,7 @@ export class Query {
      */
     onComplete: Promise<Query>;
     latLongResult: any;
-    featureResults: queryFeatureResults[] = [];
+    featureResults: QueryFeatureResults[] = [];
     resultType: string = 'geoname';
 
     constructor(config: IGeosearchConfig, query?: string) {
@@ -60,7 +83,7 @@ export class Query {
      * @returns
      */
     search(): Promise<NameResultList> {
-        return (<Promise<IRawNameResult>>this.jsonRequest(this.getUrl()))
+        return (<Promise<IRawNameResult>>jsonRequest(this.getUrl()))
             .then(r => this.normalizeNameItems(r.items))
             .catch(() => {
                 console.error('Geoname service failed');
@@ -123,34 +146,12 @@ export class Query {
             });
     }
 
-    /**
-     * Runs a url that expects a JSON return value. Returns the result when it arrives
-     * @param url
-     * @returns
-     */
-    jsonRequest(url: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            const xobj = new XMLHttpRequest();
-            xobj.open('GET', url, true);
-            xobj.responseType = 'json';
-            xobj.onload = () => {
-                if (xobj.status === 200) {
-                    const rawResponse = typeof xobj.response === 'string' ? JSON.parse(xobj.response) : xobj.response;
-                    resolve(rawResponse);
-                } else {
-                    reject('Could not load results from remote service.');
-                }
-            };
-            xobj.send();
-        });
-    }
-
     locateByQuery(): Promise<LocateResponseList> {
-        return <Promise<LocateResponseList>>this.jsonRequest(this.getUrl(true));
+        return <Promise<LocateResponseList>>jsonRequest(this.getUrl(true));
     }
 
     nameByLatLon(lat: number, lon: number): any {
-        return (<Promise<IRawNameResult>>this.jsonRequest(this.getUrl(false, lat, lon)))
+        return (<Promise<IRawNameResult>>jsonRequest(this.getUrl(false, lat, lon)))
             .then(r => {
                 return this.normalizeNameItems(r.items);
             })

@@ -5,7 +5,7 @@
 import Provinces from './provinces';
 import Types from './types';
 import * as GeoSearchQuery from './query';
-import type { IGeosearchConfig, ILatLon } from '../definitions';
+import type { IGeosearchConfig, ILatLon, IVisualResult } from '../definitions';
 import type { Query } from './query';
 
 // geosearch query services
@@ -192,7 +192,7 @@ export class GeoSearchUI {
         // run query based on search string input
         return GeoSearchQuery.make(this.config, q.toUpperCase()).onComplete.then((q: Query) => {
             // any feature result requires a manual first entry
-            let featureResult: any[] = [];
+            let featureResult: IVisualResult[] = [];
             if (q.featureResults.length > 0) {
                 if (q.resultType === 'fsa') {
                     // add first geosearch result as location of FSA itself
@@ -253,26 +253,28 @@ export class GeoSearchUI {
             }
             // console.log('first feature result: ', featureResult);
             // format returned query results appropriately to support zoom/extent functionality
-            const queryResult = q.results.map((item: any) => ({
-                name: item.name,
-                bbox: item.bbox,
-                type: item.type,
-                position: [item.LatLon.lon, item.LatLon.lat],
-                location: {
-                    city: item.location,
-                    latitude: item.LatLon.lat,
-                    longitude: item.LatLon.lon,
-                    province: this.findProvinceObj(item.province)
-                },
-                order: item.order
-            }));
+            const queryResult = q.results.map(
+                (item: any): IVisualResult => ({
+                    name: item.name,
+                    bbox: item.bbox,
+                    type: item.type,
+                    position: [item.LatLon.lon, item.LatLon.lat],
+                    location: {
+                        city: item.location,
+                        latitude: item.LatLon.lat,
+                        longitude: item.LatLon.lon,
+                        province: this.findProvinceObj(item.province)
+                    },
+                    order: item.order
+                })
+            );
 
             // console.log('remaining query results: ', queryResult);
             return {
                 results: featureResult
                     .concat(queryResult)
                     .slice(0, this.config.maxResults)
-                    .sort((a: any, b: any) => {
+                    .sort((a, b) => {
                         // use custom sort order if provided, otherwise lev sort by default
                         if (this.config.sortOrder.length > 0) {
                             return a.order > b.order ? 1 : -1;
