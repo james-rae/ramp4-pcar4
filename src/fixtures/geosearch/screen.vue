@@ -76,6 +76,7 @@ import GeosearchBar from './search-bar.vue';
 import GeosearchTopFilters from './top-filters.vue';
 import GeosearchBottomFilters from './bottom-filters.vue';
 import LoadingBar from './loading-bar.vue';
+import { jsonRequest } from './store/query';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -95,21 +96,37 @@ const failedServices = computed<string[]>(() => geosearchStore.failedServices);
 
 // zoom in to a clicked result
 const zoomIn = (result: any) => {
-    const zoom = new Polygon(
-        'zoomies',
-        [
+    // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
+
+    // TODO hack. need better value prop
+    if (result.type === 'Forward Sortation Area') {
+        const fakeRequest = `/query/?where=CFSAUID%3D'${result.name}'&outFields=CFSAUID&returnGeometry=true&f=json`;
+        const fakeUrl =
+            'https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0' +
+            fakeRequest;
+        jsonRequest(fakeUrl)
+            .then((stuff: any) => {
+                const poly = new Polygon('fsazoom', stuff.features[0].geometry.rings, 3978, true);
+                iApi.geo.map.zoomMapTo(poly);
+            })
+            .catch(e => console.error('fsa error', e));
+    } else {
+        const zoom = new Polygon(
+            'zoomies',
             [
-                [result.bbox[0], result.bbox[1]],
-                [result.bbox[0], result.bbox[3]],
-                [result.bbox[2], result.bbox[3]],
-                [result.bbox[2], result.bbox[1]],
-                [result.bbox[0], result.bbox[1]]
-            ]
-        ],
-        SpatialReference.latLongSR(),
-        true
-    );
-    iApi.geo.map.zoomMapTo(zoom);
+                [
+                    [result.bbox[0], result.bbox[1]],
+                    [result.bbox[0], result.bbox[3]],
+                    [result.bbox[2], result.bbox[3]],
+                    [result.bbox[2], result.bbox[1]],
+                    [result.bbox[0], result.bbox[1]]
+                ]
+            ],
+            SpatialReference.latLongSR(),
+            true
+        );
+        iApi.geo.map.zoomMapTo(zoom);
+    }
 };
 
 // highlight the search term in each listed geosearch result

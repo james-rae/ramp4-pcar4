@@ -106,4 +106,18 @@ export type NameResultList = INameResult[];
 export type NTSResultList = INTSResult[];
 export type AddressResultList = IAddressResult[];
 export type ResultList = (INameResult | IAddressResult)[];
-export type queryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILatLongResult | undefined;
+export type QueryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILatLongResult | undefined;
+
+export interface IVisualResult {
+    name: string;
+    bbox: Array<number>;
+    type: string;
+    position: [number, number];
+    location: {
+        city?: string;
+        latitude: number;
+        longitude: number;
+        province?: any; // TODO figure out what it is. obj?
+    };
+    order: number;
+}
