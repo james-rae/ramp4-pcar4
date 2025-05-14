@@ -111,11 +111,14 @@ export type QueryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILa
 export interface IVisualResult {
     name: string;
     bbox: Array<number>;
+    /**
+     * What shows on the second line.
+     */
     type: string;
     position: [number, number];
     location: {
         city?: string;
-        latitude: number;
+        latitude: number; // TODO figure out why this exists alongside .position . it doesn't appear in first row grey like city/prov does
         longitude: number;
         province?: any; // TODO figure out what it is. obj?
     };
