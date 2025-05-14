@@ -98,14 +98,18 @@ const failedServices = computed<string[]>(() => geosearchStore.failedServices);
 const zoomIn = (result: any) => {
     // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
 
+    console.log('zoomie payload', result);
+
     // TODO hack. need better value prop
     if (result.type === 'Forward Sortation Area') {
+        console.log('hit fsa case');
         const fakeRequest = `/query/?where=CFSAUID%3D'${result.name}'&outFields=CFSAUID&returnGeometry=true&f=json`;
         const fakeUrl =
             'https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0' +
             fakeRequest;
         jsonRequest(fakeUrl)
             .then((stuff: any) => {
+                console.log('server result', stuff);
                 const poly = new Polygon('fsazoom', stuff.features[0].geometry.rings, 3978, true);
                 iApi.geo.map.zoomMapTo(poly);
             })
