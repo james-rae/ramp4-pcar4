@@ -6,6 +6,7 @@ import Provinces from './provinces';
 import Types from './types';
 import * as GeoSearchQuery from './query';
 import type { IGeosearchConfig, ILatLon, IVisualResult } from '../definitions';
+import { FSATOKEN } from '../definitions';
 import type { Query } from './query';
 
 // geosearch query services
@@ -89,6 +90,16 @@ export class GeoSearchUI {
         geoProvinceUrl = geoProvinceUrl.replace('@{language}', language);
         geoTypesUrl = geoTypesUrl.replace('@{language}', language);
 
+        // construct a query url with a token for the FSA
+
+        let fsaUrl = '';
+        const fsaLookup: any = uConfig?.fsaBoundaries;
+        if (fsaLookup && fsaLookup.serviceUrl) {
+            const fsaField = fsaLookup.keyField || 'CFSAUID';
+
+            fsaUrl = `${fsaLookup.serviceUrl}/query/?where=${fsaField}%3D'${FSATOKEN}'&outFields=${fsaField}&returnGeometry=true&f=json`;
+        }
+
         // set default config values, if settings object is provided
         const settings: any = uConfig?.settings;
         let categories: Array<string>;
@@ -111,10 +122,12 @@ export class GeoSearchUI {
         }
 
         // match a new config object with the one defined in definitions.ts
+        // TODO set the fsa query url here
         this.config = {
             language,
             geoNameUrl,
             geoLocateUrl,
+            fsaUrl,
             types: Types(language, geoTypesUrl), // list of type filters
             provinces: Provinces(language, geoProvinceUrl), // list of province filters
             categories,
@@ -183,7 +196,8 @@ export class GeoSearchUI {
     }
 
     /**
-     * Given some string query, returns a promise that resolves as a formatted location object
+     * Given some string query, returns a promise that resolves as an array of visual result objects
+     * and a report of any service failures
      *
      * @param {string} q the search string this query is based on
      * @return {Promise}
@@ -198,6 +212,7 @@ export class GeoSearchUI {
                     // add first geosearch result as location of FSA itself
                     featureResult = q.featureResults.map((fsa: any) => ({
                         name: fsa.fsa,
+                        flav: 'fsa',
                         bbox: fakeBBox(fsa.LatLon, 0.02),
                         type: fsa.desc,
                         position: [fsa.LatLon.lon, fsa.LatLon.lat],
@@ -212,6 +227,7 @@ export class GeoSearchUI {
                     // add first geosearch result as location of NTS map number
                     featureResult = q.featureResults.map((nts: any) => ({
                         name: nts.nts,
+                        flav: 'nts',
                         bbox: nts.bbox ?? fakeBBox(nts.LatLon, 0.02),
                         type: nts.desc,
                         position: [nts.LatLon.lon, nts.LatLon.lat],
@@ -225,6 +241,7 @@ export class GeoSearchUI {
                 } else if (q.resultType === 'address') {
                     featureResult = q.featureResults.map((address: any) => ({
                         name: address.name,
+                        flav: 'add',
                         bbox: fakeBBox(address.LatLon, 0.002),
                         type: address.desc,
                         position: [address.LatLon.lon, address.LatLon.lat],
@@ -248,14 +265,15 @@ export class GeoSearchUI {
                 }
             } else if (q.resultType === 'latlong') {
                 // add first geosearch result as location of lat/lon coordinates
-                featureResult = [q.latLongResult];
-                featureResult[0].order = -1;
+                // TODO in LatLongQuery.onComplete, if we push this into .featureResults then we don't need custom stuff here
+                featureResult = [q.latLongResult!];
             }
             // console.log('first feature result: ', featureResult);
             // format returned query results appropriately to support zoom/extent functionality
             const queryResult = q.results.map(
-                (item: any): IVisualResult => ({
+                (item): IVisualResult => ({
                     name: item.name,
+                    flav: item.flav,
                     bbox: item.bbox,
                     type: item.type,
                     position: [item.LatLon.lon, item.LatLon.lat],

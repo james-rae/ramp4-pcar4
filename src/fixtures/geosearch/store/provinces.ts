@@ -25,7 +25,7 @@ const fsaToProv: { [key: string]: number | Array<number> } = {
 /**
  * Language keys with values that are lookup objects of prov keys to prov descriptions
  */
-const provs: { [key: string]: { [key: string]: string } } = {
+const provs: { [key: string]: IGenericObjectType } = {
     en: {},
     fr: {}
 };

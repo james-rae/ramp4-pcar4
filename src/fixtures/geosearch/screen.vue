@@ -78,6 +78,7 @@ import GeosearchBottomFilters from './bottom-filters.vue';
 import LoadingBar from './loading-bar.vue';
 import { jsonRequest } from './store/query';
 import { useI18n } from 'vue-i18n';
+import type { IVisualResult } from './definitions';
 
 const { t } = useI18n();
 const iApi = inject<InstanceAPI>('iApi')!;
@@ -90,12 +91,12 @@ defineProps({
 });
 
 const cleanedSearchVal = computed<string>(() => geosearchStore.searchVal.replace(/["!*$+?^{}()|[\]\\]/g, '').trim());
-const searchResults = computed<Array<any>>(() => geosearchStore.searchResults);
+const searchResults = computed<Array<IVisualResult>>(() => geosearchStore.searchResults);
 const loadingResults = computed<boolean>(() => geosearchStore.loadingResults);
 const failedServices = computed<string[]>(() => geosearchStore.failedServices);
 
 // zoom in to a clicked result
-const zoomIn = (result: any) => {
+const zoomIn = (result: IVisualResult) => {
     // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
 
     console.log('zoomie payload', result);
@@ -110,7 +111,12 @@ const zoomIn = (result: any) => {
         jsonRequest(fakeUrl)
             .then((stuff: any) => {
                 console.log('server result', stuff);
-                const poly = new Polygon('fsazoom', stuff.features[0].geometry.rings, 3978, true);
+                const poly = new Polygon(
+                    'fsazoom',
+                    stuff.features[0].geometry.rings,
+                    SpatialReference.fromESRI(stuff.spatialReference),
+                    true
+                );
                 iApi.geo.map.zoomMapTo(poly);
             })
             .catch(e => console.error('fsa error', e));

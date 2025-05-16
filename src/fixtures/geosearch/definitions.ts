@@ -2,12 +2,22 @@ export interface IGenericObjectType {
     [key: string]: string;
 }
 
+/**
+ * FSA / NTS / Address / Name / LatLon / Location-Snoop
+ */
+export type FlavourKey = 'fsa' | 'nts' | 'add' | 'nme' | 'llg' | 'loc';
+
 // config object is used by all query classes
 // this is a flattened version from the actual RAMP config. Easier to bind to.
 export interface IGeosearchConfig {
     geoNameUrl: string;
     geoLocateUrl: string;
+    fsaUrl: string;
     categories: string[];
+    /**
+     * These are concise codes in a priority order. Anything not in the list will come after codes in the list.
+     * If empty list, the levenshtein sort is used.
+     */
     sortOrder: string[];
     disabledSearchTypes: string[];
     maxResults: number;
@@ -74,6 +84,7 @@ export interface IAddressResult {
     desc: string; // "Street Address"
     LatLon: ILatLon;
     bbox: number[];
+    flav: FlavourKey;
 }
 
 export interface ILatLongResult {
@@ -83,7 +94,10 @@ export interface ILatLongResult {
     bbox: number[];
 }
 
-// defines results from a geoNames search
+//
+/**
+ * defines results from a GeoNames search
+ */
 export interface INameResult {
     name: string;
     location: string;
@@ -92,6 +106,7 @@ export interface INameResult {
     LatLon: ILatLon;
     bbox: number[];
     order: number;
+    flav: FlavourKey;
 }
 
 export interface ILocateResponse {
@@ -108,6 +123,9 @@ export type AddressResultList = IAddressResult[];
 export type ResultList = (INameResult | IAddressResult)[];
 export type QueryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILatLongResult | undefined;
 
+// used for injecting the desired code in the fsa query url
+export const FSATOKEN = '~FSA~';
+
 export interface IVisualResult {
     name: string;
     bbox: Array<number>;
@@ -115,6 +133,12 @@ export interface IVisualResult {
      * What shows on the second line.
      */
     type: string;
+
+    /**
+     * What the source of this entry was
+     */
+    flav: FlavourKey;
+
     position: [number, number];
     location: {
         city?: string;
@@ -122,5 +146,9 @@ export interface IVisualResult {
         longitude: number;
         province?: any; // TODO figure out what it is. obj?
     };
+
+    /**
+     * Lower number appears higher in the list
+     */
     order: number;
 }
