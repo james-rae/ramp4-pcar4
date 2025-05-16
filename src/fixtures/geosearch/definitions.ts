@@ -152,3 +152,5 @@ export interface IVisualResult {
      */
     order: number;
 }
+
+export type VisualResultList = Array<IVisualResult>;
