@@ -1,0 +1,1 @@
+const t=(e,r,s)=>{const a={id:"Happy",name:"FSA Squares",layerType:"esri-feature",url:"https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0",colour:"#6495ED",nameField:"CFSAUID"};return s.addLayerLegend(a),{config:e,options:r}},n=()=>{};export{n as runPostTest,t as runPreTest};
