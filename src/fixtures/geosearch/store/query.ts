@@ -6,6 +6,7 @@ import type {
     INameResponse,
     INTSResult,
     IRawNameResult,
+    IVisualResult,
     LocateResponseList,
     NameResultList,
     NTSResultList,
@@ -61,13 +62,21 @@ export class Query {
     config: IGeosearchConfig;
     query: string | undefined;
     failedServs: string[] = [];
-    results: ResultList = [];
+
+    /**
+     * This appears to be results from geonames.  I don't know why its typed to include address results. Appears those dont get added
+     */
+    results: ResultList = []; // TODO what is the difference between results and featureResults, other than looser type definitions?
 
     /**
      * A promise that resolves when this object is done searching.
      */
     onComplete: Promise<Query>;
-    latLongResult: any;
+    latLongResult: IVisualResult | undefined;
+
+    /**
+     * This appears to be special / non-geonames results. Generally a single item for FSA/NTS/LatLon, or array of address matches.
+     */
     featureResults: QueryFeatureResults[] = [];
     resultType: string = 'geoname';
 
@@ -79,7 +88,7 @@ export class Query {
     }
 
     /**
-     * Runs a geoname search
+     * Runs a geoname search (named locations) based on query properties.
      * @returns
      */
     search(): Promise<NameResultList> {
@@ -96,7 +105,7 @@ export class Query {
      * Generate a search url.
      * Lat / Lon params are ignored if useLocate is true
      *
-     * @param useLocate if true, uses the GeoLocation service. Otherwise uses the GeoName service
+     * @param useLocate if true, uses the GeoLocation service (street addresses, FSA, NTS). Otherwise uses the GeoName service (named locations, default)
      * @param lat if provided, does a search based on co-ords instead of name.
      * @param lon if provided, does a search based on co-ords instead of name.
      * @returns the url
@@ -127,12 +136,18 @@ export class Query {
         return url;
     }
 
+    /**
+     * Takes result from geonames service and tranforms into our results object format
+     * @param items
+     * @returns
+     */
     normalizeNameItems(items: INameResponse[]): NameResultList {
         return items
             .filter(i => this.config.types.validTypes[i.concise.code])
             .map(i => {
                 return {
                     name: i.name,
+                    flav: 'nme',
                     location: i.location,
                     province: this.config.provinces.list[i.province.code],
                     type: this.config.types.allTypes[i.concise.code],
@@ -146,11 +161,18 @@ export class Query {
             });
     }
 
+    /**
+     * Runs the query parameters against the location service (addresses, FSA, NTS), resolves with results
+     * @returns
+     */
     locateByQuery(): Promise<LocateResponseList> {
         return <Promise<LocateResponseList>>jsonRequest(this.getUrl(true));
     }
 
-    nameByLatLon(lat: number, lon: number): any {
+    /**
+     * Hits the geonames (named locations) service for items at the given lat/lon. All other query params are ignored.
+     */
+    nameByLatLon(lat: number, lon: number): Promise<NameResultList> {
         return (<Promise<IRawNameResult>>jsonRequest(this.getUrl(false, lat, lon)))
             .then(r => {
                 return this.normalizeNameItems(r.items);
@@ -182,13 +204,15 @@ export class LatLongQuery extends Query {
         // prep the lat/long result that needs to be generated along with name based results
         this.latLongResult = {
             name: `${coords[0]},${coords[1]}`,
+            flav: 'llg',
             location: {
                 latitude: coords[0],
                 longitude: coords[1]
             },
             type: 'Latitude/Longitude',
             position: [coords[1], coords[0]],
-            bbox: boundingBox
+            bbox: boundingBox,
+            order: -1
         };
 
         this.onComplete = new Promise((resolve, reject) => {
@@ -215,6 +239,8 @@ export class FSAQuery extends Query {
             this.formatLocationResult().then(fLR => {
                 if (fLR) {
                     this.featureResults.push(fLR);
+
+                    // TODO same, this query seems really strange. "Give me geonames at the very centroid of a giant oddly shaped area"
                     this.nameByLatLon(fLR.LatLon.lat, fLR.LatLon.lon).then((r: any) => {
                         this.results = r;
                         resolve(this);
@@ -276,7 +302,7 @@ export class FSAQuery extends Query {
 export class NTSQuery extends Query {
     unitName: string;
     unit!: INTSResult;
-    mapSheets: NTSResultList = [];
+    // mapSheets: NTSResultList = [];
 
     constructor(config: IGeosearchConfig, query: string) {
         super(config, query);
@@ -285,6 +311,13 @@ export class NTSQuery extends Query {
         // front pad 0 if NTS starts with two digits
         query = isNaN(parseInt(query[2])) ? '0' + query : query;
         this.unitName = query;
+
+        // Setps:
+        // Hits the location service.
+        // If it finds an NTS, adds that to featureResults
+        // Then calls a place-names search targeting the lat/lon on the NTS result.  Puts this on .results. what is difference??
+        //      Given how large these are, not sure how sensible that is.
+        //      "Here are some things in the very middle of the giant square."
         this.onComplete = new Promise(resolve => {
             this.locateByQuery()
                 .then(lr => {
@@ -292,7 +325,7 @@ export class NTSQuery extends Query {
                     if (lr.length > 0 && this.query) {
                         const allSheets = this.locateToResult(lr);
                         this.unit = allSheets[0];
-                        this.mapSheets = allSheets;
+                        //   this.mapSheets = allSheets; // TODO what is this??
 
                         this.featureResults.push(this.unit);
 
@@ -313,6 +346,9 @@ export class NTSQuery extends Query {
         });
     }
 
+    /**
+     * Formats a location result into an NTS result
+     */
     locateToResult(lrl: LocateResponseList): NTSResultList {
         const results = lrl.map(ls => {
             const title = ls.title.split(' ');
@@ -336,6 +372,10 @@ export class NTSQuery extends Query {
     }
 }
 
+/**
+ * This is the "default search". As in the input did not match a regex for latlon, fsa, or nts
+ * Calling it address is lies since it handles anything with a name
+ */
 export class AddressQuery extends Query {
     constructor(config: IGeosearchConfig, query: string) {
         query = encodeURIComponent(query.trim());
@@ -343,8 +383,8 @@ export class AddressQuery extends Query {
         this.resultType = 'address';
 
         // Steps:
-        // 1. Run the geolocation search for addresses.
-        // 2.
+        // 1. Run the geolocation search for addresses. Store on Feature results
+        // 2. Run the geonames search. Store results on results
         this.onComplete = new Promise(resolve => {
             this.locateByQuery()
                 .then(lr => {
@@ -365,6 +405,9 @@ export class AddressQuery extends Query {
         });
     }
 
+    /**
+     * Formats a location result into an address result
+     */
     locateToResult(lrl: LocateResponseList): AddressResultList {
         if (this.config.categories.length > 0 && !this.config.categories.includes('ADDR')) {
             return [];

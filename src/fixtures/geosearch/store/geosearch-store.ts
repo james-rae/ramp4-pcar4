@@ -2,6 +2,7 @@ import type { MapExtent, QueryParams } from './geosearch-state';
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature';
 import { computed, ref } from 'vue';
+import type { IVisualResult } from '../definitions';
 
 /**
  * Helper function that filters based on query parameters.
@@ -47,7 +48,7 @@ export const useGeosearchStore = defineStore('geosearch', () => {
     /**
      * This represents the active, visible search (typed words and any filters)
      */
-    const searchResults = ref<Array<any>>([]);
+    const searchResults = ref<Array<IVisualResult>>([]);
 
     /**
      * This is the contents of the last server search result from the current search term.
