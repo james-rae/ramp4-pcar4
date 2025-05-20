@@ -45,9 +45,12 @@ export interface ITypes {
 }
 
 export interface IProvinces {
-    list: IGenericObjectType;
+    // list: IGenericObjectType;
+    provinceList: Array<IProvinceInfo>;
     listFetched: boolean;
-    fsaToProvinces(fsa: string): IGenericObjectType;
+    fsaToProvince(fsa: string): IProvinceInfo;
+    codeToProvince(provCode: number): IProvinceInfo;
+    nameToProvince(provName: string): IProvinceInfo;
 }
 
 export interface ILatLon {
@@ -126,6 +129,22 @@ export type QueryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILa
 // used for injecting the desired code in the fsa query url
 export const FSATOKEN = '~FSA~';
 
+export interface IProvinceInfo {
+    /**
+     * Numeric province code
+     */
+    code: number;
+    /**
+     * Province abbreviation
+     */
+    abbr: string;
+
+    /**
+     * Full name
+     */
+    name: string;
+}
+
 export interface IVisualResult {
     name: string;
     bbox: Array<number>;
@@ -144,7 +163,7 @@ export interface IVisualResult {
         city?: string;
         latitude: number; // TODO figure out why this exists alongside .position . it doesn't appear in first row grey like city/prov does
         longitude: number;
-        province?: any; // TODO figure out what it is. obj?
+        province?: IProvinceInfo;
     };
 
     /**

@@ -5,7 +5,7 @@
 import Provinces from './provinces';
 import Types from './types';
 import * as GeoSearchQuery from './query';
-import type { IGeosearchConfig, ILatLon, IVisualResult } from '../definitions';
+import type { IGeosearchConfig, ILatLon, IProvinceInfo, IVisualResult } from '../definitions';
 import { FSATOKEN } from '../definitions';
 import type { Query } from './query';
 
@@ -15,25 +15,6 @@ const GEO_LOCATE_URL = 'https://geogratis.gc.ca/services/geolocation/@{language}
 const GEO_NAMES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/geonames.json';
 const GEO_PROVINCES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/codes/province.json';
 const GEO_TYPES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/codes/concise.json';
-
-// translates codes from json file to province abbreviations
-const CODE_TO_ABBR = {
-    10: 'NL',
-    11: 'PE',
-    12: 'NS',
-    13: 'NB',
-    24: 'QC',
-    35: 'ON',
-    46: 'MB',
-    47: 'SK',
-    48: 'AB',
-    59: 'BC',
-    60: 'YU',
-    61: 'NT',
-    62: 'NU',
-    72: 'UF',
-    73: 'IW'
-};
 
 /**
  * Makes a bbox around a latlon
@@ -122,7 +103,6 @@ export class GeoSearchUI {
         }
 
         // match a new config object with the one defined in definitions.ts
-        // TODO set the fsa query url here
         this.config = {
             language,
             geoNameUrl,
@@ -143,13 +123,13 @@ export class GeoSearchUI {
         (<any>this)._excludedTypes = uConfig?.excludeTypes || [];
     }
 
-    get provinceList() {
+    get provinceList(): Array<IProvinceInfo> {
         return (<any>this)._provinceList;
     }
     get typeList() {
         return (<any>this)._typeList;
     }
-    set provinceList(val) {
+    set provinceList(val: Array<IProvinceInfo>) {
         (<any>this)._provinceList = val;
     }
     set typeList(val) {
@@ -186,12 +166,12 @@ export class GeoSearchUI {
     /**
      * Find and return the province object in the province list
      *
-     * @param {string} province the target province
+     * @param {string} provinceName the target province name
      * @return {Object}         associated province object
      */
-    findProvinceObj(province: string) {
+    findProvinceObj(provinceName: string): IProvinceInfo {
         return this.provinceList.find((p: any) => {
-            return p.name === province;
+            return p.name === provinceName;
         });
     }
 
@@ -310,30 +290,20 @@ export class GeoSearchUI {
      *
      * @return {Promise<Array>} a promise that resolves to a list of formatted province objects
      */
-    fetchProvinces(): Promise<Array<any>> {
+    fetchProvinces(): Promise<Array<IProvinceInfo>> {
+        // uses an interval to watch for the flag on the .provinces object.
+        // when the flag hits, we've loaded stuff from the province definition service.
+        // then format that into a more complete object
+
+        // TODO revisit the flow. Feels like things are just routing through here.
+        //      is anything else using .provinceList other than top-filter (via the store)?
+
         return new Promise(resolve => {
             const provsWatcher = setInterval(() => {
                 if (this.config.provinces.listFetched) {
                     clearInterval(provsWatcher);
-                    const provinceList = [];
-                    // add a '...' option as a way to clear province filter
-                    const reset = {
-                        code: -1,
-                        abbr: '...',
-                        name: '...'
-                    };
-                    provinceList.push(reset);
 
-                    // obtain province filters stored in config
-                    const rawProvinces = this.config.provinces.list;
-                    for (const code in rawProvinces) {
-                        provinceList.push({
-                            code: code,
-                            abbr: (<any>CODE_TO_ABBR)[code],
-                            name: rawProvinces[code]
-                        });
-                    }
-                    this.provinceList = provinceList;
+                    this.provinceList = this.config.provinces.provinceList;
                     resolve(this.provinceList);
                 }
             });

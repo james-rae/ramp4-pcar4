@@ -140,6 +140,13 @@ const zoomIn = (result: IVisualResult) => {
 };
 
 // highlight the search term in each listed geosearch result
+
+/**
+ * Highlight the search term in each listed geosearch result
+ *
+ * @param name the display name of the search result
+ * @param province object treated as boolean. If exists, we have a prov code after the name and should account for it
+ */
 const highlightSearchTerm = (name: string, province: any) => {
     // wrap matched search term in results inside span with styling
     const highlightedResult = name.replace(

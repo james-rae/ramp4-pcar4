@@ -2,7 +2,7 @@ import type { MapExtent, QueryParams } from './geosearch-state';
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature';
 import { computed, ref } from 'vue';
-import type { IVisualResult } from '../definitions';
+import type { IProvinceInfo, IVisualResult } from '../definitions';
 
 /**
  * Helper function that filters based on query parameters.
@@ -70,11 +70,13 @@ export const useGeosearchStore = defineStore('geosearch', () => {
      *
      * @return {Promise<Array>} a promise that resolves to a list of all provinces in the form
      */
-    const getProvinces = computed<Promise<Array<any>>>(
+    const getProvinces = computed<Promise<Array<IProvinceInfo>>>(
         () =>
             new Promise(resolve => {
-                GSservice.value.fetchProvinces().then((provs: Array<any>) => {
-                    provs.sort((provA: any, provB: any) => (provA.name > provB.name ? 1 : -1));
+                GSservice.value.fetchProvinces().then((provs: Array<IProvinceInfo>) => {
+                    // Sorting now happening when it loads instead of 3 files away.
+                    // TODO Figure out why we are travelling through four files to get prov list to filter
+                    //   provs.sort((provA, provB) => (provA.name > provB.name ? 1 : -1));
                     resolve(provs);
                 });
             })

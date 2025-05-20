@@ -67,12 +67,13 @@ import type { GeosearchAPI } from './api/geosearch';
 import { useGeosearchStore } from './store';
 import type { QueryParams } from './store';
 import { useI18n } from 'vue-i18n';
+import type { IProvinceInfo } from './definitions';
 
 const { t } = useI18n();
 const iApi = inject<InstanceAPI>('iApi')!;
 const geosearchStore = useGeosearchStore();
 
-const provinces = ref<Array<any>>([]);
+const provinces = ref<Array<IProvinceInfo>>([]);
 const types = ref<Array<any>>([]);
 const watchers = ref<Array<() => void>>([]);
 

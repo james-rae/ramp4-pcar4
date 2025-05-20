@@ -1,27 +1,49 @@
-import type { IGenericObjectType, IProvinces } from '../definitions';
+import type { IGenericObjectType, IProvinceInfo, IProvinces } from '../definitions';
 import axios from 'redaxios';
 
-const fsaToProv: { [key: string]: number | Array<number> } = {
-    A: 10,
-    B: 12,
-    C: 11,
-    E: 13,
-    G: 24,
-    H: 24,
-    J: 24,
-    K: 35,
-    L: 35,
-    M: 35,
-    N: 35,
-    P: 35,
-    R: 46,
-    S: 47,
-    T: 48,
-    V: 59,
-    X: [62, 61],
-    Y: 60
+const fsaToProv: { [key: string]: number } = {
+    A: 10, // NFLD
+    B: 12, // NS
+    C: 11, // PEI
+    E: 13, // NB
+    G: 24, // QB
+    H: 24, // QB
+    J: 24, // QB
+    K: 35, // ON
+    L: 35, // ON
+    M: 35, // ON
+    N: 35, // ON
+    P: 35, // ON
+    R: 46, // MB
+    S: 47, // SK (good alignment, well done)
+    T: 48, // AB
+    V: 59, // BC
+    // this split was not working (nothing would actually show on screen)
+    // the method using this is now handling X in a custom manner
+    //  X: [62, 61], // NWT / NV
+    Y: 60 // YT (another winner)
 };
 
+// translates codes from json file to province abbreviations
+const CODE_TO_ABBR = {
+    10: 'NL',
+    11: 'PE',
+    12: 'NS',
+    13: 'NB',
+    24: 'QC',
+    35: 'ON',
+    46: 'MB',
+    47: 'SK',
+    48: 'AB',
+    59: 'BC',
+    60: 'YU',
+    61: 'NT',
+    62: 'NU',
+    72: 'UF',
+    73: 'IW'
+};
+
+// TODO figure out how and why this is being persisted. Seems we're re-downloading every lang change
 /**
  * Language keys with values that are lookup objects of prov keys to prov descriptions
  */
@@ -31,36 +53,94 @@ const provs: { [key: string]: IGenericObjectType } = {
 };
 
 class Provinces {
-    list: IGenericObjectType = {};
+    /**
+     * Maps numeric province code to province name in the loaded language
+     */
+    //  list: IGenericObjectType = {};
+
+    provinceList: Array<IProvinceInfo> = [];
+
+    /**
+     * Indicates if we've finished downloading the prov li
+     */
     listFetched: boolean = false;
 
     constructor(language: string, url: string) {
         axios.get(url).then((res: any) => {
-            // Update the provinces array.
-            res.data.definitions.forEach(
-                (type: { code: string; description: string }) => (provs[language][type.code] = type.description)
-            );
+            // add a '...' option as a way to clear province filter
+            const reset = {
+                code: -1,
+                abbr: '...',
+                name: '...'
+            };
+            this.provinceList.push(reset);
 
+            // Update the provinces array.
+            res.data.definitions.forEach((type: { code: string; description: string }) => {
+                // store number-code to name in "provs" thing (TODO figure out why)
+                provs[language][type.code] = type.description;
+
+                // add entry in the list of fancy data
+                const codeAsNum = parseInt(type.code);
+                this.provinceList.push({
+                    code: codeAsNum,
+                    abbr: (<any>CODE_TO_ABBR)[codeAsNum],
+                    name: type.description
+                });
+            });
+
+            this.provinceList.sort((provA, provB) => (provA.name > provB.name ? 1 : -1));
+
+            /*
             Object.keys(provs[language]).forEach(provKey => {
                 this.list[provKey] = (<any>provs[language])[provKey];
             });
+            */
 
             this.listFetched = true;
         });
     }
 
-    // return list of province codes based on FSA search input query
-    fsaToProvinces(fsa: string): IGenericObjectType {
-        const genericObj: IGenericObjectType = {};
-        // either a provincial code, or an array of them
-        let provCodes = <number[] | number>fsaToProv[fsa.substring(0, 1).toUpperCase()];
-        if (typeof provCodes === 'number') {
-            provCodes = [provCodes];
+    /**
+     * Get the province information for a province code
+     * @param fsa
+     * @returns
+     */
+    codeToProvince(provCode: number): IProvinceInfo {
+        return this.provinceList.find(pvi => pvi.code === provCode)!;
+    }
+
+    /**
+     * Get the province information for a province name
+     * @param fsa
+     * @returns
+     */
+    nameToProvince(provName: string): IProvinceInfo {
+        return this.provinceList.find(pvi => pvi.name === provName)!;
+    }
+
+    /**
+     * Get the province information belonging to an FSA
+     * @param fsa
+     * @returns
+     */
+    fsaToProvince(fsa: string): IProvinceInfo {
+        let provCode: number;
+
+        const fancyFSA = fsa.toUpperCase();
+        const firstLetter = fancyFSA.substring(0, 1);
+        if (firstLetter === 'X') {
+            // NTW & NV share the X. no easy way to derive but there are only 6 so hardcoding.
+            if (fancyFSA === 'X0A' || fancyFSA === 'X0B' || fancyFSA === 'X0C') {
+                provCode = 62; // NV
+            } else {
+                provCode = 61; // NWT
+            }
+        } else {
+            provCode = fsaToProv[firstLetter];
         }
-        provCodes.forEach(n => {
-            genericObj[n] = this.list[n];
-        });
-        return genericObj;
+
+        return this.codeToProvince(provCode);
     }
 }
 

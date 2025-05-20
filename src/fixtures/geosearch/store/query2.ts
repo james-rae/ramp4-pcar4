@@ -1,15 +1,10 @@
 import type {
-    AddressResultList,
-    IAddressResult,
-    IFSAResult,
     IGeosearchConfig,
-    ILatLon,
     INameResponse,
     INTSResult,
     IRawNameResult,
     IVisualResult,
     LocateResponseList,
-    NTSResultList,
     VisualResultList
 } from '../definitions';
 import to from 'await-to-js';
@@ -58,12 +53,14 @@ export const jsonRequest = async (url: string): Promise<any> => {
  * @param expand factor (in degrees) to push out each side
  * @returns four number bbox array
  */
+/*
 const fakeBBoxLL = (ll: ILatLon, expand: number): Array<number> => [
     ll.lon + expand,
     ll.lat - expand,
     ll.lon - expand,
     ll.lat + expand
 ];
+*/
 
 /**
  * Makes a bbox around a point based lon lat
@@ -187,7 +184,7 @@ export class Query {
                     city: nr.location,
                     latitude: nr.latitude,
                     longitude: nr.longitude,
-                    province: this.config.provinces.list[nr.province.code]
+                    province: this.config.provinces.codeToProvince(parseInt(nr.province.code))
                 },
                 order:
                     this.config.sortOrder.indexOf(nr.concise.code) >= 0
@@ -283,6 +280,11 @@ export class LatLongQuery extends Query {
     }
 }
 
+// WHAT IS DOES
+// hits the location service to see if FSA is valid
+// prepares a standalone "fsa" result [featureResults*]
+// no longer runs a name search on the centroid [results]
+
 export class FSAQuery extends Query {
     constructor(config: IGeosearchConfig, query: string) {
         // extract the first three characters to conduct FSA search
@@ -296,10 +298,13 @@ export class FSAQuery extends Query {
                     this.featureResults.push(fLR);
 
                     // TODO same, this query seems really strange. "Give me geonames at the very centroid of a giant oddly shaped area"
+                    // Banhammering for the moment
+                    /*
                     this.nameByLatLon(fLR.LatLon.lat, fLR.LatLon.lon).then((r: any) => {
                         this.results = r;
                         resolve(this);
                     });
+                    */
                 } else {
                     console.log('FSA code given cannot be found.');
                     resolve(this);
@@ -330,29 +335,10 @@ export class FSAQuery extends Query {
                 location: {
                     latitude: lat,
                     longitude: lon,
-                    province: this.findProvinceObj(fsa.province)
+                    province: this.config.provinces.fsaToProvince(this.query)
                 },
                 order: -1
             };
-
-            /*
-
-   const provList = this.config.provinces.fsaToProvinces(this.query);
-
-                    return <IFSAResult>{
-                        fsa: this.query,
-                        code: 'FSA',
-                        desc: this.config.types.allTypes.FSA,
-                        province: Object.keys(provList)
-                            .map(i => provList[i])
-                            .join(','),
-                        _provinces: provList,
-                        LatLon: {
-                            lat: locateResponseList[0].geometry.coordinates[1],
-                            lon: locateResponseList[0].geometry.coordinates[0]
-                        }
-                    };
-            */
         } else {
             // no hit. Prob not a valid FSA, just matched the LNL regex
             return undefined;
@@ -396,23 +382,56 @@ export class NTSQuery extends Query {
         // Then calls a place-names search targeting the lat/lon on the NTS result.  Puts this on .results. what is difference??
         //      Given how large these are, not sure how sensible that is.
         //      "Here are some things in the very middle of the giant square."
+        //      ^ Have banhammered it
         this.onComplete = new Promise(resolve => {
-            this.locateByQuery()
+            this.locationByQuery()
                 .then(lr => {
                     // query check added since it can be null but will never be in this case (make TS happy)
                     if (lr.length > 0 && this.query) {
-                        const allSheets = this.locateToResult(lr);
-                        this.unit = allSheets[0];
-                        //   this.mapSheets = allSheets; // TODO what is this??
+                        // NOTE original code had plumbing for mulitple hits, but only the first was ever used.
+                        //      unsure what changed, or what the previous behavior was (if anything)
+                        const ntsNugget = lr[0];
 
-                        this.featureResults.push(this.unit);
+                        //    const allSheets = this.locateToResult(lr);
 
+                        // TODO can we get rid of this prop?
+                        //  this.unit = allSheets[0];
+
+                        //   this.mapSheets = allSheets; // TODO what is this?? concluded nothing using it
+
+                        const title = ntsNugget.title.split(' ');
+                        const name = title.shift() || ''; // 064D or 064D06
+                        const location = title.join(' '); // "NUMABIN BAY"
+
+                        const coord = ntsNugget.geometry.coordinates;
+                        const lat = coord[1];
+                        const lon = coord[0];
+
+                        const fancyResult: IVisualResult = {
+                            name,
+                            flav: 'nts',
+                            bbox: ntsNugget.bbox ?? fakeBBoxNN(lon, lat, 0.02), // TODO this is prob way too zoomied in
+                            type: this.config.types.allTypes.NTS, // "National Topographic System"
+                            position: [lon, lat],
+                            location: {
+                                city: location,
+                                latitude: lat,
+                                longitude: lon
+                            },
+                            order: -1
+                        };
+
+                        this.featureResults.push(fancyResult);
+
+                        resolve(this);
+
+                        /*
                         this.nameByLatLon(this.unit.LatLon.lat, this.unit.LatLon.lon).then((r: any) => {
                             this.results = r;
                             resolve(this);
                         });
+                        */
                     } else {
-                        console.log('Given NTS code not found');
                         resolve(this);
                     }
                 })
@@ -427,6 +446,7 @@ export class NTSQuery extends Query {
     /**
      * Formats a location result into an NTS result
      */
+    /*
     locateToResult(lrl: LocateResponseList): NTSResultList {
         const results = lrl.map(ls => {
             const title = ls.title.split(' ');
@@ -444,10 +464,14 @@ export class NTSQuery extends Query {
         });
         return results;
     }
+*/
 
+    // TODO see if this is ever used
+    /*
     equals(otherQ: NTSQuery): boolean {
         return this.unitName === otherQ.unitName;
     }
+            */
 }
 
 /**
@@ -464,47 +488,80 @@ export class AddressQuery extends Query {
         // 1. Run the geolocation search for addresses. Store on Feature results
         // 2. Run the geonames search. Store results on results
         this.onComplete = new Promise(resolve => {
-            this.locateByQuery()
-                .then(lr => {
-                    this.featureResults = this.locateToResult(lr);
-                    this.gnSearch().then(r => {
-                        this.results = r;
-                        resolve(this);
-                    });
-                })
-                .catch(() => {
-                    this.failedServs.push('geolocation');
-                    console.error('Address service failed');
-                    this.gnSearch().then(r => {
-                        this.results = r;
-                        resolve(this);
-                    });
+            if (this.config.categories.length > 0 && !this.config.categories.includes('ADDR')) {
+                // config has forbidden address results
+                // just do geoname
+                this.gnSearch().then(r => {
+                    this.results = r;
+                    resolve(this);
                 });
+            } else {
+                this.locationByQuery()
+                    .then(lr => {
+                        this.featureResults = this.locateToResult(lr);
+                        this.gnSearch().then(r => {
+                            this.results = r;
+                            resolve(this);
+                        });
+                    })
+                    .catch(() => {
+                        this.failedServs.push('geolocation');
+                        console.error('Address service failed');
+                        this.gnSearch().then(r => {
+                            this.results = r;
+                            resolve(this);
+                        });
+                    });
+            }
         });
     }
 
     /**
      * Formats a location result into an address result
      */
-    locateToResult(lrl: LocateResponseList): AddressResultList {
-        if (this.config.categories.length > 0 && !this.config.categories.includes('ADDR')) {
-            return [];
-        }
-        const results = lrl
+    locateToResult(lrl: LocateResponseList): VisualResultList {
+        const addrSortOrder =
+            this.config.sortOrder.indexOf('ADDR') >= 0
+                ? this.config.sortOrder.indexOf('ADDR')
+                : this.config.sortOrder.length;
+
+        const results: VisualResultList = lrl
             .filter(lr => lr.type?.includes('Street'))
-            .map(ls => {
-                const [name, city, province] = ls.title.split(', ');
-                return <IAddressResult>{
-                    name: name,
-                    city: city.split(' Of ').pop(), // prevents redundant label i.e. 'City Of Kingston'
-                    province: province,
-                    desc: this.config.types.allTypes.ADDRESS,
-                    LatLon: {
-                        lat: ls.geometry.coordinates[1],
-                        lon: ls.geometry.coordinates[0]
-                    }
+            .map(address => {
+                const [name, city, province] = address.title.split(', ');
+
+                const coord = address.geometry.coordinates;
+                const lat = coord[1];
+                const lon = coord[0];
+
+                return {
+                    name,
+                    flav: 'add',
+                    bbox: fakeBBoxNN(lon, lat, 0.002),
+                    type: this.config.types.allTypes.ADDRESS,
+                    position: [lon, lat],
+                    location: {
+                        city: city.split(' Of ').pop(), // prevents redundant label i.e. 'City Of Kingston'
+                        latitude: lat,
+                        longitude: lon,
+                        province: this.config.provinces.nameToProvince(province)
+                    },
+                    order: addrSortOrder
                 };
             });
+
+        // TODO re-enable this once code is pushed around and we can use the algo.
+        //      OR decide this best happens elsewhere
+
+        /*
+        if (this.config.sortOrder.length > 0) {
+            // if custom sorting in place, apply lev only to street addresses
+            results.sort((a: any, b: any) => {
+                return this.levenshteinDistance(q, a.name) > this.levenshteinDistance(q, b.name) ? 1 : -1;
+            });
+        }
+            */
+
         return results;
     }
 }
