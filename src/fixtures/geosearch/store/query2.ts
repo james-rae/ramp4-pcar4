@@ -3,12 +3,12 @@ import type {
     IAddressResult,
     IFSAResult,
     IGeosearchConfig,
+    ILatLon,
     INameResponse,
     INTSResult,
     IRawNameResult,
     IVisualResult,
     LocateResponseList,
-    NameResultList,
     NTSResultList,
     VisualResultList
 } from '../definitions';
@@ -50,6 +50,34 @@ export const jsonRequest = async (url: string): Promise<any> => {
         return rRes.data;
     }
 };
+
+/**
+ * Makes a bbox around a latlon
+ *
+ * @param ll the latlon object
+ * @param expand factor (in degrees) to push out each side
+ * @returns four number bbox array
+ */
+const fakeBBoxLL = (ll: ILatLon, expand: number): Array<number> => [
+    ll.lon + expand,
+    ll.lat - expand,
+    ll.lon - expand,
+    ll.lat + expand
+];
+
+/**
+ * Makes a bbox around a point based lon lat
+ *
+ * @param TODO
+ * @param expand factor (in degrees) to push out each side
+ * @returns four number bbox array
+ */
+const fakeBBoxNN = (lon: number, lat: number, expand: number): Array<number> => [
+    lon + expand,
+    lat - expand,
+    lon - expand,
+    lat + expand
+];
 
 export class Query {
     config: IGeosearchConfig;
@@ -144,8 +172,7 @@ export class Query {
 
     /**
      * Takes result from geonames service and tranforms into our results object format
-     * @param items
-     * @returns
+     * Will also filter out any concise codes we dont want.
      */
     normalizeNameItems(items: INameResponse[]): VisualResultList {
         return items
@@ -173,25 +200,41 @@ export class Query {
      * Runs the query parameters against the location service (addresses, FSA, NTS), resolves with results
      * @returns
      */
-    locateByQuery(): Promise<LocateResponseList> {
-        return <Promise<LocateResponseList>>jsonRequest(this.getUrl(true));
+    async locationByQuery(): Promise<LocateResponseList> {
+        const [rErr, rRes] = await to(jsonRequest(this.getUrl(true)) as Promise<LocateResponseList>);
+
+        // TODO hunt down all the other 'geolocation' error catchers and remove. Having a different console for the same service is redundant
+        if (rErr) {
+            console.error('Geolocation service failed');
+            this.failedServs.push('geolocation');
+            return [];
+        } else {
+            return rRes;
+        }
     }
 
     /**
      * Hits the geonames (named locations) service for items at the given lat/lon. All other query params are ignored.
      */
-    nameByLatLon(lat: number, lon: number): Promise<NameResultList> {
-        return (<Promise<IRawNameResult>>jsonRequest(this.getUrl(false, lat, lon)))
-            .then(r => {
-                return this.normalizeNameItems(r.items);
-            })
-            .catch(() => {
-                console.error('LatLon service failed');
-                this.failedServs.push('geoname');
-                return this.normalizeNameItems([]);
-            });
+    async nameByLatLon(lat: number, lon: number): Promise<VisualResultList> {
+        const [rErr, rRes] = await to(jsonRequest(this.getUrl(false, lat, lon)) as Promise<IRawNameResult>);
+
+        let payload: Array<INameResponse>;
+        if (rErr) {
+            console.error('LatLon service failed');
+            this.failedServs.push('geoname');
+            payload = [];
+        } else {
+            payload = rRes.items;
+        }
+
+        return this.normalizeNameItems(payload);
     }
 }
+
+// WHAT IS DOES
+// prepares a standalone "lat lon" result [featureResults*]
+// runs a name search at the lat lon [results]
 
 export class LatLongQuery extends Query {
     constructor(config: IGeosearchConfig, query: string) {
@@ -210,6 +253,7 @@ export class LatLongQuery extends Query {
         const buff = 0.015;
         const boundingBox = [coords[1] - buff, coords[0] - buff, coords[1] + buff, coords[0] + buff];
         // prep the lat/long result that needs to be generated along with name based results
+        // TODO can this just go in the "feature" results? is there a benefit of having a dedicated property?
         this.latLongResult = {
             name: `${coords[0]},${coords[1]}`,
             flav: 'llg',
@@ -224,11 +268,14 @@ export class LatLongQuery extends Query {
         };
 
         this.onComplete = new Promise((resolve, reject) => {
-            this.nameByLatLon(coords[0], coords[1]).then((r: any) => {
+            this.nameByLatLon(coords[0], coords[1]).then(r => {
                 if (r) {
                     this.results = r;
                     resolve(this);
                 } else {
+                    // TODO this isn't really accurate.
+                    //      1. its a lie.
+                    //      2. the above method catches any errors anyways so this never hits.
                     reject('Given lat lon coordinates cannot be found');
                 }
             });
@@ -261,12 +308,37 @@ export class FSAQuery extends Query {
         });
     }
 
-    formatLocationResult(): Promise<IFSAResult | undefined> {
-        return this.locateByQuery()
-            .then(locateResponseList => {
-                // query check added since it can be null but will never be in this case (make TS happy)
-                if (locateResponseList.length === 1 && this.query) {
-                    const provList = this.config.provinces.fsaToProvinces(this.query);
+    /**
+     * Runs a geolocation service query, hunting for the FSA
+     * If found, bundles into a visual result
+     */
+    async formatLocationResult(): Promise<IVisualResult | undefined> {
+        const locationSearchResult = await this.locationByQuery();
+
+        if (locationSearchResult.length === 1 && this.query) {
+            const fsaNugget = locationSearchResult[0];
+            const coord = fsaNugget.geometry.coordinates;
+            const lat = coord[1];
+            const lon = coord[0];
+
+            return {
+                name: this.query,
+                flav: 'fsa',
+                bbox: fakeBBoxNN(lon, lat, 0.03),
+                type: this.config.types.allTypes.FSA,
+                position: [lon, lat],
+                location: {
+                    latitude: lat,
+                    longitude: lon,
+                    province: this.findProvinceObj(fsa.province)
+                },
+                order: -1
+            };
+
+            /*
+
+   const provList = this.config.provinces.fsaToProvinces(this.query);
+
                     return <IFSAResult>{
                         fsa: this.query,
                         code: 'FSA',
@@ -280,13 +352,11 @@ export class FSAQuery extends Query {
                             lon: locateResponseList[0].geometry.coordinates[0]
                         }
                     };
-                }
-            })
-            .catch(() => {
-                console.error('FSA service failed');
-                this.failedServs.push('geolocation');
-                return undefined;
-            });
+            */
+        } else {
+            // no hit. Prob not a valid FSA, just matched the LNL regex
+            return undefined;
+        }
     }
 }
 
