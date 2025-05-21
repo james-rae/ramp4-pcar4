@@ -72,7 +72,6 @@ export interface IAddressResult {
     flav: FlavourKey;
 }
 
-//
 /**
  * defines results from a GeoNames search
  */
@@ -95,10 +94,6 @@ export interface ILocateResponse {
 }
 
 export type LocateResponseList = ILocateResponse[];
-export type NameResultList = INameResult[];
-export type AddressResultList = IAddressResult[];
-export type ResultList = (INameResult | IAddressResult)[];
-export type QueryFeatureResults = IAddressResult | undefined;
 
 // used for injecting the desired code in the fsa query url
 export const FSATOKEN = '~FSA~';
@@ -120,23 +115,39 @@ export interface IProvinceInfo {
 }
 
 export interface IVisualResult {
+    /**
+     * Primary display name
+     */
     name: string;
-    bbox: Array<number>;
+
     /**
      * What shows on the second line.
      */
     type: string;
 
     /**
+     * Bounding box to zoom to, in Latlon
+     */
+    bbox: Array<number>;
+
+    /**
      * What the source of this entry was
      */
     flav: FlavourKey;
 
+    /**
+     * Encodes a position (usually a centroid) in Latlon
+     */
     position: [number, number];
     location: {
+        /**
+         * Not always an actual city. Name of appropriate sub-province location, if one exists
+         */
         city?: string;
-        latitude: number; // TODO figure out why this exists alongside .position . it doesn't appear in first row grey like city/prov does
-        longitude: number;
+
+        /**
+         * Province information object
+         */
         province?: IProvinceInfo;
     };
 

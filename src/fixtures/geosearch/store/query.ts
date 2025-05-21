@@ -158,8 +158,6 @@ export class Query {
                 position: [nr.longitude, nr.latitude],
                 location: {
                     city: nr.location,
-                    latitude: nr.latitude,
-                    longitude: nr.longitude,
                     province: this.config.provinces.codeToProvince(parseInt(nr.province.code))
                 },
                 order:
@@ -229,10 +227,7 @@ export class LatLongQuery extends Query {
         const llResult: IVisualResult = {
             name: `${coords[0]},${coords[1]}`,
             flav: 'llg',
-            location: {
-                latitude: coords[0],
-                longitude: coords[1]
-            },
+            location: {},
             type: 'Latitude/Longitude',
             position: [coords[1], coords[0]],
             bbox: boundingBox,
@@ -297,8 +292,6 @@ export class FSAQuery extends Query {
                 type: this.config.types.allTypes.FSA,
                 position: [lon, lat],
                 location: {
-                    latitude: lat,
-                    longitude: lon,
                     province: this.config.provinces.fsaToProvince(this.query)
                 },
                 order: -1
@@ -365,9 +358,7 @@ export class NTSQuery extends Query {
                             type: this.config.types.allTypes.NTS, // "National Topographic System"
                             position: [lon, lat],
                             location: {
-                                city: location,
-                                latitude: lat,
-                                longitude: lon
+                                city: location
                             },
                             order: -1
                         };
@@ -455,8 +446,7 @@ export class AddressQuery extends Query {
                     position: [lon, lat],
                     location: {
                         city: city.split(' Of ').pop(), // prevents redundant label i.e. 'City Of Kingston'
-                        latitude: lat,
-                        longitude: lon,
+
                         province: this.config.provinces.nameToProvince(province)
                     },
                     order: addrSortOrder
