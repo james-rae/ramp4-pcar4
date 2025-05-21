@@ -5,7 +5,7 @@
 import Provinces from './provinces';
 import Types from './types';
 import * as GeoSearchQuery from './query';
-import type { IGeosearchConfig, ILatLon, IProvinceInfo, IVisualResult } from '../definitions';
+import type { IGeosearchConfig, IProvinceInfo, IVisualResult } from '../definitions';
 import { FSATOKEN } from '../definitions';
 import type { Query } from './query';
 
@@ -15,20 +15,6 @@ const GEO_LOCATE_URL = 'https://geogratis.gc.ca/services/geolocation/@{language}
 const GEO_NAMES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/geonames.json';
 const GEO_PROVINCES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/codes/province.json';
 const GEO_TYPES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/codes/concise.json';
-
-/**
- * Makes a bbox around a latlon
- *
- * @param ll the latlon object
- * @param expand factor (in degrees) to push out each side
- * @returns four number bbox array
- */
-const fakeBBox = (ll: ILatLon, expand: number): Array<number> => [
-    ll.lon + expand,
-    ll.lat - expand,
-    ll.lon - expand,
-    ll.lat + expand
-];
 
 /**
  * A class/interface that wraps around a GeoSearch object and provides additional services.
@@ -164,122 +150,55 @@ export class GeoSearchUI {
     }
 
     /**
-     * Find and return the province object in the province list
-     *
-     * @param {string} provinceName the target province name
-     * @return {Object}         associated province object
-     */
-    findProvinceObj(provinceName: string): IProvinceInfo {
-        return this.provinceList.find((p: any) => {
-            return p.name === provinceName;
-        });
-    }
-
-    /**
      * Given some string query, returns a promise that resolves as an array of visual result objects
      * and a report of any service failures
      *
-     * @param {string} q the search string this query is based on
+     * @param {string} userInput the search string this query is based on
      * @return {Promise}
      */
-    query(q: string) {
+    query(userInput: string) {
         // run query based on search string input
-        return GeoSearchQuery.make(this.config, q.toUpperCase()).onComplete.then((q: Query) => {
+        return GeoSearchQuery.make(this.config, userInput.toUpperCase()).onComplete.then((q: Query) => {
             // any feature result requires a manual first entry
-            let featureResult: IVisualResult[] = [];
-            if (q.featureResults.length > 0) {
-                if (q.resultType === 'fsa') {
-                    // add first geosearch result as location of FSA itself
-                    featureResult = q.featureResults.map((fsa: any) => ({
-                        name: fsa.fsa,
-                        flav: 'fsa',
-                        bbox: fakeBBox(fsa.LatLon, 0.02),
-                        type: fsa.desc,
-                        position: [fsa.LatLon.lon, fsa.LatLon.lat],
-                        location: {
-                            latitude: fsa.LatLon.lat,
-                            longitude: fsa.LatLon.lon,
-                            province: this.findProvinceObj(fsa.province)
-                        },
-                        order: -1
-                    }));
-                } else if (q.resultType === 'nts') {
-                    // add first geosearch result as location of NTS map number
-                    featureResult = q.featureResults.map((nts: any) => ({
-                        name: nts.nts,
-                        flav: 'nts',
-                        bbox: nts.bbox ?? fakeBBox(nts.LatLon, 0.02),
-                        type: nts.desc,
-                        position: [nts.LatLon.lon, nts.LatLon.lat],
-                        location: {
-                            city: nts.location,
-                            latitude: nts.LatLon.lat,
-                            longitude: nts.LatLon.lon
-                        },
-                        order: -1
-                    }));
-                } else if (q.resultType === 'address') {
-                    featureResult = q.featureResults.map((address: any) => ({
-                        name: address.name,
-                        flav: 'add',
-                        bbox: fakeBBox(address.LatLon, 0.002),
-                        type: address.desc,
-                        position: [address.LatLon.lon, address.LatLon.lat],
-                        location: {
-                            city: address.city,
-                            latitude: address.LatLon.lat,
-                            longitude: address.LatLon.lon,
-                            province: this.findProvinceObj(address.province)
-                        },
-                        order:
-                            this.config.sortOrder.indexOf('ADDR') >= 0
-                                ? this.config.sortOrder.indexOf('ADDR')
-                                : this.config.sortOrder.length
-                    }));
-                    if (this.config.sortOrder.length > 0) {
-                        // if custom sorting in place, apply lev only to street addresses
-                        featureResult = featureResult.sort((a: any, b: any) => {
-                            return this.levenshteinDistance(q, a.name) > this.levenshteinDistance(q, b.name) ? 1 : -1;
-                        });
-                    }
-                }
-            } else if (q.resultType === 'latlong') {
-                // add first geosearch result as location of lat/lon coordinates
-                // TODO in LatLongQuery.onComplete, if we push this into .featureResults then we don't need custom stuff here
-                featureResult = [q.latLongResult!];
+
+            // IDEA
+            // concat everything.
+            //  split into two buckets
+            //  a) items with sort less than custom.length
+            //  b) items with sort === custom.length
+            //  sort a) properly
+            //  if a) length > max, slice at max and done
+            //  else levenshtein b)
+            // then take all of a) plus remainder slice of b)
+
+            // NOTE would seem there is no real reason to split by feature & results anymore
+            const combined = q.results.concat(q.featureResults);
+            // anything with a sort lower than this has a defined priority
+            const priorityLimit = this.config.sortOrder.length;
+            const maxRes = this.config.maxResults;
+
+            const priorityResults = combined.filter(vr => vr.order < priorityLimit);
+            const normalResults = combined.filter(vr => vr.order >= priorityLimit); // technically should never be greater
+
+            priorityResults.sort((a, b) => a.order - b.order);
+
+            let final: Array<IVisualResult>;
+
+            if (priorityResults.length >= maxRes) {
+                // already enough hits in priority. givver.
+                final = priorityResults.slice(0, maxRes);
+            } else {
+                // levenshtein the rest.
+                // store calc in order field to avoid running it every sort operation
+                normalResults.forEach(vr => (vr.order = this.levenshteinDistance(q, vr.name)));
+                normalResults.sort((a, b) => a.order - b.order);
+
+                final = priorityResults.concat(normalResults.slice(0, maxRes - priorityResults.length));
             }
-            // console.log('first feature result: ', featureResult);
-            // format returned query results appropriately to support zoom/extent functionality
-            const queryResult = q.results.map(
-                (item): IVisualResult => ({
-                    name: item.name,
-                    flav: item.flav,
-                    bbox: item.bbox,
-                    type: item.type,
-                    position: [item.LatLon.lon, item.LatLon.lat],
-                    location: {
-                        city: item.location,
-                        latitude: item.LatLon.lat,
-                        longitude: item.LatLon.lon,
-                        province: this.findProvinceObj(item.province)
-                    },
-                    order: item.order
-                })
-            );
 
             // console.log('remaining query results: ', queryResult);
             return {
-                results: featureResult
-                    .concat(queryResult)
-                    .slice(0, this.config.maxResults)
-                    .sort((a, b) => {
-                        // use custom sort order if provided, otherwise lev sort by default
-                        if (this.config.sortOrder.length > 0) {
-                            return a.order > b.order ? 1 : -1;
-                        } else {
-                            return this.levenshteinDistance(q, a.name) > this.levenshteinDistance(q, b.name) ? 1 : -1;
-                        }
-                    }),
+                results: final,
                 failedServs: q.failedServs
             };
         });

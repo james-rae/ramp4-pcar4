@@ -62,24 +62,6 @@ export interface IRawNameResult {
     items: INameResponse[];
 }
 
-export interface IFSAResult {
-    fsa: string; // "H0H"
-    code: string; // "FSA"
-    desc: string; // "Forward Sortation Area"
-    province: string; // Ontario
-    _provinces: IGenericObjectType; // {ON: "Ontario"} or {ON: "Ontario", MB: "Manitoba"}
-    LatLon: ILatLon;
-}
-
-export interface INTSResult {
-    nts: string; // 064D or 064D06
-    location: string; // "NUMABIN BAY"
-    code: string; // "NTS"
-    desc: string; // "National Topographic System"
-    LatLon: ILatLon;
-    bbox: number[];
-}
-
 export interface IAddressResult {
     name: string; // "123 Yonge Street"
     city: string; // "Toronto"
@@ -88,13 +70,6 @@ export interface IAddressResult {
     LatLon: ILatLon;
     bbox: number[];
     flav: FlavourKey;
-}
-
-export interface ILatLongResult {
-    latlong: string; // "54.54,-91.45"
-    desc: string; // "Latitude/Longitude",
-    LatLon: ILatLon;
-    bbox: number[];
 }
 
 //
@@ -121,10 +96,9 @@ export interface ILocateResponse {
 
 export type LocateResponseList = ILocateResponse[];
 export type NameResultList = INameResult[];
-export type NTSResultList = INTSResult[];
 export type AddressResultList = IAddressResult[];
 export type ResultList = (INameResult | IAddressResult)[];
-export type QueryFeatureResults = IFSAResult | INTSResult | IAddressResult | ILatLongResult | undefined;
+export type QueryFeatureResults = IAddressResult | undefined;
 
 // used for injecting the desired code in the fsa query url
 export const FSATOKEN = '~FSA~';
