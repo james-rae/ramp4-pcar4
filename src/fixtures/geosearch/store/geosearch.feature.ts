@@ -171,14 +171,12 @@ export class GeoSearchUI {
             //  else levenshtein b)
             // then take all of a) plus remainder slice of b)
 
-            // NOTE would seem there is no real reason to split by feature & results anymore
-            const combined = q.results.concat(q.featureResults);
             // anything with a sort lower than this has a defined priority
             const priorityLimit = this.config.sortOrder.length;
             const maxRes = this.config.maxResults;
 
-            const priorityResults = combined.filter(vr => vr.order < priorityLimit);
-            const normalResults = combined.filter(vr => vr.order >= priorityLimit); // technically should never be greater
+            const priorityResults = q.results.filter(vr => vr.order < priorityLimit);
+            const normalResults = q.results.filter(vr => vr.order >= priorityLimit); // technically should never be greater
 
             priorityResults.sort((a, b) => a.order - b.order);
 

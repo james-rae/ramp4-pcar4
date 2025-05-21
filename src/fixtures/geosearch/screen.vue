@@ -99,22 +99,22 @@ const failedServices = computed<string[]>(() => geosearchStore.failedServices);
 const zoomIn = (result: IVisualResult) => {
     // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
 
-    console.log('zoomie payload', result);
+    // console.log('zoomie payload', result);
 
-    // TODO hack. need better value prop
-    if (result.type === 'Forward Sortation Area') {
-        console.log('hit fsa case');
+    // TOOD this needs to also include a check that we have a lookup defined. and needs to use proper config value
+    if (result.flav === 'fsa') {
+        //  console.log('hit fsa case');
         const fakeRequest = `/query/?where=CFSAUID%3D'${result.name}'&outFields=CFSAUID&returnGeometry=true&f=json`;
         const fakeUrl =
             'https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0' +
             fakeRequest;
         jsonRequest(fakeUrl)
             .then((stuff: any) => {
-                console.log('server result', stuff);
+                //  console.log('server result', stuff);
                 const poly = new Polygon(
                     'fsazoom',
                     stuff.features[0].geometry.rings,
-                    SpatialReference.fromESRI(stuff.spatialReference),
+                    SpatialReference.fromConfig(stuff.spatialReference), // technically not from a config, but config follows esri spec. this server result is raw, does not have esri class wrapper
                     true
                 );
                 iApi.geo.map.zoomMapTo(poly);

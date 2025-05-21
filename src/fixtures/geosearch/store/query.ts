@@ -81,12 +81,6 @@ export class Query {
      * A promise that resolves when this object is done searching.
      */
     onComplete: Promise<Query>;
-    latLongResult: IVisualResult | undefined; // TODO nuke this if possible
-
-    /**
-     * This appears to be special / non-geonames results. Generally a single item for FSA/NTS/LatLon, or array of address matches.
-     */
-    featureResults: VisualResultList = [];
 
     constructor(config: IGeosearchConfig, query?: string) {
         // note this gets overrided by subclasses. set here to appease typescript.
@@ -231,8 +225,8 @@ export class LatLongQuery extends Query {
         const buff = 0.015;
         const boundingBox = [coords[1] - buff, coords[0] - buff, coords[1] + buff, coords[0] + buff];
         // prep the lat/long result that needs to be generated along with name based results
-        // TODO can this just go in the "feature" results? is there a benefit of having a dedicated property?
-        this.latLongResult = {
+
+        const llResult: IVisualResult = {
             name: `${coords[0]},${coords[1]}`,
             flav: 'llg',
             location: {
@@ -245,17 +239,15 @@ export class LatLongQuery extends Query {
             order: -1
         };
 
-        this.onComplete = new Promise((resolve, reject) => {
+        this.onComplete = new Promise(resolve => {
             this.nameByLatLon(coords[0], coords[1]).then(r => {
-                if (r) {
+                if (r && r.length) {
                     this.results = r;
-                    resolve(this);
-                } else {
-                    // TODO this isn't really accurate.
-                    //      1. its a lie.
-                    //      2. the above method catches any errors anyways so this never hits.
-                    reject('Given lat lon coordinates cannot be found');
                 }
+                // always include the latlon element
+                this.results.push(llResult);
+
+                resolve(this);
             });
         });
     }
@@ -275,20 +267,12 @@ export class FSAQuery extends Query {
         this.onComplete = new Promise(resolve => {
             this.formatLocationResult().then(fLR => {
                 if (fLR) {
-                    this.featureResults.push(fLR);
-
-                    // TODO same, this query seems really strange. "Give me geonames at the very centroid of a giant oddly shaped area"
-                    // Banhammering for the moment
-                    /*
-                    this.nameByLatLon(fLR.LatLon.lat, fLR.LatLon.lon).then((r: any) => {
-                        this.results = r;
-                        resolve(this);
-                    });
-                    */
+                    this.results.push(fLR);
                 } else {
                     console.log('FSA code given cannot be found.');
-                    resolve(this);
                 }
+
+                resolve(this);
             });
         });
     }
@@ -388,7 +372,7 @@ export class NTSQuery extends Query {
                             order: -1
                         };
 
-                        this.featureResults.push(fancyResult);
+                        this.results.push(fancyResult);
 
                         resolve(this);
                     } else {
@@ -427,9 +411,9 @@ export class AddressQuery extends Query {
             } else {
                 this.locationByQuery()
                     .then(lr => {
-                        this.featureResults = this.locateToResult(lr);
+                        this.results = this.locateToResult(lr);
                         this.gnSearch().then(r => {
-                            this.results = r;
+                            this.results = this.results.concat(r);
                             resolve(this);
                         });
                     })
