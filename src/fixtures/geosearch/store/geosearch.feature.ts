@@ -157,7 +157,7 @@ export class GeoSearchUI {
     }
 
     /**
-     * Given some string query, returns a promise that resolves as an array of visual result objects
+     * Given some string query, returns a promise that resolves as an array of search results
      * and a report of any service failures
      *
      * @param {string} userInput the search string this query is based on

@@ -41,6 +41,7 @@ export class QueryResult {
 
 export async function runQuery(config: IGeosearchConfig, query: string): Promise<QueryResult> {
     let queryPayload: QueryResult;
+    let cleanedInput: string;
 
     const latLngRegDD =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)(\s*[,|;\s]\s*)[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)[*]$/;
@@ -48,17 +49,18 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
     const fsaReg = /^[ABCEGHJKLMNPRSTVXY]\d[A-Z]/;
 
     if (latLngRegDD.test(query) && !config.disabledSearchTypes.includes('LAT/LNG')) {
-        // TODO this works but i'm at a loss why the last character is getting sliced off
-        //      investigate after everything else is working
-        const queryStr = query.slice(0, -1);
         // Lat/Long search in decimal degrees format
-        queryPayload = new QueryResult(config, queryStr);
+
+        // search inputs have a "*" snuck onto them. the slice chops it off
+        cleanedInput = query.slice(0, -1);
+
+        queryPayload = new QueryResult(config, cleanedInput);
 
         await runLatLongQuery(queryPayload);
     } else if (fsaReg.test(query) && !config.disabledSearchTypes.includes('FSA')) {
         // FSA search (postal area code)
 
-        const cleanedInput = query.substring(0, 3).toUpperCase();
+        cleanedInput = query.substring(0, 3).toUpperCase();
         queryPayload = new QueryResult(config, cleanedInput);
         await runFSAQuery(queryPayload);
     } else if (ntsReg.test(query) && !config.disabledSearchTypes.includes('NTS')) {
@@ -69,11 +71,13 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
         // front pad 0 if NTS starts with two digits
         // query = isNaN(parseInt(query[2])) ? '0' + query : query;
 
-        const cleanedInput = query.substring(0, 6).toUpperCase();
+        cleanedInput = query.substring(0, 6).toUpperCase();
         queryPayload = new QueryResult(config, cleanedInput);
         await runNTSQuery(queryPayload);
     } else {
-        const cleanedInput = encodeURIComponent(query.trim());
+        // just searching on the text input
+
+        cleanedInput = encodeURIComponent(query.trim());
         queryPayload = new QueryResult(config, cleanedInput);
         await runTextQuery(queryPayload);
     }
@@ -177,7 +181,6 @@ const normalizeNameItems = (config: IGeosearchConfig, items: INameResponse[]): S
 const runLocationQuery = async (queryResult: QueryResult): Promise<LocationResponseList> => {
     const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, true)) as Promise<LocationResponseList>);
 
-    // TODO hunt down all the other 'geolocation' error catchers and remove. Having a different console for the same service is redundant
     if (rErr) {
         console.error('Geolocation service failed');
         queryResult.failedServs.push('geolocation');

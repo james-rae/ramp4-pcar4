@@ -54,7 +54,7 @@ export const useGeosearchStore = defineStore('geosearch', () => {
      * This is the contents of the last server search result from the current search term.
      * Is used as input for local filters (like bounding box, province, etc) without re-querying the services.
      */
-    const savedResults = ref<Array<any>>([]);
+    const savedResults = ref<Array<ISearchResult>>([]);
 
     /**
      * When true, shows the loading indicator
@@ -73,7 +73,7 @@ export const useGeosearchStore = defineStore('geosearch', () => {
     const getProvinces = computed<Promise<Array<IProvinceInfo>>>(
         () =>
             new Promise(resolve => {
-                GSservice.value.fetchProvinces().then((provs: Array<IProvinceInfo>) => {
+                GSservice.value.fetchProvinces().then(provs => {
                     // Sorting now happening when it loads instead of 3 files away.
                     // TODO Figure out why we are travelling through four files to get prov list to filter
                     //   provs.sort((provA, provB) => (provA.name > provB.name ? 1 : -1));
