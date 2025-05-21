@@ -7,7 +7,6 @@ import Types from './types';
 import * as GeoSearchQuery from './query';
 import type { IGeosearchConfig, IProvinceInfo, IVisualResult } from '../definitions';
 import { FSATOKEN } from '../definitions';
-import type { Query } from './query';
 
 // geosearch query services
 // note "geolocation" is a service for looking up locations in canada. It is not a geolocator for the browser's location.
@@ -122,10 +121,18 @@ export class GeoSearchUI {
         (<any>this)._typeList = val;
     }
 
-    levenshteinDistance(q: Query, result: string) {
+    /**
+     * Tests a string against a goal string and returns a levenshtein distance number.
+     * The lower the number, the better the match.
+     *
+     * @param goalText gold standard text we are comparing against
+     * @param testText text to evaluate against the goal
+     * @returns a weight number
+     */
+    levenshteinDistance(goalText: string, testText: string) {
         // sanitize strings
-        result = result.toLowerCase().trim();
-        const query = decodeURI(q.query!.toLowerCase().replace('*', ''));
+        testText = testText.toLowerCase().trim();
+        goalText = decodeURI(goalText.toLowerCase().replace('*', ''));
 
         /* Use a modified levenshtein distance algorithm to compute the 'distance' between the query and the result.
          The distance is computed by assessing each letter where:
@@ -133,20 +140,20 @@ export class GeoSearchUI {
          - deletion, substitution cost 1
         */
         const levDistance = [];
-        for (let i = 0; i <= result.length; i++) {
+        for (let i = 0; i <= testText.length; i++) {
             levDistance[i] = [i];
-            for (let j = 1; j <= query.length; j++) {
+            for (let j = 1; j <= goalText.length; j++) {
                 levDistance[i][j] =
                     i === 0
                         ? j
                         : Math.min(
                               levDistance[i][j - 1] + 1, // delete
                               levDistance[i - 1][j] + 0.2, // insert
-                              levDistance[i - 1][j - 1] + (query[j - 1] === result[i - 1] ? 0 : 1) // substitute
+                              levDistance[i - 1][j - 1] + (goalText[j - 1] === testText[i - 1] ? 0 : 1) // substitute
                           );
             }
         }
-        return levDistance[result.length][query.length];
+        return levDistance[testText.length][goalText.length];
     }
 
     /**
@@ -156,50 +163,37 @@ export class GeoSearchUI {
      * @param {string} userInput the search string this query is based on
      * @return {Promise}
      */
-    query(userInput: string) {
+    async query(userInput: string) {
         // run query based on search string input
-        return GeoSearchQuery.make(this.config, userInput.toUpperCase()).onComplete.then((q: Query) => {
-            // any feature result requires a manual first entry
+        const queryResult = await GeoSearchQuery.runQuery(this.config, userInput.toUpperCase());
 
-            // IDEA
-            // concat everything.
-            //  split into two buckets
-            //  a) items with sort less than custom.length
-            //  b) items with sort === custom.length
-            //  sort a) properly
-            //  if a) length > max, slice at max and done
-            //  else levenshtein b)
-            // then take all of a) plus remainder slice of b)
+        // anything with an order property lower than this has a defined priority (from config, or is very special)
+        const priorityLimit = this.config.sortOrder.length;
+        const priorityResults = queryResult.results.filter(vr => vr.order < priorityLimit);
+        const normalResults = queryResult.results.filter(vr => vr.order >= priorityLimit); // technically should never be greater
 
-            // anything with a sort lower than this has a defined priority
-            const priorityLimit = this.config.sortOrder.length;
-            const maxRes = this.config.maxResults;
+        priorityResults.sort((a, b) => a.order - b.order);
 
-            const priorityResults = q.results.filter(vr => vr.order < priorityLimit);
-            const normalResults = q.results.filter(vr => vr.order >= priorityLimit); // technically should never be greater
+        const maxRes = this.config.maxResults;
+        let final: Array<IVisualResult>;
 
-            priorityResults.sort((a, b) => a.order - b.order);
+        if (priorityResults.length >= maxRes) {
+            // already enough hits in priority. givver.
+            final = priorityResults.slice(0, maxRes);
+        } else {
+            // levenshtein the rest.
+            // store calc in order field to avoid running it every sort operation
+            normalResults.forEach(vr => (vr.order = this.levenshteinDistance(queryResult.query, vr.name)));
+            normalResults.sort((a, b) => a.order - b.order);
 
-            let final: Array<IVisualResult>;
+            final = priorityResults.concat(normalResults.slice(0, maxRes - priorityResults.length));
+        }
 
-            if (priorityResults.length >= maxRes) {
-                // already enough hits in priority. givver.
-                final = priorityResults.slice(0, maxRes);
-            } else {
-                // levenshtein the rest.
-                // store calc in order field to avoid running it every sort operation
-                normalResults.forEach(vr => (vr.order = this.levenshteinDistance(q, vr.name)));
-                normalResults.sort((a, b) => a.order - b.order);
-
-                final = priorityResults.concat(normalResults.slice(0, maxRes - priorityResults.length));
-            }
-
-            // console.log('remaining query results: ', queryResult);
-            return {
-                results: final,
-                failedServs: q.failedServs
-            };
-        });
+        // console.log('remaining query results: ', queryResult);
+        return {
+            results: final,
+            failedServs: queryResult.failedServs
+        };
     }
 
     /**
