@@ -2,9 +2,9 @@ import type {
     IGeosearchConfig,
     INameResponse,
     IRawNameResult,
-    IVisualResult,
-    LocateResponseList,
-    VisualResultList
+    ISearchResult,
+    LocationResponseList,
+    SearchResultList
 } from '../definitions';
 import to from 'await-to-js';
 import axios from 'redaxios';
@@ -31,7 +31,7 @@ export class QueryResult {
     /**
      * Results list
      */
-    results: VisualResultList = [];
+    results: SearchResultList = [];
 
     constructor(config: IGeosearchConfig, query: string = '') {
         this.query = query;
@@ -150,7 +150,7 @@ const getUrl = (queryResult: QueryResult, useLocate?: boolean, lat?: number, lon
  * Converts results from the name service to our standardized format.
  * Will also filter out any concise codes we dont want.
  */
-const normalizeNameItems = (config: IGeosearchConfig, items: INameResponse[]): VisualResultList => {
+const normalizeNameItems = (config: IGeosearchConfig, items: INameResponse[]): SearchResultList => {
     return items
         .filter(nr => config.types.validTypes[nr.concise.code])
         .map(nr => ({
@@ -174,8 +174,8 @@ const normalizeNameItems = (config: IGeosearchConfig, items: INameResponse[]): V
  * Runs the query parameters against the location service (addresses, FSA, NTS), resolves with results
  * @returns
  */
-const runLocationQuery = async (queryResult: QueryResult): Promise<LocateResponseList> => {
-    const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, true)) as Promise<LocateResponseList>);
+const runLocationQuery = async (queryResult: QueryResult): Promise<LocationResponseList> => {
+    const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, true)) as Promise<LocationResponseList>);
 
     // TODO hunt down all the other 'geolocation' error catchers and remove. Having a different console for the same service is redundant
     if (rErr) {
@@ -245,7 +245,7 @@ const runLatLongQuery = async (queryResult: QueryResult): Promise<void> => {
     //       codebase that could be stolen if this ever needs revisiting.
     //       search for  `class LatLongQuery extends Query`
 
-    const fancyResult: IVisualResult = {
+    const fancyResult: ISearchResult = {
         name: `${lat},${lon}`,
         flav: 'llg',
         location: {},
@@ -277,7 +277,7 @@ const runFSAQuery = async (queryResult: QueryResult): Promise<void> => {
         const lat = coord[1];
         const lon = coord[0];
 
-        const fancyResult: IVisualResult = {
+        const fancyResult: ISearchResult = {
             name: queryResult.query,
             flav: 'fsa',
             bbox: fakeBBox(lon, lat, 0.03),
@@ -335,7 +335,7 @@ const runNTSQuery = async (queryResult: QueryResult): Promise<void> => {
         const lat = coord[1];
         const lon = coord[0];
 
-        const fancyResult: IVisualResult = {
+        const fancyResult: ISearchResult = {
             name,
             flav: 'nts',
             bbox: ntsNugget.bbox ?? fakeBBox(lon, lat, 0.03),
@@ -371,7 +371,7 @@ const runTextQuery = async (queryResult: QueryResult): Promise<void> => {
         const addrSortOrder = addrSortIdx >= 0 ? addrSortIdx : config.sortOrder.length;
 
         // convert to universal form
-        const finalAddressResults: VisualResultList = rawAddressResults
+        const finalAddressResults: SearchResultList = rawAddressResults
             .filter(rar => rar.type?.includes('Street'))
             .map(address => {
                 const [name, city, province] = address.title.split(', ');

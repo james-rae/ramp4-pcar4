@@ -5,7 +5,7 @@
 import Provinces from './provinces';
 import Types from './types';
 import * as GeoSearchQuery from './query';
-import type { IGeosearchConfig, IProvinceInfo, IVisualResult } from '../definitions';
+import type { IGeosearchConfig, IProvinceInfo, ISearchResult } from '../definitions';
 import { FSATOKEN } from '../definitions';
 
 // geosearch query services
@@ -175,7 +175,7 @@ export class GeoSearchUI {
         priorityResults.sort((a, b) => a.order - b.order);
 
         const maxRes = this.config.maxResults;
-        let final: Array<IVisualResult>;
+        let final: Array<ISearchResult>;
 
         if (priorityResults.length >= maxRes) {
             // already enough hits in priority. givver.

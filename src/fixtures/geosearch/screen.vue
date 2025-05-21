@@ -78,7 +78,7 @@ import GeosearchBottomFilters from './bottom-filters.vue';
 import LoadingBar from './loading-bar.vue';
 import { jsonRequest } from './store/query';
 import { useI18n } from 'vue-i18n';
-import type { IVisualResult } from './definitions';
+import type { ISearchResult } from './definitions';
 
 const { t } = useI18n();
 const iApi = inject<InstanceAPI>('iApi')!;
@@ -91,12 +91,12 @@ defineProps({
 });
 
 const cleanedSearchVal = computed<string>(() => geosearchStore.searchVal.replace(/["!*$+?^{}()|[\]\\]/g, '').trim());
-const searchResults = computed<Array<IVisualResult>>(() => geosearchStore.searchResults);
+const searchResults = computed<Array<ISearchResult>>(() => geosearchStore.searchResults);
 const loadingResults = computed<boolean>(() => geosearchStore.loadingResults);
 const failedServices = computed<string[]>(() => geosearchStore.failedServices);
 
 // zoom in to a clicked result
-const zoomIn = (result: IVisualResult) => {
+const zoomIn = (result: ISearchResult) => {
     // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
 
     // console.log('zoomie payload', result);
