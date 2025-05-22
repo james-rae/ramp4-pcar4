@@ -18,14 +18,7 @@ const GEO_TYPES_URL = 'https://geogratis.gc.ca/services/geoname/@{language}/code
 /**
  * A class/interface that wraps around a GeoSearch object and provides additional services.
  * Can consume an optional config object upon creation.
- *
- * The following are valid config object properties:
- * {
- *      excludeTypes: string | Array<string>,
- *      language: string,
- *      geoNames: string,
- *      geoLocation: string
- * }
+ * The config structure can be found in schema.json, look for #/$defs/geosearch
  */
 export class GeoSearchUI {
     config: IGeosearchConfig;
@@ -94,7 +87,7 @@ export class GeoSearchUI {
             geoLocateUrl,
             fsaUrl,
             types: Types(language, geoTypesUrl), // list of type filters
-            provinces: Provinces(language, geoProvinceUrl), // list of province filters
+            provinces: Provinces(geoProvinceUrl), // list of province filters
             categories,
             sortOrder,
             disabledSearchTypes,
@@ -103,20 +96,15 @@ export class GeoSearchUI {
         };
         // remove any types to be excluded from config
         this.config.types.filterValidTypes(uConfig?.excludeTypes);
-        (<any>this)._provinceList = [];
+
         (<any>this)._typeList = [];
         (<any>this)._excludedTypes = uConfig?.excludeTypes || [];
     }
 
-    get provinceList(): Array<IProvinceInfo> {
-        return (<any>this)._provinceList;
-    }
     get typeList() {
         return (<any>this)._typeList;
     }
-    set provinceList(val: Array<IProvinceInfo>) {
-        (<any>this)._provinceList = val;
-    }
+
     set typeList(val) {
         (<any>this)._typeList = val;
     }
@@ -174,7 +162,7 @@ export class GeoSearchUI {
         before the chop, then we would show all 20 records.
         There is a trade-off to this. Doing the filters afterwards means we can change the filters without
         re-running the server hits. The geosearch store maintains an array called savedResults, possibly
-        we could start putting the queryResult.results in there instead of the sorted and clipped list.
+        we could start putting the queryPayload.results in there instead of the sorted and clipped list.
         Would then need to abstract the sort & clip to its own method, so it could be called here and
         when a top-filter changes.
         Also worth noting, queries against the name server are already capped at the max limit (see `getUrl()` ).
@@ -185,12 +173,12 @@ export class GeoSearchUI {
         */
 
         // run query based on search string input
-        const queryResult = await GeoSearchQuery.runQuery(this.config, userInput.toUpperCase());
+        const queryPayload = await GeoSearchQuery.runQuery(this.config, userInput.toUpperCase());
 
         // anything with an order property lower than this has a defined priority (from config, or is very special)
         const priorityLimit = this.config.sortOrder.length;
-        const priorityResults = queryResult.results.filter(vr => vr.order < priorityLimit);
-        const normalResults = queryResult.results.filter(vr => vr.order >= priorityLimit); // technically should never be greater
+        const priorityResults = queryPayload.results.filter(vr => vr.order < priorityLimit);
+        const normalResults = queryPayload.results.filter(vr => vr.order >= priorityLimit); // technically should never be greater
 
         priorityResults.sort((a, b) => a.order - b.order);
 
@@ -203,39 +191,35 @@ export class GeoSearchUI {
         } else {
             // levenshtein the rest.
             // store calc in order field to avoid running it every sort operation
-            normalResults.forEach(vr => (vr.order = this.levenshteinDistance(queryResult.query, vr.name)));
+            normalResults.forEach(vr => (vr.order = this.levenshteinDistance(queryPayload.query, vr.name)));
             normalResults.sort((a, b) => a.order - b.order);
 
             final = priorityResults.concat(normalResults.slice(0, maxRes - priorityResults.length));
         }
 
-        // console.log('remaining query results: ', queryResult);
+        // console.log('remaining query results: ', queryPayload);
         return {
             results: final,
-            failedServs: queryResult.failedServs
+            failedServs: queryPayload.failedServs
         };
     }
 
     /**
-     * Will download the list of provinces from geogratis. Stores it
+     * Waits for the download of province data from geogratis, then returns it
      *
-     * @return {Promise<Array>} a promise that resolves to a list of formatted province objects
+     * @return {Promise<Array>} resolves to a list of formatted province objects
      */
     fetchProvinces(): Promise<Array<IProvinceInfo>> {
         // uses an interval to watch for the flag on the .provinces object.
         // when the flag hits, we've loaded stuff from the province definition service.
         // then format that into a more complete object
 
-        // TODO revisit the flow. Feels like things are just routing through here.
-        //      is anything else using .provinceList other than top-filter (via the store)?
-
         return new Promise(resolve => {
             const provsWatcher = setInterval(() => {
                 if (this.config.provinces.listFetched) {
                     clearInterval(provsWatcher);
 
-                    this.provinceList = this.config.provinces.provinceList;
-                    resolve(this.provinceList);
+                    resolve(this.config.provinces.provinceList);
                 }
             }, 100);
         });

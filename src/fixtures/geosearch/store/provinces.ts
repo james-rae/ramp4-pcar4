@@ -1,4 +1,4 @@
-import type { IGenericObjectType, IProvinceInfo, IProvinces } from '../definitions';
+import type { IProvinceInfo, IProvinces } from '../definitions';
 import axios from 'redaxios';
 
 const fsaToProv: { [key: string]: number } = {
@@ -43,21 +43,10 @@ const CODE_TO_ABBR = {
     73: 'IW'
 };
 
-// TODO figure out how and why this is being persisted. Seems we're re-downloading every lang change
-/**
- * Language keys with values that are lookup objects of prov keys to prov descriptions
- */
-const provs: { [key: string]: IGenericObjectType } = {
-    en: {},
-    fr: {}
-};
-
 class Provinces {
     /**
-     * Maps numeric province code to province name in the loaded language
+     * List of downloaded province items.
      */
-    //  list: IGenericObjectType = {};
-
     provinceList: Array<IProvinceInfo> = [];
 
     /**
@@ -65,7 +54,7 @@ class Provinces {
      */
     listFetched: boolean = false;
 
-    constructor(language: string, url: string) {
+    constructor(url: string) {
         axios.get(url).then((res: any) => {
             // add a '...' option as a way to clear province filter
             const reset = {
@@ -77,9 +66,6 @@ class Provinces {
 
             // Update the provinces array.
             res.data.definitions.forEach((type: { code: string; description: string }) => {
-                // store number-code to name in "provs" thing (TODO figure out why)
-                provs[language][type.code] = type.description;
-
                 // add entry in the list of fancy data
                 const codeAsNum = parseInt(type.code);
                 this.provinceList.push({
@@ -90,12 +76,6 @@ class Provinces {
             });
 
             this.provinceList.sort((provA, provB) => (provA.name > provB.name ? 1 : -1));
-
-            /*
-            Object.keys(provs[language]).forEach(provKey => {
-                this.list[provKey] = (<any>provs[language])[provKey];
-            });
-            */
 
             this.listFetched = true;
         });
@@ -144,6 +124,6 @@ class Provinces {
     }
 }
 
-export default function (language: string, url: string): IProvinces {
-    return new Provinces(language, url);
+export default function (url: string): IProvinces {
+    return new Provinces(url);
 }

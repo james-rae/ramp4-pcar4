@@ -1213,9 +1213,9 @@ export class MapAPI extends CommonMapAPI {
                     const query = layerView.createQuery();
                     query.aggregateIds = [hr.graphic.getObjectId() as number];
 
-                    const queryResult = await layerView.queryFeatures(query);
+                    const queryPayload = await layerView.queryFeatures(query);
 
-                    return queryResult.features.map(fr => ({
+                    return queryPayload.features.map(fr => ({
                         layerId: esriFeatureLayer.id,
                         layerIdx: 0,
                         oid: fr.getObjectId() as number

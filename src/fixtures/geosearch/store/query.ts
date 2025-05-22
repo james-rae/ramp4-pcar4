@@ -12,7 +12,7 @@ import axios from 'redaxios';
 /**
  * Houses all the data for an active geosearch query
  */
-export class QueryResult {
+export class QueryPayload {
     /**
      * Collection of goodness
      */
@@ -39,8 +39,8 @@ export class QueryResult {
     }
 }
 
-export async function runQuery(config: IGeosearchConfig, query: string): Promise<QueryResult> {
-    let queryPayload: QueryResult;
+export async function runQuery(config: IGeosearchConfig, query: string): Promise<QueryPayload> {
+    let queryPayload: QueryPayload;
     let cleanedInput: string;
 
     const latLngRegDD =
@@ -54,14 +54,14 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
         // search inputs have a "*" snuck onto them. the slice chops it off
         cleanedInput = query.slice(0, -1);
 
-        queryPayload = new QueryResult(config, cleanedInput);
+        queryPayload = new QueryPayload(config, cleanedInput);
 
         await runLatLongQuery(queryPayload);
     } else if (fsaReg.test(query) && !config.disabledSearchTypes.includes('FSA')) {
         // FSA search (postal area code)
 
         cleanedInput = query.substring(0, 3).toUpperCase();
-        queryPayload = new QueryResult(config, cleanedInput);
+        queryPayload = new QueryPayload(config, cleanedInput);
         await runFSAQuery(queryPayload);
     } else if (ntsReg.test(query) && !config.disabledSearchTypes.includes('NTS')) {
         // NTS search
@@ -75,13 +75,13 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
         // query = isNaN(parseInt(query[2])) ? '0' + query : query;
 
         cleanedInput = query.substring(0, 6).toUpperCase();
-        queryPayload = new QueryResult(config, cleanedInput);
+        queryPayload = new QueryPayload(config, cleanedInput);
         await runNTSQuery(queryPayload);
     } else {
         // just searching on the text input
 
         cleanedInput = encodeURIComponent(query.trim());
-        queryPayload = new QueryResult(config, cleanedInput);
+        queryPayload = new QueryPayload(config, cleanedInput);
         await runTextQuery(queryPayload);
     }
 
@@ -108,7 +108,8 @@ export const jsonRequest = async (url: string): Promise<any> => {
 /**
  * Makes a bbox around a point based lon lat
  *
- * @param TODO
+ * @param lon longitude
+ * @param lat latitude
  * @param expand factor (in degrees) to push out each side
  * @returns four number bbox array
  */
@@ -123,24 +124,25 @@ const fakeBBox = (lon: number, lat: number, expand: number): Array<number> => [
  * Generate a search url.
  * Lat / Lon params are ignored if useLocate is true
  *
+ * @param queryPayload the query inputs, used to configure the url
  * @param useLocate if true, uses the GeoLocation service (street addresses, FSA, NTS). Otherwise uses the GeoName service (named locations, default)
  * @param lat if provided, does a search based on co-ords instead of name.
  * @param lon if provided, does a search based on co-ords instead of name.
  * @returns the url
  */
-const getUrl = (queryResult: QueryResult, useLocate?: boolean, lat?: number, lon?: number): string => {
+const getUrl = (queryPayload: QueryPayload, useLocate?: boolean, lat?: number, lon?: number): string => {
     let url = '';
-    const config = queryResult.config;
+    const config = queryPayload.config;
     if (useLocate) {
         // URL for FSA and NFA search
-        url = config.geoLocateUrl + '?q=' + queryResult.query;
+        url = config.geoLocateUrl + '?q=' + queryPayload.query;
     } else {
         if (lat && lon) {
             // lat long URL
             url = `${config.geoNameUrl}?lat=${lat}&lon=${lon}&num=${config.maxResults}`;
         } else {
             // plain name based search
-            url = `${config.geoNameUrl}?q=${queryResult.query}&num=${config.maxResults}`;
+            url = `${config.geoNameUrl}?q=${queryPayload.query}&num=${config.maxResults}`;
         }
 
         // filter params for geoname service
@@ -183,12 +185,12 @@ const normalizeNameItems = (config: IGeosearchConfig, items: INameResponse[]): S
  * Runs the query parameters against the location service (addresses, FSA, NTS), resolves with results
  * @returns
  */
-const runLocationQuery = async (queryResult: QueryResult): Promise<LocationResponseList> => {
-    const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, true)) as Promise<LocationResponseList>);
+const runLocationQuery = async (queryPayload: QueryPayload): Promise<LocationResponseList> => {
+    const [rErr, rRes] = await to(jsonRequest(getUrl(queryPayload, true)) as Promise<LocationResponseList>);
 
     if (rErr) {
         console.error('Geolocation service failed');
-        queryResult.failedServs.push('geolocation');
+        queryPayload.failedServs.push('geolocation');
         return [];
     } else {
         return rRes;
@@ -198,49 +200,49 @@ const runLocationQuery = async (queryResult: QueryResult): Promise<LocationRespo
 /**
  * Hits the GeoName service using the search text and stores the results
  */
-const runGeoNameTextQuery = async (queryResult: QueryResult): Promise<void> => {
-    const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, false)) as Promise<IRawNameResult>);
+const runGeoNameTextQuery = async (queryPayload: QueryPayload): Promise<void> => {
+    const [rErr, rRes] = await to(jsonRequest(getUrl(queryPayload, false)) as Promise<IRawNameResult>);
 
     let payload: Array<INameResponse>;
     if (rErr) {
         console.error('GeoName service targeting Name failed');
-        queryResult.failedServs.push('geoname');
+        queryPayload.failedServs.push('geoname');
         payload = [];
     } else {
         payload = rRes.items;
     }
 
-    queryResult.results = queryResult.results.concat(normalizeNameItems(queryResult.config, payload));
+    queryPayload.results = queryPayload.results.concat(normalizeNameItems(queryPayload.config, payload));
 };
 
 /**
  * Hits the GeoName service at a specific location and stores the results
  */
-const runGeoNameLocationQuery = async (queryResult: QueryResult, lat: number, lon: number): Promise<void> => {
-    const [rErr, rRes] = await to(jsonRequest(getUrl(queryResult, false, lat, lon)) as Promise<IRawNameResult>);
+const runGeoNameLocationQuery = async (queryPayload: QueryPayload, lat: number, lon: number): Promise<void> => {
+    const [rErr, rRes] = await to(jsonRequest(getUrl(queryPayload, false, lat, lon)) as Promise<IRawNameResult>);
 
     let payload: Array<INameResponse>;
     if (rErr) {
         console.error('GeoName service targeting Lat Lon failed');
-        queryResult.failedServs.push('geoname');
+        queryPayload.failedServs.push('geoname');
         payload = [];
     } else {
         payload = rRes.items;
     }
 
-    queryResult.results = queryResult.results.concat(normalizeNameItems(queryResult.config, payload));
+    queryPayload.results = queryPayload.results.concat(normalizeNameItems(queryPayload.config, payload));
 };
 
 /**
  * Runs a search where the input is suspected to be a Latitude Longitude entry
  */
-const runLatLongQuery = async (queryResult: QueryResult): Promise<void> => {
+const runLatLongQuery = async (queryPayload: QueryPayload): Promise<void> => {
     // create a result for the Lat/Lon itself
     // run a search at that location against the name service.
 
     // remove extra spaces and delimiters (the filter). convert string numbers to floaty numbers
     // this will be [Latitude, Longitude], which is [y, x] so be careful!
-    const coords = queryResult.query
+    const coords = queryPayload.query
         .split(/[\s|,|;|]/)
         .filter(n => !isNaN(n as any) && n !== '')
         .map(n => parseFloat(n));
@@ -263,21 +265,21 @@ const runLatLongQuery = async (queryResult: QueryResult): Promise<void> => {
         order: -1
     };
 
-    await runGeoNameLocationQuery(queryResult, lat, lon);
+    await runGeoNameLocationQuery(queryPayload, lat, lon);
 
-    queryResult.results.push(fancyResult);
+    queryPayload.results.push(fancyResult);
 };
 
 /**
  * Runs a search where the input is suspected to be an FSA
  */
-const runFSAQuery = async (queryResult: QueryResult): Promise<void> => {
+const runFSAQuery = async (queryPayload: QueryPayload): Promise<void> => {
     // run a search against the location service.
     // if we have a result, process it
 
-    const config = queryResult.config;
+    const config = queryPayload.config;
 
-    const rawLocationResults = await runLocationQuery(queryResult);
+    const rawLocationResults = await runLocationQuery(queryPayload);
 
     if (rawLocationResults.length) {
         const fsaNugget = rawLocationResults[0];
@@ -286,18 +288,18 @@ const runFSAQuery = async (queryResult: QueryResult): Promise<void> => {
         const lon = coord[0];
 
         const fancyResult: ISearchResult = {
-            name: queryResult.query,
+            name: queryPayload.query,
             flav: 'fsa',
             bbox: fakeBBox(lon, lat, 0.03),
             type: config.types.allTypes.FSA,
             position: [lon, lat],
             location: {
-                province: config.provinces.fsaToProvince(queryResult.query)
+                province: config.provinces.fsaToProvince(queryPayload.query)
             },
             order: -1
         };
 
-        queryResult.results.push(fancyResult);
+        queryPayload.results.push(fancyResult);
     }
 };
 
@@ -322,13 +324,13 @@ const runFSAQuery = async (queryResult: QueryResult): Promise<void> => {
 /**
  * Runs a search where the input is suspected to be an NTS code
  */
-const runNTSQuery = async (queryResult: QueryResult): Promise<void> => {
+const runNTSQuery = async (queryPayload: QueryPayload): Promise<void> => {
     // run a search against the location service.
     // if we have a result, process it
 
-    const config = queryResult.config;
+    const config = queryPayload.config;
 
-    const rawLocationResults = await runLocationQuery(queryResult);
+    const rawLocationResults = await runLocationQuery(queryPayload);
 
     if (rawLocationResults.length) {
         // NOTE original code had plumbing for mulitple hits, but only the first was ever used.
@@ -355,25 +357,25 @@ const runNTSQuery = async (queryResult: QueryResult): Promise<void> => {
             order: -1
         };
 
-        queryResult.results.push(fancyResult);
+        queryPayload.results.push(fancyResult);
     }
 };
 
 /**
  * This is the default "search some text" algo. Used when a fancy case is not detected (no LatLon, FSA, NTS)
  */
-const runTextQuery = async (queryResult: QueryResult): Promise<void> => {
+const runTextQuery = async (queryPayload: QueryPayload): Promise<void> => {
     // run a name search against the name service.
     // run an address search against the location service, if enabled
 
-    const config = queryResult.config;
+    const config = queryPayload.config;
 
-    await runGeoNameTextQuery(queryResult);
+    await runGeoNameTextQuery(queryPayload);
 
     if (config.categories.length === 0 || config.categories.includes('ADDR')) {
         // address results are allowed
 
-        const rawAddressResults = await runLocationQuery(queryResult);
+        const rawAddressResults = await runLocationQuery(queryPayload);
 
         const addrSortIdx = config.sortOrder.indexOf('ADDR');
         const addrSortOrder = addrSortIdx >= 0 ? addrSortIdx : config.sortOrder.length;
@@ -402,6 +404,6 @@ const runTextQuery = async (queryResult: QueryResult): Promise<void> => {
                 };
             });
 
-        queryResult.results = queryResult.results.concat(finalAddressResults);
+        queryPayload.results = queryPayload.results.concat(finalAddressResults);
     }
 };
