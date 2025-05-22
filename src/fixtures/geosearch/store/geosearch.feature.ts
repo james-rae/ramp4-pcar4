@@ -156,9 +156,9 @@ export class GeoSearchUI {
         Potential improvement for later.
         Bulk of this methods work is to sort results by priority and then chop off at the max results.
         This happens BEFORE any of the top-filters get applied (province, type, probably "visible on map").
-        So lets say we have 200 raw results, 20 are in Ontario. Then we chop to the top 100, leaving are 10 Ontario
+        So lets say we have 200 raw results, 20 are in Ontario. Then we chop to the top 100, leaving 10 Ontario
         records in the return value.
-        The UI gets this, applies its filters, and shows 10 records. A better scenario would be to filter here
+        The UI gets this, applies an Ontario filter, and shows 10 records. A better scenario would be to filter here
         before the chop, then we would show all 20 records.
         There is a trade-off to this. Doing the filters afterwards means we can change the filters without
         re-running the server hits. The geosearch store maintains an array called savedResults, possibly
@@ -182,6 +182,11 @@ export class GeoSearchUI {
 
         priorityResults.sort((a, b) => a.order - b.order);
 
+        // very fancy future enhancement. take the sorted priority results. split into buckets of same order values
+        // apply a levenshtein to each bucket. then recombine.
+        // e.g. if ADDR is priority 0 (top), they will come first, but be in random order. this will put best address
+        // matches first.
+
         const maxRes = this.config.maxResults;
         let final: Array<ISearchResult>;
 
@@ -197,7 +202,6 @@ export class GeoSearchUI {
             final = priorityResults.concat(normalResults.slice(0, maxRes - priorityResults.length));
         }
 
-        // console.log('remaining query results: ', queryPayload);
         return {
             results: final,
             failedServs: queryPayload.failedServs

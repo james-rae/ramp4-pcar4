@@ -96,7 +96,8 @@ const clearFilters = () => {
 const updateProvincesAndTypes = () => {
     // Because of the way the GSservice is structured, on language switch, we need to make a new GSservice in the updated language
     // and then re fetch all the provinces and types again.
-    // TODO: In the future, we should look to refactor the code for this fixture to improve clarity and reduce the number of API calls.
+    // Given a normal user will change language 0 to 1 times, this is fine and not worth refactoring.
+    // Most sites use separate ramp configs per language anyways, which causes fixtures to get destroyed & recreated, making the point moot.
 
     geosearchStore.initService(iApi.language, iApi.fixture.get<GeosearchAPI>('geosearch').config);
 

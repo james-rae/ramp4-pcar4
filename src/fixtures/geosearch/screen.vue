@@ -145,8 +145,6 @@ const zoomIn = async (result: ISearchResult): Promise<void> => {
     iApi.geo.map.zoomMapTo(zoom);
 };
 
-// highlight the search term in each listed geosearch result
-
 /**
  * Highlight the search term in each listed geosearch result
  *

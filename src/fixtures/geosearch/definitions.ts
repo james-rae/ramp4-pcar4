@@ -3,9 +3,9 @@ export interface IGenericObjectType {
 }
 
 /**
- * FSA / NTS / Address / Name / LatLon / Location-Snoop
+ * FSA / NTS / Address / Name / LatLon
  */
-export type FlavourKey = 'fsa' | 'nts' | 'add' | 'nme' | 'llg' | 'loc';
+export type FlavourKey = 'fsa' | 'nts' | 'add' | 'nme' | 'llg';
 
 /**
  * Config object is used by all query classes.

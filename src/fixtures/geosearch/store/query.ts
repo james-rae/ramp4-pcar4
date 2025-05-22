@@ -94,7 +94,7 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
  * @returns
  */
 export const jsonRequest = async (url: string): Promise<any> => {
-    const [rErr, rRes] = await to(axios.get(url, { params: { f: 'json' } }));
+    const [rErr, rRes] = await to(axios.get(url));
 
     if (rErr) {
         console.error('Request error from ' + url);

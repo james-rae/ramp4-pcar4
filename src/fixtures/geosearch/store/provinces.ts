@@ -2,7 +2,7 @@ import type { IProvinceInfo, IProvinces } from '../definitions';
 import axios from 'redaxios';
 
 const fsaToProv: { [key: string]: number } = {
-    A: 10, // NFLD
+    A: 10, // NL
     B: 12, // NS
     C: 11, // PEI
     E: 13, // NB
@@ -18,10 +18,11 @@ const fsaToProv: { [key: string]: number } = {
     S: 47, // SK (good alignment, well done)
     T: 48, // AB
     V: 59, // BC
-    // this split was not working (nothing would actually show on screen)
-    // the method using this is now handling X in a custom manner
+    Y: 60 //  YT (another winner)
+
     //  X: [62, 61], // NWT / NV
-    Y: 60 // YT (another winner)
+    // this split was not working (nothing would actually show on screen)
+    // fsaToProvince() is now handling X in a custom manner
 };
 
 // translates codes from json file to province abbreviations
