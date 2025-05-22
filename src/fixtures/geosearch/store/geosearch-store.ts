@@ -70,17 +70,7 @@ export const useGeosearchStore = defineStore('geosearch', () => {
      *
      * @return {Promise<Array>} a promise that resolves to a list of all provinces in the form
      */
-    const getProvinces = computed<Promise<Array<IProvinceInfo>>>(
-        () =>
-            new Promise(resolve => {
-                GSservice.value.fetchProvinces().then(provs => {
-                    // Sorting now happening when it loads instead of 3 files away.
-                    // TODO Figure out why we are travelling through four files to get prov list to filter
-                    //   provs.sort((provA, provB) => (provA.name > provB.name ? 1 : -1));
-                    resolve(provs);
-                });
-            })
-    );
+    const getProvinces = computed<Promise<Array<IProvinceInfo>>>(() => GSservice.value.fetchProvinces());
 
     /**
      * Fetches the list of all possible types in a geoName query. Returned type objects contain the following properties:

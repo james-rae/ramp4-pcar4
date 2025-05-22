@@ -217,7 +217,7 @@ export class GeoSearchUI {
     }
 
     /**
-     * Return a promise that resolves to a list of formatted province objects
+     * Will download the list of provinces from geogratis. Stores it
      *
      * @return {Promise<Array>} a promise that resolves to a list of formatted province objects
      */
@@ -237,7 +237,7 @@ export class GeoSearchUI {
                     this.provinceList = this.config.provinces.provinceList;
                     resolve(this.provinceList);
                 }
-            });
+            }, 100);
         });
     }
 
@@ -271,7 +271,7 @@ export class GeoSearchUI {
                     this.typeList = typeList;
                     resolve(this.typeList);
                 }
-            }, 250);
+            }, 100);
         });
     }
 }
