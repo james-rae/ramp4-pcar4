@@ -79,6 +79,8 @@ import LoadingBar from './loading-bar.vue';
 import { jsonRequest } from './store/query';
 import { useI18n } from 'vue-i18n';
 import type { ISearchResult } from './definitions';
+import { FSATOKEN } from './definitions';
+import to from 'await-to-js';
 
 const { t } = useI18n();
 const iApi = inject<InstanceAPI>('iApi')!;
@@ -94,49 +96,53 @@ const cleanedSearchVal = computed<string>(() => geosearchStore.searchVal.replace
 const searchResults = computed<Array<ISearchResult>>(() => geosearchStore.searchResults);
 const loadingResults = computed<boolean>(() => geosearchStore.loadingResults);
 const failedServices = computed<string[]>(() => geosearchStore.failedServices);
+const fsaLookupUrl = computed<string>(() => geosearchStore.GSservice.config.fsaUrl);
 
 // zoom in to a clicked result
-const zoomIn = (result: ISearchResult) => {
-    // https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0
+const zoomIn = async (result: ISearchResult): Promise<void> => {
+    // use fancy fsa boundary service if appropriate
+    if (result.flav === 'fsa' && fsaLookupUrl.value) {
+        const targetedUrl = fsaLookupUrl.value.replace(FSATOKEN, result.name);
 
-    // console.log('zoomie payload', result);
+        const [rErr, rRes] = await to(jsonRequest(targetedUrl));
 
-    // TOOD this needs to also include a check that we have a lookup defined. and needs to use proper config value
-    if (result.flav === 'fsa') {
-        //  console.log('hit fsa case');
-        const fakeRequest = `/query/?where=CFSAUID%3D'${result.name}'&outFields=CFSAUID&returnGeometry=true&f=json`;
-        const fakeUrl =
-            'https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/CCDS/FSA_Boundaries_RTA_Limites_StatsCan_2021/MapServer/0' +
-            fakeRequest;
-        jsonRequest(fakeUrl)
-            .then((stuff: any) => {
-                //  console.log('server result', stuff);
-                const poly = new Polygon(
-                    'fsazoom',
-                    stuff.features[0].geometry.rings,
-                    SpatialReference.fromConfig(stuff.spatialReference), // technically not from a config, but config follows esri spec. this server result is raw, does not have esri class wrapper
-                    true
-                );
-                iApi.geo.map.zoomMapTo(poly);
-            })
-            .catch(e => console.error('fsa error', e));
-    } else {
-        const zoom = new Polygon(
-            'zoomies',
-            [
-                [
-                    [result.bbox[0], result.bbox[1]],
-                    [result.bbox[0], result.bbox[3]],
-                    [result.bbox[2], result.bbox[3]],
-                    [result.bbox[2], result.bbox[1]],
-                    [result.bbox[0], result.bbox[1]]
-                ]
-            ],
-            SpatialReference.latLongSR(),
-            true
-        );
-        iApi.geo.map.zoomMapTo(zoom);
+        // if there was an error, we just fall-through to the regular zoom, targeting the fake bbox
+        if (!rErr) {
+            // rRes is the result object of an ArcServer featurelayer query
+            const poly = new Polygon(
+                'fsazoom',
+                rRes.features[0].geometry.rings,
+                SpatialReference.fromConfig(rRes.spatialReference), // technically not from a config, but config follows esri spec. this server result is raw, does not have esri class wrapper
+                true
+            );
+            iApi.geo.map.zoomMapTo(poly);
+
+            // donethanks
+            return;
+        }
+
+        // solution if the response time here becomes too noticeable.
+        // 1. add new property to ISearchResult -->  esriPoly?: { rings: number[][][], sr: any}
+        // 2. move the url check and json request into runFSAQuery()
+        // 3. if it runs & returns, stick the values on fancyResult.esriPoly
+        // 4. the logic here changes to check if result.esriPoly exists. if so, makes the new Polygon() and zoomies it
     }
+
+    const zoom = new Polygon(
+        'zoomies',
+        [
+            [
+                [result.bbox[0], result.bbox[1]],
+                [result.bbox[0], result.bbox[3]],
+                [result.bbox[2], result.bbox[3]],
+                [result.bbox[2], result.bbox[1]],
+                [result.bbox[0], result.bbox[1]]
+            ]
+        ],
+        SpatialReference.latLongSR(),
+        true
+    );
+    iApi.geo.map.zoomMapTo(zoom);
 };
 
 // highlight the search term in each listed geosearch result

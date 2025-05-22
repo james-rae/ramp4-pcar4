@@ -68,6 +68,9 @@ export async function runQuery(config: IGeosearchConfig, query: string): Promise
 
         // NOTE: this padding was in the original code, but written in such a way that it was never used.
         //       it doesn't seem to care? E.g. 064D and 64D both hit the NTS entry.
+        //       There was an `.equals()` method for comparing two NTS queries, it may have been utilized there.
+        //       The equals method wasn't being used either and got removed.
+        //
         // front pad 0 if NTS starts with two digits
         // query = isNaN(parseInt(query[2])) ? '0' + query : query;
 
@@ -94,6 +97,8 @@ export const jsonRequest = async (url: string): Promise<any> => {
     const [rErr, rRes] = await to(axios.get(url, { params: { f: 'json' } }));
 
     if (rErr) {
+        console.error('Request error from ' + url);
+        console.error(rErr);
         return Promise.reject('Could not load results from remote service.');
     } else {
         return rRes.data;

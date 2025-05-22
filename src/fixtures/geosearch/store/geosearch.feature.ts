@@ -164,6 +164,26 @@ export class GeoSearchUI {
      * @return {Promise}
      */
     async query(userInput: string) {
+        /*
+        Potential improvement for later.
+        Bulk of this methods work is to sort results by priority and then chop off at the max results.
+        This happens BEFORE any of the top-filters get applied (province, type, probably "visible on map").
+        So lets say we have 200 raw results, 20 are in Ontario. Then we chop to the top 100, leaving are 10 Ontario
+        records in the return value.
+        The UI gets this, applies its filters, and shows 10 records. A better scenario would be to filter here
+        before the chop, then we would show all 20 records.
+        There is a trade-off to this. Doing the filters afterwards means we can change the filters without
+        re-running the server hits. The geosearch store maintains an array called savedResults, possibly
+        we could start putting the queryResult.results in there instead of the sorted and clipped list.
+        Would then need to abstract the sort & clip to its own method, so it could be called here and
+        when a top-filter changes.
+        Also worth noting, queries against the name server are already capped at the max limit (see `getUrl()` ).
+        This "doubling" scenario only affects standard text searches, where you get a pile of name results,
+        and also a pile of address results. Might be a nothingburger, but could be helpful when user doesn't
+        have a very precise search word and it spams lots of results.
+        Becomes worse if max results is config'd to a lower value.
+        */
+
         // run query based on search string input
         const queryResult = await GeoSearchQuery.runQuery(this.config, userInput.toUpperCase());
 
