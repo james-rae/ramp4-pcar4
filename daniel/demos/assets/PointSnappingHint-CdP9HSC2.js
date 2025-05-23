@@ -1,0 +1,1 @@
+import{H as i}from"./vec32-DGxMYmwS.js";import{a as n}from"./hitTestSelectUtils-DKz6iswb.js";class o extends n{constructor(t,r,s){super(r,s),this.point=t}equals(t){return t instanceof o&&i(this.point,t.point)}}export{o as n};
