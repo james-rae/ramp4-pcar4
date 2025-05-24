@@ -1,1 +1,0 @@
-import{o as a,t as s}from"./operatorUnion-D3a8N9Pw.js";import{fromGeometry as n,toGeometry as m,fromGeometryToGXGeometry as f,fromGeometries as c}from"./jsonConverter-5eb0iSD7.js";function u(t,o){const e=n(t),r=e.getSpatialReference();return m(a(e.getGeometry(),f(o),r),r)}function G(t){const[o,e]=c(t);return m(s(o,e),e)}export{u as execute,G as executeMany};

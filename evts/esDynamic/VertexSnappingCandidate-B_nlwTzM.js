@@ -1,1 +1,0 @@
-import{g as r}from"./hitTestSelectUtils-C4biMoaL.js";import{n as o}from"./RouteLayerInteraction-pMYP6tPv.js";import{n as s}from"./PointSnappingHint-CJV4z3TJ.js";class n extends o{constructor(t){super({...t,constraint:new r(t.targetPoint)})}get hints(){return[new s(this.targetPoint,this.isDraped,this.domain)]}}export{n as r};
