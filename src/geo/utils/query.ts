@@ -158,7 +158,7 @@ export class QueryAPI extends APIScope {
      * @param {Integer} tolerance   optional. distance in pixels from mouse point that qualifies as a hit. default is 5
      * @return {Extent} an extent of desired size and location
      */
-    makeClickBuffer(point: Point, tolerance = 5): Extent {
+    makeClickBuffer(point: Point, tolerance: number = 5): Extent {
         // take pixel tolerance, convert to map units at current scale.
         const map = this.$iApi.geo.map;
         const mapExt = map.getExtent();

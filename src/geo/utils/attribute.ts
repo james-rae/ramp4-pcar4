@@ -580,7 +580,7 @@ export class AttributeAPI extends APIScope {
         const rows = attSet.features.map(feature => {
             const att = deepmerge({}, feature);
             att.rvInteractive = '';
-            att.rvSymbol = layer.getIcon(feature[layer.oidField]); // this.renderer?.getGraphicIcon(feature);
+            att.rvSymbol = layer.getIcon(feature[layer.oidField]);
             att.rvUid = layer.uid;
             return att;
         });
