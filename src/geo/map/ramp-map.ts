@@ -640,7 +640,7 @@ export class MapAPI extends CommonMapAPI {
                     // carry on with resolution steps.
                     // Re: cancelling a load - would have gotten caught in error block above. if comes after, layer load
                     //     process will handle it.
-                    console.time(initKey);
+                    console.timeEnd(initKey);
                     clearInterval(layerWatcher);
                     if (layer.mapLayer) {
                         // ramp layer is map ready, add it at the correct position
