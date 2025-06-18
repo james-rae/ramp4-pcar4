@@ -607,6 +607,11 @@ export class MapAPI extends CommonMapAPI {
             // This interval waits for layer initiation, and has a kickout for layers that initiate forever.
             // After it initiates the callback will start the next step in the loading pipeline.
             // Alternative to this: use event API and watch for layer initiated and layer error events??
+
+            const initKey = 'Layer Initiate ' + layer.id;
+
+            console.time(initKey);
+
             const layerWatcher = setInterval(() => {
                 timeElapsed += 250;
                 if (timeElapsed >= layer.expectedTime.fail || layer.layerState === LayerState.ERROR) {
@@ -635,6 +640,7 @@ export class MapAPI extends CommonMapAPI {
                     // carry on with resolution steps.
                     // Re: cancelling a load - would have gotten caught in error block above. if comes after, layer load
                     //     process will handle it.
+                    console.time(initKey);
                     clearInterval(layerWatcher);
                     if (layer.mapLayer) {
                         // ramp layer is map ready, add it at the correct position

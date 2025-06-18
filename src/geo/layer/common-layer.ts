@@ -264,6 +264,9 @@ export class CommonLayer extends LayerInstance {
             this.onError();
         }, this.expectedTime.fail);
 
+        const loadKey = 'Layer Load ' + this.id;
+        console.time(loadKey);
+
         // handling for any errors that are thrown when executing layer onLoadActions call
         // For issue https://github.com/ramp4-pcar4/ramp4-pcar4/issues/2103, without proper error handling here any subsequent
         // layer that is added will not trigger its esriLayer.loadStatus watcher, meaning onLoadActions is never called
@@ -287,6 +290,8 @@ export class CommonLayer extends LayerInstance {
                             }
                             this.loadDefProm.resolveMe();
                             this.loadPromDone = true;
+
+                            console.timeEnd(loadKey);
 
                             // This will just trigger the above statements for each sublayer
                             this.sublayers.forEach(sublayer => sublayer.onLoad());

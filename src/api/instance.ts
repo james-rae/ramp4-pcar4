@@ -106,6 +106,8 @@ export class InstanceAPI {
     private _isFullscreen: boolean;
 
     constructor(element: HTMLElement, configs?: RampConfigs, options?: RampOptions) {
+        console.log('Instance constructor starting now');
+        console.time('Instance');
         this.event = new EventAPI(this);
 
         const appInstance = createApp(element, this);
@@ -186,10 +188,14 @@ export class InstanceAPI {
             const mapDivWatcher = setInterval(() => {
                 const mapViewElement: Element | null = this.$vApp.$el.querySelector('#esriMap');
                 if (mapViewElement) {
+                    console.timeEnd('Map Creating');
+                    console.time('Map Initializing');
                     clearInterval(mapDivWatcher);
 
                     // create the map
                     this.geo.map.createMap(activeConfig.map, mapViewElement as HTMLDivElement).then(() => {
+                        console.timeEnd('Map Initializing');
+
                         // Hide hovertip on map creation
                         //@ts-expect-error TODO: explain why this is needed or remove
                         mapViewElement._tippy.hide(0);
@@ -202,9 +208,12 @@ export class InstanceAPI {
                             // Enhanced positioning logic is now handled by map.addLayer()
                             let mapOrderPos = 0;
                             activeConfig.layers.forEach(layerConfig => {
+                                const key = 'Add To Map: Layer ' + layerConfig.id;
+                                console.time(key);
                                 const layer = this.geo.layer.createLayer(layerConfig);
                                 this.geo.map
                                     .addLayer(layer, mapOrderPos)
+                                    .then(() => console.timeEnd(key))
                                     // just to silence console about unhandled rejections.
                                     .catch(() => {});
                                 if (layer.mapLayer) {
@@ -320,6 +329,8 @@ export class InstanceAPI {
         } else {
             this.startRequired = false;
             instanceStore.started = true;
+            console.timeEnd('Instance');
+            console.time('Map Creating');
             this.event.emit(GlobalEvents.MAP_START);
         }
 
