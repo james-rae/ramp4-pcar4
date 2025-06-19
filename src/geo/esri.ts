@@ -63,6 +63,8 @@ import '@arcgis/map-components/components/arcgis-swipe';
 //      how Vite knows how to optimize the chunks.
 //      So lots of boilerplate here instead of nice `genericLoad(libPath: string)` gettup.
 
+let featLayerFetcher: any;
+
 class EsriAPI {
     // --- Maps ---
 
@@ -83,8 +85,16 @@ class EsriAPI {
 
     // --- Layers ---
 
+    static async PrefetchFeatureLayer(): Promise<any> {
+        if (!featLayerFetcher) {
+            featLayerFetcher = import('@arcgis/core/layers/FeatureLayer');
+        }
+
+        return featLayerFetcher;
+    }
+
     static async FeatureLayer(prams: __esri.FeatureLayerProperties): Promise<EsriFeatureLayer> {
-        const lib = await import('@arcgis/core/layers/FeatureLayer');
+        const lib = await EsriAPI.PrefetchFeatureLayer();
         return Reflect.construct(lib.default, [prams]);
     }
 

@@ -555,6 +555,11 @@ export class MapAPI extends CommonMapAPI {
                 this.noMapErr();
                 reject();
             }
+
+            const initKey = 'Layer Initiate ' + layer.id;
+
+            console.time(initKey);
+
             if (
                 layer.initiationState !== InitiationState.INITIATING &&
                 layer.initiationState !== InitiationState.INITIATED &&
@@ -607,10 +612,6 @@ export class MapAPI extends CommonMapAPI {
             // This interval waits for layer initiation, and has a kickout for layers that initiate forever.
             // After it initiates the callback will start the next step in the loading pipeline.
             // Alternative to this: use event API and watch for layer initiated and layer error events??
-
-            const initKey = 'Layer Initiate ' + layer.id;
-
-            console.time(initKey);
 
             const layerWatcher = setInterval(() => {
                 timeElapsed += 250;

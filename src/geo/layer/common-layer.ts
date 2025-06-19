@@ -166,6 +166,15 @@ export class CommonLayer extends LayerInstance {
     // need this so initiate encapsulates the entire initiation process regardless of which inherited layer type is being initiated
     async initiate(): Promise<void> {
         this.updateInitiationState(InitiationState.INITIATING);
+
+        // TODO this would become specific to the incoming layer
+        if (this.layerType === LayerType.FEATURE) {
+            const key = 'FL Prefetch ' + this.id;
+            console.time(key);
+            await EsriAPI.PrefetchFeatureLayer();
+            console.timeEnd(key);
+        }
+
         this.startTimer(TimerType.LOAD);
 
         const failStepsHelper = (consoleMessage: string) => {
