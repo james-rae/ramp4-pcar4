@@ -28,6 +28,7 @@ import {
     DataFormat,
     DefPromise,
     Extent,
+    FieldRole,
     GeometryType,
     InitiationState,
     LayerControl,
@@ -461,7 +462,8 @@ export class LayerAPI extends APIScope {
                         name: f.name!,
                         alias: f.alias!,
                         type: f.type!,
-                        length: f.length!
+                        length: f.length!,
+                        role: FieldRole.Show // this will get updated when processing fieldMetadata
                     };
                 });
 

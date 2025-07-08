@@ -4,6 +4,7 @@ import type {
     AttributeSet,
     BaseGeometry,
     CompactJson,
+    EsriArcadeVarType,
     Extent,
     FieldDefinition,
     GetGraphicServiceDetails,
@@ -11,7 +12,7 @@ import type {
     RampLayerFieldMetadataConfig,
     TabularAttributeSet
 } from '@/geo/api';
-import { DataFormat, GeometryType, Graphic, NoGeometry } from '@/geo/api';
+import { DataFormat, FieldRole, GeometryType, Graphic, NoGeometry } from '@/geo/api';
 import { EsriGeometryFromJson, EsriRequest } from '@/geo/esri';
 import to from 'await-to-js';
 import deepmerge from 'deepmerge';
@@ -32,12 +33,6 @@ export interface AttributeLoaderDetails {
     permanentFilter?: string; // SQL to restrict the attributes to download
     fieldsToTrim?: Array<string>; // All string fields whose values should be trimmed
 }
-
-// See valid DOV at https://developers.arcgis.com/javascript/latest/api-reference/esri-arcade.html#SimpleVariable
-/**
- * Arcade data types we are currenlty supporting
- */
-type EsriArcadeVarType = 'geometry' | 'number' | 'text' | 'date';
 
 /**
  * Maps the ESRI field type to a matching ESRI arcade variable type
@@ -422,8 +417,33 @@ export class AttributeAPI extends APIScope {
             return;
         }
 
+        const fieldInfo = fieldMetadata.fieldInfo;
+
+        // TODO for fancy stuff
+        // find any arcade tagged fields. generate new field objects for them. generate arcade executors for them.
+        // find any hidden tagged fields. find their corresponding field and update the role status.
+        //
+
+        const arcadeFields = fieldInfo.filter(
+            infoItem => infoItem.role === FieldRole.Arcade && infoItem.arcade && infoItem.arcade.formula
+        );
+
+        arcadeFields.forEach(arcadeMetadata => {
+            // make new field object in our field array
+
+            layer.fields.push({
+                name: arcadeMetadata.name,
+                alias: arcadeMetadata.alias,
+                type: arcadeMetadata.arcade!.type, // TODO does this type need to be mapped to a field type?
+                length: undefined, // TODO figure out if undefined means all good or problem for string. if problem, might need to detect string and set a value
+                role: FieldRole.Arcade
+            });
+
+            // TODO setup arcade executor here?
+        });
+
         // Find the fields that should be trimmed (have trim = true)...
-        const fieldsToTrim = fieldMetadata.fieldInfo.filter(elem => elem.trim).map(elem => elem.name);
+        const fieldsToTrim = fieldInfo.filter(elem => elem.trim).map(elem => elem.name);
 
         // ...and set their trim properties on the layer
         layer.fields.forEach(field => {
@@ -433,17 +453,21 @@ export class AttributeAPI extends APIScope {
         });
 
         // if order enforced, order the fields first before doing exclusive fields check
-        if (fieldMetadata?.enforceOrder && fieldMetadata?.fieldInfo && fieldMetadata?.fieldInfo.length > 0) {
+        if (fieldMetadata.enforceOrder && fieldInfo.length > 0) {
             // demand respect for order
-            layer.fields = this.orderFields(layer.fields, fieldMetadata.fieldInfo);
-            layer.fieldList = fieldMetadata.fieldInfo.map(f => f.name).join(',');
+            layer.fields = this.orderFields(layer.fields, fieldInfo);
+
+            // TODO why is this being ordered? Especially here.... does it even have a value yet? is it just '*' ?
+            //      plus it will get overwritten if exclusive fields is on.
+            layer.fieldList = fieldInfo.map(f => f.name).join(',');
         }
 
+        // TODO incorporate the DROP role here?
         // if exlusive fields, only respect fields in the field info array
         if (fieldMetadata.exclusiveFields) {
             // ensure object id field is included
-            if (!fieldMetadata.fieldInfo.find(f => f.name === layer.oidField)) {
-                fieldMetadata.fieldInfo.push({ name: layer.oidField });
+            if (!fieldInfo.find(f => f.name === layer.oidField)) {
+                fieldInfo.push({ name: layer.oidField });
             }
 
             // TODO do we also need to ensure fields required by other things are auto-included?
@@ -455,17 +479,18 @@ export class AttributeAPI extends APIScope {
             //      "coreHidden" that indicates the field has to exist, but should not be shown
             //      on things like details panes or grids
 
-            layer.fieldList = fieldMetadata.fieldInfo.map(f => f.name).join(',');
-            const tempFI = fieldMetadata.fieldInfo; // required because typescript is throwing a fit about undefineds inside the .filter
+            // TODO would need to exclude any arcade-style fields here, as they dont exist on the server
+            layer.fieldList = fieldInfo.map(f => f.name).join(',');
+
             layer.fields = layer.fields.filter(origField => {
-                return tempFI.find(fInfo => fInfo.name === origField.name);
+                return fieldInfo.find(fInfo => fInfo.name === origField.name);
             });
         } else {
             layer.fieldList = '*';
         }
 
         // if any aliases overrides, apply them
-        fieldMetadata.fieldInfo.forEach(cf => {
+        fieldInfo.forEach(cf => {
             if (cf.alias) {
                 const ff = layer.fields.find(fff => fff.name === cf.name);
                 if (ff) {

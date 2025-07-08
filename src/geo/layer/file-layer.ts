@@ -11,6 +11,7 @@ import {
     DataFormat,
     DefPromise,
     Extent,
+    FieldRole,
     GeometryType,
     Graphic,
     IdentifyResultFormat,
@@ -174,6 +175,11 @@ export class FileLayer extends AttribLayer {
             // NOTE: call extract, not load, as there is no service involved here
             this.extractLayerMetadata();
 
+            // TODO might need some trickery here with arcade fields. For file layers, there is no "calculate after the fact",
+            //      we would calculate all the arcade stuff upfront and stuff in the layer.
+            //      So we wouldn't want to "apply" arcade metadata as we would with a server layer. It's already been applied
+            //      and looks just like a normal field.
+            //      So maybe we clone the fieldMetadata object, then convert all the arcade tagged fields into normal "show" fields.
             this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
 
             this.attribs.attLoader.updateFieldList(this.fieldList);
@@ -335,6 +341,9 @@ export class FileLayer extends AttribLayer {
         return [result];
     }
 
+    /**
+     * Hunts information from the esri layer and applies to the ramp layer wrapper
+     */
     extractLayerMetadata(): void {
         const l = this.esriLayer;
         if (!l) {
@@ -359,7 +368,8 @@ export class FileLayer extends AttribLayer {
                 name: f.name!,
                 alias: f.alias!,
                 type: f.type!,
-                length: f.length!
+                length: f.length!,
+                role: FieldRole.Show // NOTE: Arcade and Drop won't exist by this step. Hide is valid, but will get set in applyFieldMetadata()
             };
         });
         this.nameField = l.displayField!;

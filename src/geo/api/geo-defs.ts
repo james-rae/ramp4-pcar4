@@ -20,6 +20,19 @@ export const enum FieldType {
     XML = 'xml'
 }
 
+export const enum FieldRole {
+    Show = 'show',
+    Hidden = 'hidden',
+    Drop = 'drop',
+    Arcade = 'arcade'
+}
+
+// See valid DOV at https://developers.arcgis.com/javascript/latest/api-reference/esri-arcade.html#SimpleVariable
+/**
+ * Arcade data types we are currenlty supporting
+ */
+export type EsriArcadeVarType = 'geometry' | 'number' | 'text' | 'date';
+
 export interface ColourParams {
     r: number;
     g: number;
@@ -392,6 +405,8 @@ export interface FieldDefinition {
     type: string;
     length?: number;
     trim?: boolean;
+    role: FieldRole;
+    arcade?: any; // TODO figure out what we got here. the executor?
 }
 
 export interface TabularAttributeSet {
@@ -679,6 +694,11 @@ export interface RampLayerFieldInfoConfig {
     name: string;
     alias?: string;
     trim?: boolean;
+    role?: FieldRole;
+    arcade?: {
+        formula: string;
+        type: EsriArcadeVarType; // NOTE we are re-using this nice type, but will not support the 'geometry' option. Our attribute fields don't hold geometries
+    };
 }
 
 export interface RampLayerFieldMetadataConfig {
