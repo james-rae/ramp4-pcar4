@@ -434,7 +434,7 @@ export class AttributeAPI extends APIScope {
             layer.fields.push({
                 name: arcadeMetadata.name,
                 alias: arcadeMetadata.alias,
-                type: arcadeMetadata.arcade!.type, // TODO does this type need to be mapped to a field type?
+                type: arcadeMetadata.arcade!.type, // TODO does this type need to be mapped to a field type? see arcadeTypeMapper . Might need to go backwards, to double / string / date
                 length: undefined, // TODO figure out if undefined means all good or problem for string. if problem, might need to detect string and set a value
                 role: FieldRole.Arcade
             });
