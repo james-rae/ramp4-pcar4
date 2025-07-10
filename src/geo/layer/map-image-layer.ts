@@ -335,7 +335,7 @@ export class MapImageLayer extends MapLayer {
                       true);
                 miSL.opacity = subC.state?.opacity ?? this.origState.opacity ?? 1;
 
-                this.$iApi.geo.attributes.applyFieldMetadata(miSL, subC.fieldMetadata);
+                await this.$iApi.geo.attributes.applyFieldMetadata(miSL, subC.fieldMetadata);
 
                 if (!miSL.canModifyLayer) {
                     this.$iApi.notify.show(
@@ -353,7 +353,7 @@ export class MapImageLayer extends MapLayer {
             } else {
                 // pulling from parent would be cool, but complex. all the promises would need to be resolved in tree-order
                 // maybe put defaulting here for visible/opac/identify
-                this.$iApi.geo.attributes.applyFieldMetadata(miSL);
+                await this.$iApi.geo.attributes.applyFieldMetadata(miSL);
             }
 
             // do any things that are specific to feature or raster subtypes

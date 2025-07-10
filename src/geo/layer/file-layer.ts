@@ -180,7 +180,7 @@ export class FileLayer extends AttribLayer {
             //      So we wouldn't want to "apply" arcade metadata as we would with a server layer. It's already been applied
             //      and looks just like a normal field.
             //      So maybe we clone the fieldMetadata object, then convert all the arcade tagged fields into normal "show" fields.
-            this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
+            await this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
 
             this.attribs.attLoader.updateFieldList(this.fieldList);
 

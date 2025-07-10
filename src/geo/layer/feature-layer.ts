@@ -114,7 +114,7 @@ export class FeatureLayer extends AttribLayer {
                 // apply server visibility in case of missing visibility in config
                 this.visibility = this.origRampConfig?.state?.visibility ?? this._serverVisibility ?? true;
 
-                this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
+                await this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
                 this.attribs.attLoader.updateFieldList(this.fieldList);
                 this.attribs.attLoader.updateFieldsToTrim(this.getFieldsToTrim());
 

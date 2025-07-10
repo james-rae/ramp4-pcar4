@@ -13,7 +13,7 @@ import type {
     TabularAttributeSet
 } from '@/geo/api';
 import { DataFormat, FieldRole, GeometryType, Graphic, NoGeometry } from '@/geo/api';
-import { EsriGeometryFromJson, EsriRequest } from '@/geo/esri';
+import { EsriAPI, EsriGeometryFromJson, EsriRequest } from '@/geo/esri';
 import to from 'await-to-js';
 import deepmerge from 'deepmerge';
 import { toRaw } from 'vue';
@@ -399,16 +399,53 @@ export class AttributeAPI extends APIScope {
     }
 
     /**
+     * Will create an arcade formula executor valid for the given layer.
+     * The executor takes an attribute set (that aligns to the layer) as parameter
+     * and returns the formula evaluated with those attributes.
+     *
+     * @param layer the layer the arcade formula applies to
+     * @param formula an arcade formula
+     * @returns resolves with an arcade executor object
+     */
+    async arcadeGenerator(layer: LayerInstance, formula: string): Promise<__esri.ArcadeExecutor> {
+        // NOTE: this stuff exists in CommonLayer because it can be used by both AttributeLayer and DataLayer
+        //       branches of layer classes.
+        const arcadeProfile: __esri.Profile = {
+            variables: [
+                {
+                    name: '$attr',
+                    type: 'dictionary',
+                    properties: layer.fields
+                        // arcade fields cannot be used to calculate values in other arcade formulas. more recursion than i'm willing to support
+                        .filter(f => f.role !== FieldRole.Arcade)
+                        .map(fd => {
+                            const arcardeType = this.fieldTypeToArcade(fd.type);
+                            if (arcardeType) {
+                                return { name: fd.name, type: arcardeType };
+                            } else {
+                                console.error(`Encountered field type with no arcade support: ${fd.type} [${fd.name}]`);
+                                return arcardeType; // <-- will be undefined
+                            }
+                        })
+                        .filter(f => !!f)
+                }
+            ]
+        };
+
+        return EsriAPI.ArcadeExecutor(formula, arcadeProfile);
+    }
+
+    /**
      * Will apply any field config metadata to a layer.
      * Should be used after loading process has populated .fields property of the layer
      *
      * @param layer the layer to apply the additional configuration to. Will be modified.
      * @param fieldMetadata field settings from the config object. can be undefined
      */
-    applyFieldMetadata(
+    async applyFieldMetadata(
         layer: LayerInstance,
         fieldMetadata: RampLayerFieldMetadataConfig | undefined = undefined
-    ): void {
+    ): Promise<void> {
         // TODO ensure we do not have to worry about case mismatch of field names.
 
         // check for no enhancements requested
@@ -424,23 +461,24 @@ export class AttributeAPI extends APIScope {
         // find any hidden tagged fields. find their corresponding field and update the role status.
         //
 
-        const arcadeFields = fieldInfo.filter(
-            infoItem => infoItem.role === FieldRole.Arcade && infoItem.arcade && infoItem.arcade.formula
-        );
+        // holds arcade field and formula, to be used to generate executor
+        const arcadeExecutorData = fieldInfo
+            .filter(infoItem => infoItem.role === FieldRole.Arcade && infoItem.arcade && infoItem.arcade.formula)
+            .map(arcadeMetadata => {
+                // make new field object in our field array
 
-        arcadeFields.forEach(arcadeMetadata => {
-            // make new field object in our field array
+                const newArcadeField: FieldDefinition = {
+                    name: arcadeMetadata.name,
+                    alias: arcadeMetadata.alias,
+                    type: arcadeMetadata.arcade!.type, // TODO does this type need to be mapped to a field type? see arcadeTypeMapper . Might need to go backwards, to double / string / date
+                    length: undefined, // TODO figure out if undefined means all good or problem for string. if problem, might need to detect string and set a value
+                    role: FieldRole.Arcade
+                };
 
-            layer.fields.push({
-                name: arcadeMetadata.name,
-                alias: arcadeMetadata.alias,
-                type: arcadeMetadata.arcade!.type, // TODO does this type need to be mapped to a field type? see arcadeTypeMapper . Might need to go backwards, to double / string / date
-                length: undefined, // TODO figure out if undefined means all good or problem for string. if problem, might need to detect string and set a value
-                role: FieldRole.Arcade
+                layer.fields.push(newArcadeField);
+
+                return [newArcadeField, arcadeMetadata.arcade!.formula] as [FieldDefinition, string];
             });
-
-            // TODO setup arcade executor here?
-        });
 
         // Find the fields that should be trimmed (have trim = true)...
         const fieldsToTrim = fieldInfo.filter(elem => elem.trim).map(elem => elem.name);
@@ -498,6 +536,13 @@ export class AttributeAPI extends APIScope {
                 }
             }
         });
+
+        // generate any arcade executors
+        await Promise.all(
+            arcadeExecutorData.map(async arcadeInfo => {
+                arcadeInfo[0].arcade = await this.arcadeGenerator(layer, arcadeInfo[1]);
+            })
+        );
     }
 
     /**

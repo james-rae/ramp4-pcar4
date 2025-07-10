@@ -51,7 +51,7 @@ export class TableLayer extends DataLayer {
         const featIdx: number = urlData.index || 0;
 
         // update asynch data
-        const pLD: Promise<void> = this.$iApi.geo.layer.loadLayerMetadata(this.serviceUrl).then(sData => {
+        const pLD: Promise<void> = this.$iApi.geo.layer.loadLayerMetadata(this.serviceUrl).then(async sData => {
             if (startTime < this.lastCancel) {
                 return;
             }
@@ -67,7 +67,7 @@ export class TableLayer extends DataLayer {
             // process fields and any overrides
             this.fields = sData.fields;
 
-            this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
+            await this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
 
             // NOTE this must be called after the fields are set
             this.nameInitializer(this.origRampConfig, sData.displayField);

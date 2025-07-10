@@ -406,7 +406,7 @@ export interface FieldDefinition {
     length?: number;
     trim?: boolean;
     role: FieldRole;
-    arcade?: any; // TODO figure out what we got here. the executor?
+    arcade?: __esri.ArcadeExecutor;
 }
 
 export interface TabularAttributeSet {

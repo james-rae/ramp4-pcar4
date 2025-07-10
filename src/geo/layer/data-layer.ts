@@ -13,6 +13,7 @@ import {
 import {
     DataFormat,
     DrawState,
+    FieldRole,
     FieldType,
     Graphic,
     InitiationState,
@@ -112,18 +113,19 @@ export class DataLayer extends CommonLayer {
                     name: finalName,
                     alias: alias,
                     type: dataType,
+                    role: FieldRole.Show,
                     length: dataType === FieldType.STRING ? 256 : undefined
                 };
             });
 
             // setup fake OID
             this.oidField = 'rampOID';
-            this.fields.push({ name: this.oidField, type: FieldType.OID });
+            this.fields.push({ name: this.oidField, type: FieldType.OID, role: FieldRole.Hidden });
             realJson.fields.push(this.oidField);
             realJson.data.forEach((row, i) => row.push(i + 1)); // +1 to start at 1, not zero
 
             // this will apply any additional aliases and field exclusions as specified.
-            this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
+            await this.$iApi.geo.attributes.applyFieldMetadata(this, this.origRampConfig.fieldMetadata);
             this.fieldList = '*'; // overwrite, no server.
 
             // TODO this is a potential improvement. Consider doing it if this format becomes popular, otherwise this

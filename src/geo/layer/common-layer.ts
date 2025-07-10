@@ -8,6 +8,7 @@ import {
     DefPromise,
     DrawState,
     Extent,
+    FieldRole,
     GeometryType,
     Graphic,
     InitiationState,
@@ -564,36 +565,6 @@ export class CommonLayer extends LayerInstance {
         }
     }
 
-    /**
-     * Will create an arcade formula executor valid for this layer
-     *
-     * @param formula an arcade formula
-     * @returns resolves with an arcade executor object
-     */
-    private async arcadeGenerator(formula: string): Promise<__esri.ArcadeExecutor> {
-        const arcadeProfile: __esri.Profile = {
-            variables: [
-                {
-                    name: '$attr',
-                    type: 'dictionary',
-                    properties: this.fields
-                        .map(fd => {
-                            const arcardeType = this.$iApi.geo.attributes.fieldTypeToArcade(fd.type);
-                            if (arcardeType) {
-                                return { name: fd.name, type: arcardeType };
-                            } else {
-                                console.error(`Encountered field type with no arcade support: ${fd.type} [${fd.name}]`);
-                                return arcardeType; // <-- will be undefined
-                            }
-                        })
-                        .filter(f => !!f)
-                }
-            ]
-        };
-
-        return EsriAPI.ArcadeExecutor(formula, arcadeProfile);
-    }
-
     get nameArcade(): string {
         return this.nameArcadeFormula;
     }
@@ -606,7 +577,7 @@ export class CommonLayer extends LayerInstance {
             } else {
                 this.nameArcadeFormula = formula;
 
-                this.nameArcadeExecutor = await this.arcadeGenerator(formula);
+                this.nameArcadeExecutor = await this.$iApi.geo.attributes.arcadeGenerator(this, formula);
             }
         } else {
             console.error("Attempted to set a name arcade function on a layer that doesn't support it.");
@@ -656,7 +627,7 @@ export class CommonLayer extends LayerInstance {
                 const arcadePayload = {
                     $attr: attributes
                 };
-
+                // BREE
                 return this.nameArcadeExecutor?.execute(arcadePayload) ?? 'Arcade Error';
             } else {
                 return this.nameField ? (attributes[this.nameField] ?? 'Name Field Error') : '';
@@ -677,7 +648,7 @@ export class CommonLayer extends LayerInstance {
                 this.tooltipArcadeExecutor = undefined;
             } else {
                 this.tooltipArcadeFormula = formula;
-                this.tooltipArcadeExecutor = await this.arcadeGenerator(formula);
+                this.tooltipArcadeExecutor = await this.$iApi.geo.attributes.arcadeGenerator(this, formula);
             }
         } else {
             console.error("Attempted to set a tooltip arcade function on a layer that doesn't support it.");
