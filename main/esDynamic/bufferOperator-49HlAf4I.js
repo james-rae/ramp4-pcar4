@@ -1,0 +1,1 @@
+import{eu as s}from"./main-K6kS0XWo.js";import{f}from"./operatorBuffer-C81JOysX.js";import{getSpatialReference as i,fromGeometry as c,toGeometry as p}from"./jsonConverter-Dh1x29Xx.js";function u(t,e,n={}){const{unit:o}=n,r=i(t);o&&r&&(e=s(e,o,r));const a=c(t),m=a.getSpatialReference();return p(f(a.getGeometry(),m,e),m)}export{u as execute};
