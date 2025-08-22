@@ -1,1 +1,0 @@
-import{t as r}from"./OperatorCrosses-DwcP9CZA.js";import{fromGeometry as m,fromGeometryToGXGeometry as n}from"./jsonConverter-lveyYFVa.js";const a=new r;function c(t,o){const e=m(t);return a.execute(e.getGeometry(),n(o),e.getSpatialReference(),null)}export{c as execute};
