@@ -81,10 +81,12 @@ export class GridAccessibilityManager {
                 this.cellBlurHandler(event, cell, buttons);
             });
 
+            // handles when we tab on the last button of the header cell (i.e. time to navigate to next header cell)
             buttons[buttons.length - 1].addEventListener('keydown', (event: KeyboardEvent) => {
                 this.cellButtonTabHandler(event, cell, buttons, false);
             });
 
+            // handles when we shift-tab on the first button of the header cell (i.e. time to navigate to previous header cell)
             buttons[0].addEventListener('keydown', (event: KeyboardEvent) => {
                 this.cellButtonTabHandler(event, cell, buttons, true);
             });

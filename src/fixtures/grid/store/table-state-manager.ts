@@ -10,7 +10,7 @@ import type { ActionButtonDefinition, TableStateOptions } from './grid-state';
  *      - whether table maximized is in maximized or split view
  */
 export default class TableStateManager {
-    state: any;
+    state: TableStateOptions;
     _title: string;
     _showFilter: boolean;
     _filterByExtent: boolean;
