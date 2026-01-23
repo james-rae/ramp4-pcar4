@@ -51,10 +51,11 @@ import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ColumnDefinition, FilterParams } from '../table-component.vue';
 import { usePanelStore } from '@/stores/panel';
+import type { RangeFilterValue } from '../store';
 
 export interface GridCustomDateFilter {
-    minVal: any;
-    maxVal: any;
+    minVal: RangeFilterValue;
+    maxVal: RangeFilterValue;
     colDef: ColumnDefinition;
     params: FilterParams;
 }

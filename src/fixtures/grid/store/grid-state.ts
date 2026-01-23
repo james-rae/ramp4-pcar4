@@ -74,11 +74,19 @@ export interface MergeGridConfig {
     }>;
 }
 
+export type FilterRange = 'min' | 'max';
+
+// reasonings:
+// string  covers empty string, which we use for a blank / cleared filter in UI state.
+//         covers active date range filters, e.g. "2025-02-22"
+// number  is when an actual number is typed in the filter. it gets converted to a numeric and stored.
+export type RangeFilterValue = string | number;
+
 export interface TableColumnFilterOptions {
     type: 'string' | 'number' | 'date' | 'selector';
     value?: string;
-    min?: string | null;
-    max?: string | null;
+    min?: RangeFilterValue;
+    max?: RangeFilterValue;
     static?: boolean;
 }
 

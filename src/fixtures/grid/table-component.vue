@@ -384,17 +384,19 @@ import {
 } from 'vue';
 
 import { GlobalEvents, InstanceAPI, LayerInstance, NotificationType, PanelInstance } from '@/api/internal';
-import { DefPromise, LayerState } from '@/geo/api';
+import { CoreFilter, DefPromise, FieldType, LayerState } from '@/geo/api';
 import type { Attributes, TabularAttributeSet } from '@/geo/api';
 import to from 'await-to-js';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import { AgGridVue } from 'ag-grid-vue3';
-import { useGridStore, type AttributeMapPair } from './store';
+
+import { useGridStore } from './store';
+import type { ActionButtonDefinition, AttributeMapPair, GridConfig, TableStateOptions } from './store';
 import { usePanelStore } from '@/stores/panel';
 import { GridAccessibilityManager, tabToNextCellHandler, tabToNextHeaderHandler } from './accessibility';
-import type { ActionButtonDefinition, GridConfig, TableStateOptions } from './store';
+
 import ColumnDropdown from './column-dropdown.vue';
 import TableStateManager from './store/table-state-manager';
 import ColumnStateManager from './store/column-state-manager';
@@ -412,7 +414,6 @@ import DetailsButtonRendererV from './templates/details-button-renderer.vue';
 import ZoomButtonRendererV from './templates/zoom-button-renderer.vue';
 import CustomButtonRendererV from './templates/custom-button-renderer.vue';
 import CellRendererV from './templates/cell-renderer.vue';
-import { CoreFilter, FieldType } from '@/geo/api';
 
 // grid locales
 import { AG_GRID_LOCALE_EN, AG_GRID_LOCALE_FR } from '@ag-grid-community/locale';
@@ -421,6 +422,7 @@ import { debounce } from 'throttle-debounce';
 
 import type { ColDef, GridApi, RowNode } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+
 // register all community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 // mark all grids as using legacy themes
@@ -572,6 +574,9 @@ const gridLayers = computed(() => {
     } else return [];
 });
 
+/**
+ * If there are any active filters (column or search box).
+ */
 const canClearFilters = computed(
     () => mergedGridConfig.value.state.filtered || mergedGridConfig.value.state.searchFilter
 );
@@ -1213,7 +1218,7 @@ const getFiltersQuery = (layerId: string) => {
  * @param col column name. this will be the attribute name in the filter
  * @param colFilter this is the ag-grid filter model for the column https://www.ag-grid.com/javascript-data-grid/filter-api/
  */
-const filterToSql = (col: string, colFilter: { [key: string]: any }): string | undefined => {
+const filterToSql = (col: string, colFilter: Record<string, any>): string | undefined => {
     switch (colFilter.filterType) {
         case 'number': {
             switch (colFilter.type) {
