@@ -132,9 +132,23 @@ export interface AttributeMapPair {
 }
 
 export interface ActionButtonDefinition {
-    // HUH
+    /**
+     * The name of the event to raise when the button is clicked.
+     */
     actionEvent: string;
+
+    /**
+     * Icon of the button. Treated as HTML. So could be an Emoji, could be SVG tags. Image tag might work?
+     */
     icon: string;
+
+    /**
+     * Tooltip for the button
+     */
     tooltip: string;
-    displayOn: string;
+
+    /**
+     * Which layer format this button should appear for. Options are 'geo' for map layers, 'data' for data layers, or 'all' for both.
+     */
+    displayOn: 'all' | 'geo' | 'data';
 }

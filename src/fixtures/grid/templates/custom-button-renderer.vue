@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { InstanceAPI, LayerInstance } from '@/api/internal';
-import type { AttributeMapPair } from '../store';
+import * as GridUtils from '../grid-utils';
 
 const props = defineProps(['params']);
 const iApi = inject('iApi') as InstanceAPI;
@@ -40,16 +40,17 @@ const isButtonVisible = computed<boolean>(() => {
 const onButtonClick = () => {
     const data = Object.assign({}, props.params.data);
 
-    const layer: LayerInstance | undefined = iApi.geo.layer.getLayer(data['rvUid'])!;
-    const oidPair = props.params.layerCols[layer.id].find((pair: AttributeMapPair) => pair.origAttr === layer.oidField);
+    const layerUid = data.rvUid as string;
+    const layer: LayerInstance | undefined = iApi.geo.layer.getLayer(layerUid)!;
 
-    const oid = oidPair.mappedAttr ? data[oidPair.mappedAttr] : data[oidPair.origAttr];
+    const oidField = GridUtils.findMappedOidField(props.params.layerCols, layer);
+    const oid = data[oidField] as number;
 
     layer.getGraphic(oid, { getAttribs: true }).then(g => {
         iApi.event.emit(props.params.config.actionEvent, {
             data: g.attributes,
             layer: layer,
-            uid: props.params.data.rvUid,
+            uid: layerUid,
             oid: oid
         });
     });

@@ -386,6 +386,7 @@ import {
 import { GlobalEvents, InstanceAPI, LayerInstance, NotificationType, PanelInstance } from '@/api/internal';
 import { CoreFilter, DefPromise, FieldType, LayerState } from '@/geo/api';
 import type { Attributes, TabularAttributeSet } from '@/geo/api';
+import * as GridUtils from './grid-utils';
 import to from 'await-to-js';
 
 import 'ag-grid-community/styles/ag-grid.css';
@@ -1431,7 +1432,7 @@ const getAttrPair = (layerId: string, attr: string): AttributeMapPair | undefine
     // limitation: cannot do swapsies-like mapping between real attributes and mapped attributes.
     // eg. orig layer has fields xx and yy.  Can't map xx to yy and yy to zz.
     //     would likely write xx to yy, then overwrite with yy (from source). then would duplicate yy (source) to zz.
-    return layerCols.value[layerId].find(layer => (layer.mappedAttr ?? layer.origAttr) === attr);
+    return GridUtils.findAttributePair(layerCols.value, layerId, attr);
 };
 
 const setUpColumns = async (): Promise<void> => {
