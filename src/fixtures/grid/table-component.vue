@@ -569,9 +569,7 @@ const origLayerIds = ref(gridStore.grids[props.gridId].layerIds);
  */
 const gridLayers = computed(() => {
     if (gridStore.grids[props.gridId]) {
-        return gridStore.grids[props.gridId].layerIds
-            .map(id => iApi.geo.layer.getLayer(id))
-            .filter(layer => layer !== undefined);
+        return origLayerIds.value.map(id => iApi.geo.layer.getLayer(id)).filter(layer => layer !== undefined);
     } else return [];
 });
 
@@ -613,10 +611,7 @@ const addAriaLabels = (): void => {
  * Indicates at least one layer in this grid is loaded and visible.
  */
 const somethingVisible = computed(() =>
-    origLayerIds.value.some(layerId => {
-        const layer = iApi.geo.layer.getLayer(layerId);
-        return layer?.layerState === LayerState.LOADED && layer?.visibility;
-    })
+    gridLayers.value.some(layer => layer.layerState === LayerState.LOADED && layer.visibility)
 );
 
 /**

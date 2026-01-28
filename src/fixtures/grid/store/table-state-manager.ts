@@ -45,7 +45,7 @@ export default class TableStateManager {
      */
     parsecolumns() {
         if (this.state.columns) {
-            this.state.columns.forEach((columnConfig: any) => {
+            this.state.columns.forEach(columnConfig => {
                 this._columns[columnConfig.field] = new ColumnStateManager(columnConfig);
             });
         }
@@ -119,6 +119,7 @@ export default class TableStateManager {
     }
 
     _checkFilters() {
+        // TODO should we be skipping static filters in this check?  clearFilters above seems to suggest we should
         this._filtered = Object.values(this._columns).some(config => {
             return config.filter.value !== '' || config.filter.min !== '' || config.filter.max !== '';
         });

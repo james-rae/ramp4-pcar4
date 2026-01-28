@@ -25,8 +25,8 @@ export default class ColumnStateManager {
         this._filter = {
             type: columnConfig?.filter?.type ?? 'string',
             value: columnConfig?.filter?.value ?? '',
-            min: columnConfig?.filter?.min,
-            max: columnConfig?.filter?.max,
+            min: columnConfig?.filter?.min ?? '',
+            max: columnConfig?.filter?.max ?? '',
             static: columnConfig?.filter?.static ?? false
         };
         this._template = columnConfig.template ?? '';
