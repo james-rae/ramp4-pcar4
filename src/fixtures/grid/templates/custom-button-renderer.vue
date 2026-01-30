@@ -18,6 +18,12 @@ import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { InstanceAPI, LayerInstance } from '@/api/internal';
 import * as GridUtils from '../grid-utils';
 
+/**
+ * .config: ActionButtonDefinition
+ * .data: the "row data" attribute
+ * .layerCols: the layer-to-pairmapping lookup
+ * .eGridCell: ?? something from ag-grid cell guts?
+ */
 const props = defineProps(['params']);
 const iApi = inject('iApi') as InstanceAPI;
 const el = ref<HTMLElement>();
