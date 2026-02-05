@@ -176,7 +176,7 @@ export class TableLayer extends DataLayer {
     // Making a common class between data and attribute layers adds in other duplications for the non-attribute-layer stuff.
     // This set of methods is more streamlined since there are no layer/extent stuff to deal with.
 
-    setSqlFilter(filterKey: string, whereClause: string): void {
+    async setSqlFilter(filterKey: string, whereClause: string): Promise<void> {
         // dirty test
         const currentFilter = this.filter.getSql(filterKey);
         if (whereClause === currentFilter) {

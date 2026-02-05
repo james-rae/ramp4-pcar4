@@ -772,7 +772,7 @@ export class LayerInstance extends APIScope {
      * @param {String} filterKey the filter key / named filter to apply the SQL to
      * @param {String} whereClause the WHERE clause of the filter
      */
-    setSqlFilter(filterKey: string, whereClause: string): void {}
+    async setSqlFilter(filterKey: string, whereClause: string): Promise<void> {}
 
     /**
      * Applies the current filter settings to the physical map layer.

@@ -492,7 +492,7 @@ export class CommonLayer extends LayerInstance {
         return '';
     }
 
-    setSqlFilter(filterKey: string, whereClause: string): void {
+    async setSqlFilter(filterKey: string, whereClause: string): Promise<void> {
         this.stubError();
     }
 

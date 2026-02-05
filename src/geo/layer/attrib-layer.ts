@@ -17,6 +17,7 @@ import {
     BaseGeometry,
     CoreFilter,
     DataFormat,
+    DefPromise,
     Extent,
     Filter,
     GeometryType,
@@ -387,11 +388,11 @@ export class AttribLayer extends MapLayer {
         return this.$iApi.geo.symbology.getGraphicIcon(g.attributes || {}, this.renderer);
     }
 
-    setSqlFilter(filterKey: string, whereClause: string): void {
+    setSqlFilter(filterKey: string, whereClause: string): Promise<void> {
         // dirty test
         const currentFilter = this.filter.getSql(filterKey);
         if (whereClause === currentFilter) {
-            return;
+            return Promise.resolve();
         }
 
         this.filter.setSql(filterKey, whereClause);
@@ -406,15 +407,19 @@ export class AttribLayer extends MapLayer {
         const debounceKey = `${this.uid}-${filterKey}-${whereClause}`;
         this._lastFilterUpdate = debounceKey;
 
+        const def = new DefPromise<void>();
+
         const refreshCheck = () => {
             if (this._lastFilterUpdate === debounceKey) {
                 // no other filter changes have happened in the delay window.
                 // apply the filter to the layer
                 this.applySqlFilter();
             }
+            def.resolveMe();
         };
 
-        setTimeout(refreshCheck, 80);
+        setTimeout(refreshCheck, 25);
+        return def.getPromise();
     }
 
     applySqlFilter(exclusions: Array<string> = []): void {

@@ -245,8 +245,6 @@ export class LayerItem extends LegendItem {
 
         // LayerItem additionally deals with symbology and layers
         if (this.layer && this.layer.layerExists) {
-            this.layer.visibility = this.visibility;
-
             // check child symbols for visibility
             const someVisible = this._symbologyStack.some((item: LegendSymbology) => item.lastVisbility);
 
@@ -257,6 +255,11 @@ export class LayerItem extends LegendItem {
                     item.lastVisbility = true;
                 }
                 item.visibility = this.visibility ? item.lastVisbility : false;
+            });
+
+            this.updateSymbolFilter().then(() => {
+                // note about flicker, reference issue
+                this.layer.visibility = this.visibility;
             });
         }
     }
@@ -298,6 +301,9 @@ export class LayerItem extends LegendItem {
      * @param {boolean | undefined} visible if we are clicking it on or off. Undefined will perform a toggle.
      */
     clickSymbology(uid: string, visible?: boolean | undefined): void {
+        // tracks if we need to change the layer visibility due to our symbol change
+        let layerVizChange: boolean | undefined = undefined;
+
         // careful now. need to use ` !== false `, as we want the undefined value to count
         if (!this.symbolsVisible() && visible !== false) {
             // If no symbols are visible, and we're turning on a symbol, then set the parent layer to visible
@@ -309,17 +315,28 @@ export class LayerItem extends LegendItem {
             // since we are "turning on" at the symbol level, we assume user wants only this symbol on.
             this.setSymbologyVisibility(undefined, false);
             this.setSymbologyVisibility(uid, true);
-            this.toggleVisibility(true);
+            layerVizChange = true;
         } else {
             // Toggle the child symbology
             this.setSymbologyVisibility(uid, visible);
         }
 
+        // worth retrying: set filter prior to turning off.
+
         // If all child symbols are toggled off, then toggle off the parent layer too
         if (!this.symbolsVisible()) {
-            this.toggleVisibility(false);
+            layerVizChange = false;
         }
 
+        this.updateSymbolFilter().then(() => {
+            // make note with the double draw issue number
+            if (layerVizChange !== undefined) {
+                this.toggleVisibility(layerVizChange);
+            }
+        });
+    }
+
+    async updateSymbolFilter(): Promise<void> {
         // Update the layer definition to filter child symbols
         // At the moment, only layers that support features will support sql filters
         if (this.layer?.supportsFeatures) {
@@ -336,7 +353,8 @@ export class LayerItem extends LegendItem {
                 sql = filterGuts.join(' OR ');
             }
 
-            this.layer.setSqlFilter(CoreFilter.SYMBOL, sql);
+            console.log('updating symbol filter: ' + sql);
+            return this.layer.setSqlFilter(CoreFilter.SYMBOL, sql);
         }
     }
 
