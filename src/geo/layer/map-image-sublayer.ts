@@ -145,7 +145,22 @@ export class MapImageSublayer extends AttribLayer {
      */
     set visibility(value: boolean) {
         if (this.layerExists) {
-            this.esriSubLayer!.visible = value;
+            let blocker = Promise.resolve();
+
+            if (this.canModifyLayer && !value) {
+                console.log('blocking ON');
+                blocker = this.setSqlFilter('lolfilter', '1=2');
+            }
+
+            blocker.then(() => {
+                console.log('setting viz: ' + value);
+                this.esriSubLayer!.visible = value;
+
+                if (this.canModifyLayer && value) {
+                    console.log('blocking OFF');
+                    this.setSqlFilter('lolfilter', '');
+                }
+            });
         } else {
             this.noLayerErr();
         }
