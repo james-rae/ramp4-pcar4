@@ -1,0 +1,1 @@
+import"./main-Cdvumtis.js";import{o as m}from"./operatorIntersection-BRsd9Z6U.js";import{fromGeometry as a,toGeometry as f,fromGeometryToGXGeometry as p}from"./jsonConverter-C8vnab2l.js";function s(t,r){const e=a(t),o=e.getSpatialReference();return f(m(e.getGeometry(),p(r),o),o)}export{s as execute};
