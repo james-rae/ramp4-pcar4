@@ -93,6 +93,16 @@ export class MapImageLayer extends MapLayer {
             // ensure layer is actually on
             if (value && !this.esriLayer!.visible) {
                 this.esriLayer!.visible = true;
+            } else if (!value && this.esriLayer!.visible) {
+                // secret efficieny test.
+                // wait a bit then turn off layer.
+                setTimeout(() => {
+                    // are we still fake invisible?
+                    if (!this.actualViz) {
+                        // turn off layer to stop pan-pings
+                        this.esriLayer!.visible = false;
+                    }
+                }, 3000);
             }
 
             if (value) {
