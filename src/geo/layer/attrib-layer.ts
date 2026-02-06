@@ -401,6 +401,7 @@ export class AttribLayer extends MapLayer {
             filterKey
         });
 
+        /*
         // updating the filter on the layer can smash the server if multiple changes occur at once.
         // this will delay applying changes if more changes arrive shortly after this one.
         const debounceKey = `${this.uid}-${filterKey}-${whereClause}`;
@@ -415,6 +416,9 @@ export class AttribLayer extends MapLayer {
         };
 
         setTimeout(refreshCheck, 80);
+        */
+
+        this.applySqlFilter();
     }
 
     applySqlFilter(exclusions: Array<string> = []): void {

@@ -56,6 +56,39 @@ export class MapImageLayer extends MapLayer {
         this.identifyMode = LayerIdentifyMode.GEOMETRIC;
     }
 
+    /**
+     * Applies visibility to  .
+     *
+     * @function setVisibility
+     * @param {Boolean} value the new visibility setting
+     */
+    set visibility(value: boolean) {
+        if (this.layerExists) {
+            if (!value) {
+                console.log('blocking ON parent' + this.id);
+                this.sublayers.forEach(sl => {
+                    if (sl.layerExists && sl.canModifyLayer) {
+                        sl.setSqlFilter('lolfilter2', '1=2');
+                    }
+                });
+            }
+
+            console.log('setting viz: ' + value);
+            this.esriLayer!.visible = value;
+
+            if (value) {
+                console.log('blocking OFF parent' + this.id);
+                this.sublayers.forEach(sl => {
+                    if (sl.layerExists && sl.canModifyLayer) {
+                        sl.setSqlFilter('lolfilter2', '');
+                    }
+                });
+            }
+        } else {
+            this.noLayerErr();
+        }
+    }
+
     protected async onInitiate(): Promise<void> {
         this.esriLayer = markRaw(await EsriAPI.MapImageLayer(this.makeEsriLayerConfig(this.origRampConfig)));
 
