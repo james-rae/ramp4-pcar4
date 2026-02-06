@@ -56,6 +56,58 @@ export class MapImageLayer extends MapLayer {
         this.identifyMode = LayerIdentifyMode.GEOMETRIC;
     }
 
+    /**
+     * We keep the esri layer always visible to avoid flicker. This tracks what our fake viz state is.
+     */
+    private actualViz: boolean = false;
+
+    /**
+     * Returns the visibility of the layer.
+     *
+     * @returns {Boolean} visibility of the layer
+     */
+    get visibility(): boolean {
+        return this.actualViz;
+    }
+
+    /**
+     * Applies visibility to  .
+     *
+     * @function setVisibility
+     * @param {Boolean} value the new visibility setting
+     */
+    set visibility(value: boolean) {
+        if (this.layerExists) {
+            if (!value) {
+                console.log('blocking ON parent' + this.id);
+                this.sublayers.forEach(sl => {
+                    if (sl.layerExists && sl.canModifyLayer) {
+                        sl.setSqlFilter('lolfilter2', '1=2');
+                    }
+                });
+            }
+
+            console.log('setting viz: ' + value);
+            this.actualViz = value;
+
+            // ensure layer is actually on
+            if (value && !this.esriLayer!.visible) {
+                this.esriLayer!.visible = true;
+            }
+
+            if (value) {
+                console.log('blocking OFF parent' + this.id);
+                this.sublayers.forEach(sl => {
+                    if (sl.layerExists && sl.canModifyLayer) {
+                        sl.setSqlFilter('lolfilter2', '');
+                    }
+                });
+            }
+        } else {
+            this.noLayerErr();
+        }
+    }
+
     protected async onInitiate(): Promise<void> {
         this.esriLayer = markRaw(await EsriAPI.MapImageLayer(this.makeEsriLayerConfig(this.origRampConfig)));
 
