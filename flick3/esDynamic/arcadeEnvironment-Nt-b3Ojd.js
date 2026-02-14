@@ -1,1 +1,0 @@
-import{n as t}from"./enum-C8Pl9GlZ.js";function e(r){if(typeof r=="string")return r.toLowerCase();if("name"in r)return r.name.toLowerCase();if(typeof r.value!="string")throw new t(null,"InvalidIdentifier",null);return r.value.toLowerCase()}const n=Object.freeze({aborted:!1});export{e as r,n as t};

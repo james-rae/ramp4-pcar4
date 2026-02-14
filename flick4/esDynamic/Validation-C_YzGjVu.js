@@ -1,1 +1,0 @@
-import{cD as n,cH as o,cC as l,cK as r}from"./main-Cdvumtis.js";const d={validationContainer:"validation-container"},$=()=>{},v=({scale:a,status:i,id:s,icon:t,message:e,ref:c})=>l`<div class=${n(d.validationContainer)} ${o(c||$)}><calcite-input-message aria-live=polite .icon=${t} id=${s??r} .scale=${a} .status=${i}>${e}</calcite-input-message></div>`;export{v as V};

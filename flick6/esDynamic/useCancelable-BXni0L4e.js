@@ -1,1 +1,0 @@
-import{eH as r}from"./main-wvCPQF-3.js";const n=()=>r((s,o)=>{const e=new Set;return o.onDisconnected(()=>{e.forEach(c=>c.cancel())}),{add:c=>{[c].flat().forEach(a=>e.add(a))},resources:e}});export{n as u};
