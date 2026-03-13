@@ -1,0 +1,1 @@
+import{a7 as e,ab as a}from"./main-DIl_XuHL.js";import{B as r,p as t}from"./FeatureLikeLayerView-DmTWPruZ.js";class l extends r{constructor(){super(...arguments),this.layer=null}}let s=class extends t(l){};s=e([a("esri.views.2d.layers.KnowledgeGraphSublayerView2D")],s);const o=s;export{o as default};

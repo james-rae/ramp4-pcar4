@@ -1,0 +1,1 @@
+import{n as e}from"./workers-BDMsps2I.js";var t=e;export{t};

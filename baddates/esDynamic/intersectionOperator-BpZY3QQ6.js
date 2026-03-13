@@ -1,0 +1,1 @@
+import"./main-DEatOGo1.js";import{execute as m}from"./operatorIntersection-DQdG5tRi.js";import{fromGeometry as a,toGeometry as f,fromGeometryToGXGeometry as c}from"./jsonConverter-Blb05b2z.js";function n(t,r){const e=a(t),o=e.getSpatialReference();return f(m(e.getGeometry(),c(r),o),o)}export{n as execute};

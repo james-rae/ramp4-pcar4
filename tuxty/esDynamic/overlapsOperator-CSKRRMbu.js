@@ -1,0 +1,1 @@
+import{t as r}from"./OperatorOverlaps-OtW5qROo.js";import{fromGeometry as m,fromGeometryToGXGeometry as n}from"./jsonConverter-DGJx4cg1.js";const a=new r;function c(t,o){const e=m(t);return a.execute(e.getGeometry(),n(o),e.getSpatialReference(),null)}export{c as execute};

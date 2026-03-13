@@ -1,0 +1,1 @@
+import{a7 as e,ab as a}from"./main-DEatOGo1.js";import{B as r,p as t}from"./FeatureLikeLayerView-DWQuXsPA.js";class o extends r{constructor(){super(...arguments),this.layer=null}}let s=class extends t(o){};s=e([a("esri.views.2d.layers.OrientedImageryLayerView2D")],s);const l=s;export{l as default};

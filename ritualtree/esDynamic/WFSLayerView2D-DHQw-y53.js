@@ -1,0 +1,1 @@
+import{a7 as e,ab as a}from"./main-CO6m7wmX.js";import{B as r,p as t}from"./FeatureLikeLayerView-C4SSdq2p.js";class o extends r{constructor(){super(...arguments),this.layer=null}}let s=class extends t(o){};s=e([a("esri.views.2d.layers.WFSLayerView2D")],s);const l=s;export{l as default};

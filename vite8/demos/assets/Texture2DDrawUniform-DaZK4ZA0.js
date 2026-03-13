@@ -1,0 +1,1 @@
+import{t as e}from"./Uniform-Hvgg11bn.js";var t=class extends e{constructor(e,t){super(e,`sampler2D`,2,(n,r,i)=>n.bindTexture(e,t(r,i)))}};export{t};
