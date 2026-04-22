@@ -5,18 +5,48 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { GlobalEvents, InstanceAPI } from '@/api';
 import { useI18n } from 'vue-i18n';
 import type { EsriViewPointerEventCommon } from '@/geo/esri';
+import { usePanguardStore } from './store';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;
+const panguardStore = usePanguardStore();
 const panGuard = ref<HTMLElement>();
 
+const enabled = computed(() => panguardStore.enabled);
 const timeoutID = ref(-1);
 const esriHandlers = reactive<Array<any>>([]);
 const rampHanders = reactive<Array<string>>([]);
+const pointers = new Map<number, { x: number; y: number }>();
+
+const hidePanGuard = () => {
+    panGuard.value?.classList.remove('pg-active');
+
+    if (timeoutID.value !== -1) {
+        clearTimeout(timeoutID.value);
+        timeoutID.value = -1;
+    }
+};
+
+const resetPanGuard = () => {
+    pointers.clear();
+    hidePanGuard();
+};
+
+const setSingleTouchPan = (enabled: boolean) => {
+    const view = iApi.geo.map.esriView;
+
+    if (view?.navigation) {
+        view.navigation.browserTouchPanEnabled = enabled;
+    }
+};
+
+const updateMapNavigation = () => {
+    setSingleTouchPan(!enabled.value);
+};
 
 onMounted(() => {
     setup();
@@ -28,11 +58,13 @@ onMounted(() => {
     );
     rampHanders.push(
         iApi.event.on(GlobalEvents.MAP_DESTROYED, () => {
+            resetPanGuard();
             esriHandlers.forEach(h => h.remove());
         })
     );
     rampHanders.push(
         iApi.event.on(GlobalEvents.MAP_REFRESH_START, () => {
+            resetPanGuard();
             esriHandlers.forEach(h => h.remove());
         })
     );
@@ -44,14 +76,21 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    setSingleTouchPan(true);
     rampHanders.forEach(h => iApi.event.off(h));
     esriHandlers.forEach(h => h.remove());
+    resetPanGuard();
+});
+
+watch(enabled, value => {
+    setSingleTouchPan(!value);
+
+    if (!value) {
+        resetPanGuard();
+    }
 });
 
 const setup = () => {
-    // keep track of how many concurrent pointers are on the screen and their initial positions. This is a javascript map, not a map-map
-    const pointers = new Map();
-
     const touchOffHandler = (e: EsriViewPointerEventCommon): void => {
         if (e.pointerType === 'touch') {
             // small delay as to not offend panguard when more than one finger lifts or leaves the map
@@ -63,9 +102,11 @@ const setup = () => {
 
     // prevent possible issues with esri event registration if this fixture runs before the map has built itself
     iApi.geo.map.viewPromise.then(() => {
+        updateMapNavigation();
+
         esriHandlers.push(
             iApi.geo.map.esriView!.on('pointer-down', e => {
-                if (e.pointerType !== 'touch') return;
+                if (!enabled.value || e.pointerType !== 'touch') return;
                 pointers.set(e.pointerId, { x: e.x, y: e.y });
             })
         );
@@ -76,11 +117,16 @@ const setup = () => {
 
         esriHandlers.push(
             iApi.geo.map.esriView!.on('pointer-move', e => {
+                if (!enabled.value) {
+                    resetPanGuard();
+                    return;
+                }
+
                 const { pointerId, pointerType, x, y } = e;
                 const pointer = pointers.get(pointerId);
 
                 if (!pointer || pointerType !== 'touch' || pointers.size !== 1) {
-                    panGuard.value!.classList.remove('pg-active');
+                    hidePanGuard();
                     return;
                 }
 
@@ -89,14 +135,15 @@ const setup = () => {
                 if (distance < 20) return;
 
                 // show the text on screen and remove after 2 seconds of no movement
-                panGuard.value!.classList.add('pg-active');
+                panGuard.value?.classList.add('pg-active');
 
                 if (timeoutID.value !== -1) {
                     clearTimeout(timeoutID.value);
                 }
 
                 timeoutID.value = window.setTimeout(() => {
-                    panGuard.value!.classList.remove('pg-active');
+                    panGuard.value?.classList.remove('pg-active');
+                    timeoutID.value = -1;
                 }, 2000);
             })
         );

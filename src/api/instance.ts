@@ -59,6 +59,7 @@ import { useNortharrowStore } from '@/fixtures/northarrow/store';
 import { useNotificationStore } from '@/stores/notification';
 import { useOverviewmapStore } from '@/fixtures/overviewmap/store';
 import { usePanelStore } from '@/stores/panel';
+import { usePanguardStore } from '@/fixtures/panguard/store';
 import { useScrollguardStore } from '@/fixtures/scrollguard/store';
 import { useWizardStore } from '@/fixtures/wizard/store';
 
@@ -524,6 +525,7 @@ export class InstanceAPI {
             'metadata',
             'northarrow',
             'overviewmap',
+            'panguard',
             'scrollguard',
             'wizard'
         ];
@@ -563,6 +565,8 @@ export class InstanceAPI {
                 return <Readonly<T>>useNortharrowStore(this.$vApp.$pinia);
             case 'overviewmap':
                 return <Readonly<T>>useOverviewmapStore(this.$vApp.$pinia);
+            case 'panguard':
+                return <Readonly<T>>usePanguardStore(this.$vApp.$pinia);
             case 'scrollguard':
                 return <Readonly<T>>useScrollguardStore(this.$vApp.$pinia);
             case 'wizard':
