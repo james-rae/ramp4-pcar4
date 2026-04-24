@@ -1,0 +1,1 @@
+import"./multi-instances-DIs8JowB.js";
