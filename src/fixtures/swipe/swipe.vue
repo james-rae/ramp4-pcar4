@@ -19,6 +19,7 @@
             :style="{ 'z-index': 10 }"
         />
         <arcgis-swipe
+            tabindex="-1"
             direction="horizontal"
             :swipe-position="swipeComponentPosition"
             :view="view"
