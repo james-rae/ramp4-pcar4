@@ -2,7 +2,7 @@ import type { MapExtent, QueryParams } from './geosearch-state';
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature';
 import { computed, ref } from 'vue';
-import type { IProvinceInfo, ISearchResult} from '../definitions';
+import type { IProvinceInfo, ISearchResult } from '../definitions';
 
 /**
  * Helper function that filters based on query parameters.
@@ -246,21 +246,24 @@ export const useGeosearchStore = defineStore('geosearch', () => {
         // For highlighting purposes, we want to treat accented characters as normal ones & vice versa
         searchTerm = cleanVal(searchTerm);
 
-        searchRegex.value = Array.from(searchTerm)
-            .map(c => {
-                // If character has accents, add them as equivalent replacements to the regex
-                if (Object.keys(accentedChars).includes(c)) {
-                    return '[' + c + accentedChars[c] + ']';
-                }
+        searchRegex.value = searchTerm
+            .trim()
+            .split(/\s+/)
+            .map(word =>
+                Array.from(word)
+                    .map(c => {
+                        // If character has accents, add them as equivalent replacements to the regex
+                        if (Object.keys(accentedChars).includes(c)) {
+                            return '[' + c + accentedChars[c] + ']';
+                        }
 
-                // Replace bad characters with empty string
-                // Escape special regex characters (like '.'), so the string isn't broken
-                return c
-                    .replace(/["$!*+?^{}()|[\]\\]/g, '')
-                    .replace(/[.\\]/g, '\\$&')
-                    .trim();
-            })
-            .join('');
+                        // Replace bad characters with empty string
+                        // Escape special regex characters (like '.'), so the string isn't broken
+                        return c.replace(/["$!*+?^{}()|[\]\\]/g, '').replace(/[.\\]/g, '\\$&');
+                    })
+                    .join('')
+            )
+            .join('|');
     }
 
     /**
