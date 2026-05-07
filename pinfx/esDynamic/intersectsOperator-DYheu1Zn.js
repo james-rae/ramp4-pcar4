@@ -1,0 +1,1 @@
+import{r as e}from"./chunk-BQCxAhux.js";import"./apiConverter-BpN5Zyvx.js";import"./OperatorIntersects-B_K6STiw.js";import{n as t,r as n,t as r}from"./intersectsOperator-jC0ymu_M.js";var i=e({accelerateGeometry:()=>r,execute:()=>n,supportsCurves:()=>t});export{i as t};

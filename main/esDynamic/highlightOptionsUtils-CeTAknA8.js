@@ -1,0 +1,1 @@
+import"./HighlightDefaults-Bb_44AGx.js";function e(e){return e?.name??`default`}export{e as t};

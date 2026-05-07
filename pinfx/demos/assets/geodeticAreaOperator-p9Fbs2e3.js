@@ -1,0 +1,1 @@
+import{r as e}from"./chunk-CaO2_eQ1.js";import"./units-CwYq5mBl.js";import{a as t,i as n,r,t as i}from"./geodeticAreaOperator-Di4v10t5.js";var a=e({execute:()=>r,isLoaded:()=>i,load:()=>n,supportsCurves:()=>t});export{a as t};

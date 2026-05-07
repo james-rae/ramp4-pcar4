@@ -1,0 +1,1 @@
+import{n as e}from"./utils-C-KUAH-p.js";import{t}from"./queryTopFeatures-DEMmdSzh.js";import{n}from"./TopFeaturesQuery-D_vclSth.js";async function r(r,i,a){return(await t(e(r),n.from(i),{...a})).data.count}export{r as executeForTopCount};

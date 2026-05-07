@@ -1,0 +1,1 @@
+import"./teleport-details-LXZdynb5.js";
