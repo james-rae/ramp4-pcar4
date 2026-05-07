@@ -1,8 +1,9 @@
 import messages from './lang/lang.csv?raw';
 import PanguardV from './map-panguard.vue';
-import { FixtureInstance } from '@/api';
+import { PanguardAPI } from './api/panguard';
+import { usePanguardStore } from './store';
 
-class PanguardFixture extends FixtureInstance {
+class PanguardFixture extends PanguardAPI {
     added(): void {
         // console.log(`[fixture] ${this.id} added`);
         // Manually add lang entries to i18n
@@ -18,6 +19,9 @@ class PanguardFixture extends FixtureInstance {
         this.removed = () => {
             // console.log(`[fixture] ${this.id} removed`);
             destroy();
+
+            const panguardStore = usePanguardStore(this.$vApp.$pinia);
+            panguardStore.$reset();
         };
     }
 }

@@ -192,7 +192,7 @@ export class MapAPI extends CommonMapAPI {
                 spatialReference: this._rampSR.toESRI(),
                 extent: this._rampExtentSet.defaultExtent.toESRI(),
                 navigation: {
-                    browserTouchPanEnabled: false
+                    browserTouchPanEnabled: true
                 },
                 background: { color: bm.backgroundColour }
             })
