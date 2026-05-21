@@ -1,0 +1,1 @@
+import"./multi-instances-DD4a29lZ.js";

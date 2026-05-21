@@ -1,0 +1,1 @@
+import"./HighlightDefaults-8UBT2Dmf.js";function e(e){return e?.name??`default`}export{e as t};

@@ -1,0 +1,1 @@
+import{t as e}from"./FeatureSet-DcLCQjcH.js";import{n as t}from"./utils-C-KUAH-p.js";import{i as n}from"./queryTopFeatures-DEMmdSzh.js";import{n as r}from"./TopFeaturesQuery-D_vclSth.js";async function i(i,a,o,s){let c=t(i),l={...s},{data:u}=await n(c,r.from(a),o,l);return e.fromJSON(u)}export{i as executeTopFeaturesQuery};

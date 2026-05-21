@@ -1,0 +1,1 @@
+import"./multi-instances-3nJ1yPgw.js";
