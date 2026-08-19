@@ -488,6 +488,12 @@ export interface GetGraphicParams {
      * Only valid with getGeom flag. Only valid for Point/Multipoint geometries.
      */
     forZoom?: boolean;
+
+    /**
+     * Indicates we should not attempt local-layer interrogations.
+     * Only valid with getGeom flag. Only valid for Feature Layers.
+     */
+    serverOnly?: boolean;
 }
 
 export interface GetGraphicServiceDetails {
@@ -844,6 +850,7 @@ export interface RampLayerConfig {
     maxLoadTime?: number; // how long layer can load before error
     labels?: RampLabelsConfig; // label config. for now only valid on MILSublayer but needs to be here due to inheritance fun
     geomClustering?: EsriFeatureReductionCluster; // spatially groups geometries into clusters
+    divertIdentifyLayer?: RampLayerConfig;
 }
 
 export interface RampExtentConfig {
