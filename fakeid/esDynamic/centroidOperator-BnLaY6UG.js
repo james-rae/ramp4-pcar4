@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime-DY7j01NX.js";import"./apiConverter-DyLwAYcj.js";import{t}from"./centroidOperator-cOZDDcU2.js";var n=e({execute:()=>t});export{n as t};

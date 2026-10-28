@@ -1,1 +1,0 @@
-import"./Point2D-CyGifH7F.js";export{Et as queryTransformationList}from"./SpatialReference-BPacMEKJ.js";

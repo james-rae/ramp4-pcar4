@@ -1,1 +1,0 @@
-import"./apiConverter-DJGhCaRo.js";export{i as execute,t as executeMany,r as supportsCurves}from"./clipOperator-DMw_QFot.js";
