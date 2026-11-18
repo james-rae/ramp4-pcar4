@@ -32,13 +32,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useGeosearchStore } from './store';
+import { useGeosearchStoreOld } from './store';
 import { debounce } from 'es-toolkit/function';
 import { useI18n } from 'vue-i18n';
 import { usePanelStore } from '@/stores/panel';
 
 const { t } = useI18n();
-const geosearchStore = useGeosearchStore();
+const geosearchStore = useGeosearchStoreOld();
 const panelStore = usePanelStore();
 
 const searchVal = computed(() => geosearchStore.searchVal);

@@ -4,14 +4,14 @@ import GeosearchNavButtonV from './nav-button.vue';
 
 import messages from './lang/lang.csv?raw';
 import { useAppbarStore } from '../appbar/store';
-import { useGeosearchStore } from './store';
+import { useGeosearchStoreOld } from './store';
 import { useMapnavStore } from '../mapnav/store';
 
 class GeosearchFixture extends GeosearchAPI {
     async added() {
         // console.log(`[fixture] ${this.id} added`);
 
-        const geosearchStore = useGeosearchStore(this.$vApp.$pinia);
+        const geosearchStore = useGeosearchStoreOld(this.$vApp.$pinia);
         geosearchStore.initService(this.$iApi.language, this.config);
 
         this.$iApi.component('geosearch-nav-button', GeosearchNavButtonV);
@@ -49,7 +49,7 @@ class GeosearchFixture extends GeosearchAPI {
             mapnavStore.removeItem('geosearch');
         }
 
-        const geosearchStore = useGeosearchStore(this.$vApp.$pinia);
+        const geosearchStore = useGeosearchStoreOld(this.$vApp.$pinia);
         geosearchStore.$reset();
 
         this.$iApi.panel.remove('geosearch');

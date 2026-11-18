@@ -72,12 +72,12 @@ import type { PropType } from 'vue';
 import type { InstanceAPI, PanelInstance } from '@/api';
 import { GlobalEvents } from '@/api';
 import { Polygon, SpatialReference } from '@/geo/api';
-import { useGeosearchStore } from './store';
+import { useGeosearchStoreOld } from './store';
 import GeosearchBar from './search-bar.vue';
 import GeosearchTopFilters from './top-filters.vue';
 import GeosearchBottomFilters from './bottom-filters.vue';
 import LoadingBar from './loading-bar.vue';
-import { jsonRequest } from './store/query';
+import { jsonRequest } from './store/query-old';
 import { useI18n } from 'vue-i18n';
 import type { ISearchResult } from './definitions';
 import { FSATOKEN } from './definitions';
@@ -85,7 +85,7 @@ import to from 'await-to-js';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;
-const geosearchStore = useGeosearchStore();
+const geosearchStore = useGeosearchStoreOld();
 
 defineProps({
     panel: {

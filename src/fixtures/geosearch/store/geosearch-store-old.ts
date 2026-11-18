@@ -1,6 +1,6 @@
-import type { MapExtent, QueryParams } from './geosearch-state';
+import type { MapExtent, QueryParams } from './geosearch-state-old';
 import { defineStore } from 'pinia';
-import { GeoSearchUI } from './geosearch.feature';
+import { GeoSearchUI } from './geosearch.feature-old';
 import { computed, ref } from 'vue';
 import type { IProvinceInfo, ISearchResult } from '../definitions';
 
@@ -33,7 +33,7 @@ function filter(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>
     return data;
 }
 
-export const useGeosearchStore = defineStore('geosearch', () => {
+export const useGeosearchStoreOld = defineStore('geosearch', () => {
     // NOTE this is just defining the reactive instance of GSUI. The lang gets properly set in .initService()
     const GSservice = ref<GeoSearchUI>(new GeoSearchUI('en', undefined));
     const queryParams = ref<QueryParams>({

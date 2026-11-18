@@ -93,7 +93,9 @@ export interface ILocationResponse {
 
 export type LocationResponseList = ILocationResponse[];
 
-// used for injecting the desired code in the fsa query url
+/**
+ * used for injecting the desired code in the fsa query url
+ */
 export const FSATOKEN = '~FSA~';
 
 export interface IProvinceInfo {

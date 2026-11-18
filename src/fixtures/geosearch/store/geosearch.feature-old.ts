@@ -2,12 +2,12 @@
  * @namespace geoSearch
  * @description A feature that provides geo location search
  */
-import Provinces from './provinces';
-import Types from './types';
-import * as GeoSearchQuery from './query';
+import Provinces from './provinces-old';
+import Types from './types-old';
+import * as GeoSearchQuery from './query-old';
 import type { ICustomSource, IGeosearchConfig, IProvinceInfo, ISearchResult } from '../definitions';
 import { FSATOKEN } from '../definitions';
-import { useGeosearchStore } from './geosearch-store';
+import { useGeosearchStoreOld } from './geosearch-store-old';
 
 // geosearch query services
 // note "geolocation" is a service for looking up locations in canada. It is not a geolocator for the browser's location.
@@ -87,7 +87,7 @@ export class GeoSearchUI {
             ...src,
             onSearch: async (searchTerm: string): Promise<ISearchResult[]> => {
                 const data: Array<any> = (src as any).data ?? [];
-                const geosearchStore = useGeosearchStore();
+                const geosearchStore = useGeosearchStoreOld();
                 // the main searcher is encoding the search term for web requests. Since we are now searching plain text, reverse.
                 const cleanedTerm = decodeURIComponent(geosearchStore.cleanVal(searchTerm)).replace('*', '');
                 return data

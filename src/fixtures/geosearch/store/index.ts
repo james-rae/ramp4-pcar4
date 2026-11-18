@@ -1,2 +1,2 @@
-export * from './geosearch-state';
-export * from './geosearch-store';
+export * from './geosearch-state-old';
+export * from './geosearch-store-old';

@@ -18,7 +18,7 @@
 import { GlobalEvents } from '@/api/internal';
 import type { InstanceAPI } from '@/api/internal';
 import type { Extent } from '@/geo/api';
-import { useGeosearchStore } from './store';
+import { useGeosearchStoreOld } from './store';
 import { debounce } from 'es-toolkit/function';
 
 import { computed, inject, onBeforeUnmount, onMounted } from 'vue';
@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;
-const geosearchStore = useGeosearchStore();
+const geosearchStore = useGeosearchStoreOld();
 
 const resultsVisible = computed<boolean>(() => geosearchStore.resultsVisible);
 
