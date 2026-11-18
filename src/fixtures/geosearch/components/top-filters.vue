@@ -63,11 +63,11 @@
 <script setup lang="ts">
 import type { InstanceAPI } from '@/api';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
-import type { GeosearchAPI } from './api/geosearch';
-import { useGeosearchStoreOld } from './store';
-import type { QueryParams } from './store';
+import type { GeosearchAPI } from '../api/geosearch';
+import { useGeosearchStoreOld } from '../store';
+import type { QueryParams } from '../store';
 import { useI18n } from 'vue-i18n';
-import type { IProvinceInfo } from './definitions';
+import type { IProvinceInfo } from '../definitions';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;

@@ -1,3 +1,5 @@
+import type { Extent } from '@/geo/api';
+
 export interface IGenericObjectType {
     [key: string]: string;
 }
@@ -154,3 +156,28 @@ export interface ISearchResult {
 }
 
 export type SearchResultList = Array<ISearchResult>;
+
+/**
+ * Additional filters for a query
+ */
+export interface QueryFilters {
+    // TODO rename to QueryFilters
+    type: string;
+    province: string;
+    extent: Extent | undefined;
+}
+
+// TODO smarter to combine this with QueryFilters above? seems this and extent: Extent|undefined serve the same purpose
+/**
+ * Parameters for the map extent filter
+ */
+export interface MapExtentFilter {
+    /**
+     * The extent to filter against
+     */
+    extent: Extent;
+    /**
+     * If we are filtering against what is visible on the map
+     */
+    visible: boolean;
+}

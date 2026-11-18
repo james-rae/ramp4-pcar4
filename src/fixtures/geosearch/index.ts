@@ -1,6 +1,6 @@
 import { markRaw } from 'vue';
 import { GeosearchAPI } from './api/geosearch';
-import GeosearchNavButtonV from './nav-button.vue';
+import GeosearchNavButtonV from './components/nav-button.vue';
 
 import messages from './lang/lang.csv?raw';
 import { useAppbarStore } from '../appbar/store';
@@ -21,7 +21,7 @@ class GeosearchFixture extends GeosearchAPI {
                 id: 'geosearch',
                 config: {
                     screens: {
-                        'geosearch-component': () => markRaw(import('./screen.vue'))
+                        'geosearch-component': () => markRaw(import('./geosearch-screen.vue'))
                     },
                     button: {
                         tooltip: 'geosearch.title',

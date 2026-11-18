@@ -18,7 +18,7 @@
 import { GlobalEvents } from '@/api/internal';
 import type { InstanceAPI } from '@/api/internal';
 import type { Extent } from '@/geo/api';
-import { useGeosearchStoreOld } from './store';
+import { useGeosearchStoreOld } from '../store';
 import { debounce } from 'es-toolkit/function';
 
 import { computed, inject, onBeforeUnmount, onMounted } from 'vue';

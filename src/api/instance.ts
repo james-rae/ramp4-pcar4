@@ -44,7 +44,7 @@ import { useDetailsStore } from '@/fixtures/details/store';
 import { useExportStore } from '@/fixtures/export/store';
 import { useExtentguardStore } from '@/fixtures/extentguard/store';
 import { useFixtureStore } from '@/stores/fixture';
-import { useGeosearchStoreOld } from '@/fixtures/geosearch/store';
+import { useGeosearchStore } from '@/fixtures/geosearch/store';
 import { useGridStore } from '@/fixtures/grid/store';
 import { useHelpStore } from '@/fixtures/help/store';
 import { useKeyboardnavStore } from '@/fixtures/keyboardnav/store/keyboardnav-store';
@@ -561,7 +561,7 @@ export class InstanceAPI {
             case 'extentguard':
                 return <Readonly<T>>useExtentguardStore(this.$vApp.$pinia);
             case 'geosearch':
-                return <Readonly<T>>useGeosearchStoreOld(this.$vApp.$pinia);
+                return <Readonly<T>>useGeosearchStore(this.$vApp.$pinia);
             case 'grid':
                 return <Readonly<T>>useGridStore(this.$vApp.$pinia);
             case 'help':

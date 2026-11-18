@@ -1,4 +1,3 @@
-import type { MapExtent, QueryParams } from './geosearch-state-old';
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature-old';
 import { computed, ref } from 'vue';
@@ -12,7 +11,7 @@ import type { IProvinceInfo, ISearchResult } from '../definitions';
  * @param {Object}  queryParams Contains which filter to process
  * @param {Array}   data        An array of results from the query
  */
-function filter(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>) {
+function filterOLD(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>) {
     if (visibleOnly && queryParams.extent) {
         // ensure bbox boundaries are within the current map extent properties
         const extent = queryParams.extent!;
@@ -102,7 +101,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
         GSservice.value = new GeoSearchUI(lang, config);
     }
 
-    function cleanVal(val: string) {
+    function cleanValOld(val: string) {
         return val
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -115,7 +114,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
      * @function runQuery
      * @param {boolean} forceReRun whether to force the server query (i.e. the typed-in search) to run again
      */
-    function runQuery(forceReRun?: boolean): void {
+    function runQueryOld(forceReRun?: boolean): void {
         // set loading flag to true and turn off when reach return
         loadingResults.value = true;
         // Replace bad characters with empty string because the default geocratis service
@@ -211,7 +210,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
      * @function setSearchRegex
      * @param {string} searchTerm current geosearch search value term
      */
-    function setSearchRegex(searchTerm: string): void {
+    function setSearchRegexOld(searchTerm: string): void {
         // List of all character accents
         // (NOTE: probably not a comprehensive list, add more as encountered)
         const accentedChars: { [key: string]: string } = {
