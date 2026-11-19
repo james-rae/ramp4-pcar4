@@ -1,1 +1,0 @@
-import{hm as e}from"./store-Dx3UekD1.js";async function t(t,n){return(await e(t,{responseType:`image`,...n})).data}export{t};

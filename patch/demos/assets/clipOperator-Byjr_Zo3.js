@@ -1,1 +1,0 @@
-export{i as execute,t as executeMany,r as supportsCurves}from"./clipOperator-Ct45GmMX.js";import"./apiConverter-Bi_vhE0d.js";
