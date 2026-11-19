@@ -11,7 +11,7 @@ import type { IProvinceInfo, ISearchResult } from '../definitions';
  * @param {Object}  queryParams Contains which filter to process
  * @param {Array}   data        An array of results from the query
  */
-function filterOLD(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>) {
+function filterOld(visibleOnly: boolean, queryParams: QueryParams, data: Array<any>) {
     if (visibleOnly && queryParams.extent) {
         // ensure bbox boundaries are within the current map extent properties
         const extent = queryParams.extent!;
@@ -138,7 +138,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
                             savedResults.value = data.results;
 
                             // replace old saved results
-                            const filteredData = filter(
+                            const filteredData = filterOld(
                                 resultsVisible.value,
                                 //@ts-expect-error TODO: explain why this is needed or remove
                                 queryParams.value,
@@ -151,7 +151,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
                 }, 250);
             } else {
                 // otherwise no new search term so we only need to filter on query param values
-                const filteredData = filter(
+                const filteredData = filterOld(
                     resultsVisible.value,
                     //@ts-expect-error TODO: explain why this is needed or remove
                     queryParams.value,
@@ -304,12 +304,12 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
         getProvinces,
         getTypes,
         initService,
-        runQuery,
+        runQueryOld,
         setProvince,
         setType,
         setSearchTerm,
-        setSearchRegex,
+        setSearchRegexOld,
         setMapExtent,
-        cleanVal
+        cleanValOld
     };
 });

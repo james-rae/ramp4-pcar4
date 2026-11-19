@@ -89,7 +89,7 @@ export class GeoSearchUI {
                 const data: Array<any> = (src as any).data ?? [];
                 const geosearchStore = useGeosearchStoreOld();
                 // the main searcher is encoding the search term for web requests. Since we are now searching plain text, reverse.
-                const cleanedTerm = decodeURIComponent(geosearchStore.cleanVal(searchTerm)).replace('*', '');
+                const cleanedTerm = decodeURIComponent(geosearchStore.lowerNoAccent(searchTerm)).replace('*', '');
                 return data
                     .filter(item => item.name.toLowerCase().includes(cleanedTerm))
                     .map<ISearchResult>(item => ({

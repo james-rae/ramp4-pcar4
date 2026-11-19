@@ -86,7 +86,7 @@ class Provinces {
      * Get the province information for a province code
      * @param provCode numeric prov code
      */
-    codeToProvince(provCode: number): IProvinceInfo {
+    codeToProvinceOld(provCode: number): IProvinceInfo {
         return this.provinceList.find(pvi => pvi.code === provCode)!;
     }
 

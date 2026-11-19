@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature-old';
 import { computed, ref } from 'vue';
-import type { IProvinceInfo, ISearchResult, MapExtentFilter, QueryFilters } from '../definitions';
+import type { IProvinceInfo, ISearchResult, LangLookup, MapExtentFilter, QueryFilters } from '../definitions';
 
 export const useGeosearchStore = defineStore('geosearch', () => {
     // NOTE this is just defining the reactive instance of GSUI. The lang gets properly set in .initService()
@@ -50,6 +50,11 @@ export const useGeosearchStore = defineStore('geosearch', () => {
      */
     const loadingResults = ref<boolean>(false);
     const failedServices = ref<Array<string>>([]);
+
+    /**
+     * Our cache of province data
+     */
+    const provinceData = ref<LangLookup<Array<IProvinceInfo>>>({ en: undefined, fr: undefined });
 
     /**
      * Fetches the list of all possible provinces in a geoName query. Province objects contain the following properties:
@@ -186,7 +191,6 @@ export const useGeosearchStore = defineStore('geosearch', () => {
         setType,
         setSearchTerm,
         setSearchRegex,
-        setMapExtent,
-        cleanVal
+        setMapExtent
     };
 });

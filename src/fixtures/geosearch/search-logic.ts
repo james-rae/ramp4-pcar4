@@ -3,8 +3,15 @@
 import type { ISearchResult, QueryFilters } from './definitions';
 import { useGeosearchStore } from './store';
 
-export function cleanVal(val: string): string {
-    // TODO rename method once we know what it actually does
+/**
+ * Takes a string and converts it to an equivalent string that is lowercase and
+ * has all accents removed from letters (e.g. é becomes e )
+ */
+export function lowerNoAccent(val: string): string {
+    // trickery to convert accent characters to their base letters.
+    // the NFD thing converts to unicode "canonical decomposition". This splits stuff like ö into an o and a unicode for the dots.
+    // the replace targets the range of unicode that represent the different accent symbols.  so we're essentially stripping them out.
+    // then we to-lower which does that but also re-assembles everything into a basic string
 
     return val
         .normalize('NFD')
@@ -55,7 +62,9 @@ export function runQuery(forceReRun?: boolean): void {
     // TODO consider having a way to run the query with passed-in parameter values as overrides to the store values.
     //      different approach is have a generalized version of this, then two other methods that call it,
     //      one that collects data from store and makes the param payload, other accepts param payload.
-    //      the store-based one could live in the store. have the other one here for API call useage
+    //      the store-based one could live in the store. have the other one here for API call useage.
+    //      Also may want to separate the "search" and the "show in the UI" functionality.
+    //      Would let someone just get geosearch stuff without the UI going ham.
 
     const gsStore = useGeosearchStore();
 
@@ -147,7 +156,7 @@ export function makeSearchRegex(searchTerm: string): string {
 
     // Strip out all accents first, to make life easier
     // For highlighting purposes, we want to treat accented characters as normal ones & vice versa
-    searchTerm = cleanVal(searchTerm);
+    searchTerm = lowerNoAccent(searchTerm);
 
     return searchTerm
         .trim()

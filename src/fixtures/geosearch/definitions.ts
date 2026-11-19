@@ -5,6 +5,14 @@ export interface IGenericObjectType {
 }
 
 /**
+ * A structure for storing two variants of the same thing, one for each language
+ */
+export type LangLookup<T> = {
+    en: T;
+    fr: T;
+};
+
+/**
  * FSA / NTS / Address / Name / LatLon
  */
 export type FlavourKey = 'fsa' | 'nts' | 'add' | 'nme' | 'llg';
@@ -100,13 +108,9 @@ export type LocationResponseList = ILocationResponse[];
  */
 export const FSATOKEN = '~FSA~';
 
-export interface IProvinceInfo {
+export interface AbbrNamePair {
     /**
-     * Numeric province code
-     */
-    code: number;
-    /**
-     * Province abbreviation
+     * abbreviation / code
      */
     abbr: string;
 
@@ -114,6 +118,13 @@ export interface IProvinceInfo {
      * Full name
      */
     name: string;
+}
+
+export function abbrPairMaker(abbr: string, name: string): AbbrNamePair {
+    return {
+        abbr,
+        name
+    };
 }
 
 export interface ISearchResult {
