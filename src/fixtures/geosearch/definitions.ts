@@ -120,13 +120,6 @@ export interface AbbrNamePair {
     name: string;
 }
 
-export function abbrPairMaker(abbr: string, name: string): AbbrNamePair {
-    return {
-        abbr,
-        name
-    };
-}
-
 export interface ISearchResult {
     /**
      * Primary display name
@@ -172,9 +165,8 @@ export type SearchResultList = Array<ISearchResult>;
  * Additional filters for a query
  */
 export interface QueryFilters {
-    // TODO rename to QueryFilters
-    type: string;
-    province: string;
+    category: string; // TODO same, should this be code?
+    province: string; // TODO will it make sense for this to be province abbreviation??
     extent: Extent | undefined;
 }
 

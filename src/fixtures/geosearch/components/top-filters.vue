@@ -15,7 +15,7 @@
                 <option value="" disabled hidden v-truncate>
                     {{ t('geosearch.filters.province') }}
                 </option>
-                <option v-for="province in provinces" v-bind:key="province.code" v-truncate>
+                <option v-for="province in provinces" v-bind:key="province.abbr" v-truncate>
                     {{ province.name }}
                 </option>
             </select>
@@ -23,8 +23,8 @@
         <div class="sm:w-1/2 h-26 sm:mx-16 flex">
             <select
                 class="border-b border-b-gray-600 w-full h-full py-0 cursor-pointer max-w-150"
-                :value="queryParams.type"
-                :aria-label="t('geosearch.filters.type')"
+                :value="queryParams.category"
+                :aria-label="t('geosearch.filters.category')"
                 v-on:change="
                     setType({
                         type: ($event.target as HTMLSelectElement).value
@@ -33,7 +33,7 @@
                 v-truncate
             >
                 <option value="" disabled hidden>
-                    {{ t('geosearch.filters.type') }}
+                    {{ t('geosearch.filters.category') }}
                 </option>
                 <option v-for="t in types" :key="t.code">
                     {{ t.name }}
@@ -42,7 +42,7 @@
             <button
                 type="button"
                 class="text-gray-500 w-1/8 h-24 pl-8 pr-16 sm:pr-8 hover:text-black disabled:cursor-default disabled:text-gray-400"
-                :disabled="!queryParams.type && !queryParams.province"
+                :disabled="!queryParams.category && !queryParams.province"
                 v-on:click="clearFilters"
                 :content="t('geosearch.filters.clear')"
                 :aria-label="t('geosearch.filters.clear')"
@@ -64,20 +64,19 @@
 import type { InstanceAPI } from '@/api';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import type { GeosearchAPI } from '../api/geosearch';
-import { useGeosearchStoreOld } from '../store';
-import type { QueryParams } from '../store';
+import { useGeosearchStore } from '../store';
 import { useI18n } from 'vue-i18n';
-import type { IProvinceInfo } from '../definitions';
+import type { AbbrNamePair, QueryFilters } from '../definitions';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;
-const geosearchStore = useGeosearchStoreOld();
+const geosearchStore = useGeosearchStore();
 
-const provinces = ref<Array<IProvinceInfo>>([]);
+const provinces = ref<Array<AbbrNamePair>>([]);
 const types = ref<Array<any>>([]);
 const watchers = ref<Array<() => void>>([]);
 
-const queryParams = computed<QueryParams>(() => geosearchStore.queryParams as QueryParams);
+const queryParams = computed<QueryFilters>(() => geosearchStore.queryParams as QueryFilters);
 const language = computed<string>(() => iApi.language);
 
 const setProvince = (payload: { province?: string; forceReRun?: boolean }) => geosearchStore.setProvince(payload);
@@ -102,17 +101,18 @@ const updateProvincesAndTypes = () => {
     geosearchStore.initService(iApi.language, iApi.fixture.get<GeosearchAPI>('geosearch').config);
 
     // convert current province and type selection to new lang
-    const queryProvCode = provinces.value.find(prov => queryParams.value.province === prov.name)?.code;
-    const queryTypeCode = types.value.find(type => queryParams.value.type === type.name)?.code;
+    // TODO revisit this. would it make more sense for the queryParam to be the abbr value?   Same with type
+    const queryProvCode = provinces.value.find(prov => queryParams.value.province === prov.name)?.abbr;
+    const queryTypeCode = types.value.find(type => queryParams.value.category === type.name)?.abbr;
 
     // populate province and type selection lists in new lang
-    geosearchStore.getProvinces.then(provs => {
-        provinces.value = provs;
-        setProvince({
-            province: provs.find(prov => prov.code === queryProvCode)?.name,
-            forceReRun: true
-        });
+
+    provinces.value = geosearchStore.provinceList;
+    setProvince({
+        province: geosearchStore.provinceList.find(prov => prov.abbr === queryProvCode)?.name,
+        forceReRun: true
     });
+
     geosearchStore.getTypes.then(typs => {
         types.value = typs;
         setType({

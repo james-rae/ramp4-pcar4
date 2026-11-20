@@ -4,7 +4,7 @@ geosearch.noResults,No results to show for ,1,Aucun résultat à afficher pour ,
 geosearch.searchText,Search for a location...,1,Rechercher un emplacement...,1
 geosearch.visible,Visible on map,1,Visible sur la carte,1
 geosearch.filters.province,Province,1,Province,1
-geosearch.filters.type,Type,1,Type,1
+geosearch.filters.category,Type,1,Type,1
 geosearch.filters.clear,Clear filters,1,Effacer les filtres,1
 geosearch.serviceError,No response from {services} service(s),1,Pas de réponse de la part des services de {services},1
 geosearch.badChars,The character(s) {chars} are not supported and will be ignored,1,Les caractères {chars} ne sont pas pris en charge et seront ignorés,0

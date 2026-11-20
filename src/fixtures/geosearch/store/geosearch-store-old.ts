@@ -70,7 +70,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
      *
      * @return {Promise<Array>} a promise that resolves to a list of all provinces in the form
      */
-    const getProvinces = computed<Promise<Array<IProvinceInfo>>>(() =>
+    const getProvincesOld = computed<Promise<Array<IProvinceInfo>>>(() =>
         GSservice.value.fetchProvinces().then(provs => {
             provs.sort((provA, provB) => provA.name.localeCompare(provB.name, undefined, { sensitivity: 'case' }));
             return provs;
@@ -85,7 +85,7 @@ export const useGeosearchStoreOld = defineStore('geosearch', () => {
      * @function getTypes
      * @return {Promise<Array>} a promise that resolves to a list of all types in the form
      */
-    const getTypes = computed<Promise<Array<any>>>(
+    const getTypesOld = computed<Promise<Array<any>>>(
         () =>
             new Promise(resolve => {
                 GSservice.value.fetchTypes().then((types: Array<any>) => {

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature-old';
 import { computed, ref } from 'vue';
-import type { IProvinceInfo, ISearchResult, LangLookup, MapExtentFilter, QueryFilters } from '../definitions';
+import type { AbbrNamePair, ISearchResult, MapExtentFilter, QueryFilters } from '../definitions';
+import { categoryData, provinceData } from '../dov-tools';
 
 export const useGeosearchStore = defineStore('geosearch', () => {
     // NOTE this is just defining the reactive instance of GSUI. The lang gets properly set in .initService()
@@ -51,47 +52,29 @@ export const useGeosearchStore = defineStore('geosearch', () => {
     const loadingResults = ref<boolean>(false);
     const failedServices = ref<Array<string>>([]);
 
+    // TODO ideally we wouldn't need this and could just bind to the reactive instance.$i18n.locale.value
+    //      It seems stores are not tied to the instance (maybe?), so doing this for now.
+    //      If there is a smart way to link it, do so cuz this is a bit silly
     /**
-     * Our cache of province data
+     * The active language.
      */
-    const provinceData = ref<LangLookup<Array<IProvinceInfo>>>({ en: undefined, fr: undefined });
+    const gsLang = ref<'en' | 'fr'>('en');
+
+    const sortyMcGhee = (itemA: AbbrNamePair, itemB: AbbrNamePair): number =>
+        itemA.name.localeCompare(itemB.name, undefined, { sensitivity: 'case' });
 
     /**
-     * Fetches the list of all possible provinces in a geoName query. Province objects contain the following properties:
-     * code: numeric province code (i.e. ontario is 35)
-     * abbr: short hand notation (Ontario is ON)
-     * name: full province name
-     *
-     * @return {Promise<Array>} a promise that resolves to a list of all provinces in the form
+     * Returns the list of province abbr/name objects in the active language, sorted by name
      */
-    const getProvinces = computed<Promise<Array<IProvinceInfo>>>(() =>
-        GSservice.value.fetchProvinces().then(provs => {
-            provs.sort((provA, provB) => provA.name.localeCompare(provB.name, undefined, { sensitivity: 'case' }));
-            return provs;
-        })
-    );
+    const provinceList = computed<Array<AbbrNamePair>>(() => provinceData[gsLang.value].toSorted(sortyMcGhee));
 
     /**
-     * Fetches the list of all possible types in a geoName query. Returned type objects contain the following properties:
-     * code: short form code (i.e. TERR)
-     * name: full type name (i.e. Territory)
-     *
-     * @function getTypes
-     * @return {Promise<Array>} a promise that resolves to a list of all types in the form
+     * Returns the list of category abbr/name objects in the active language, sorted by name
      */
-    const getTypes = computed<Promise<Array<any>>>(
-        () =>
-            new Promise(resolve => {
-                GSservice.value.fetchTypes().then((types: Array<any>) => {
-                    types.sort((typeA: any, typeB: any) =>
-                        typeA.name.localeCompare(typeB.name, undefined, { sensitivity: 'case' })
-                    );
-                    resolve(types);
-                });
-            })
-    );
+    const categoryList = computed<Array<AbbrNamePair>>(() => categoryData[gsLang.value].toSorted(sortyMcGhee));
 
     function initService(lang: string, config: any) {
+        gsLang.value = lang as 'en' | 'fr';
         GSservice.value = new GeoSearchUI(lang, config);
     }
 
@@ -184,8 +167,9 @@ export const useGeosearchStore = defineStore('geosearch', () => {
         savedResults,
         loadingResults,
         failedServices,
-        getProvinces,
-        getTypes,
+        provinceList,
+        categoryList,
+        gsLang,
         initService,
         setProvince,
         setType,
