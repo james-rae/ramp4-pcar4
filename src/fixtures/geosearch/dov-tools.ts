@@ -1,11 +1,33 @@
 // logic for working with the category and province values
 
-import type { AbbrNamePair, LangLookup } from './definitions';
 import { zip } from 'es-toolkit';
 import { useGeosearchStore } from './store';
 
+// NOTE: if the whole `as const` trick for types blows up when we try to add custom categories,
+//       i guess just roll back to basic string
+
 // TODO revist the .. key.  maybe change to XX or something. make sure our combo code recognizes the key as nothing
-const provAbbr = ['..', 'AB', 'BC', 'IW', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'UF', 'YT'];
+const provCodes = [
+    '..',
+    'AB',
+    'BC',
+    'IW',
+    'MB',
+    'NB',
+    'NL',
+    'NS',
+    'NT',
+    'NU',
+    'ON',
+    'PE',
+    'QC',
+    'SK',
+    'UF',
+    'YT'
+] as const;
+
+export type ProvCode = (typeof provCodes)[number];
+
 const provEn = [
     '...',
     'Alberta',
@@ -43,7 +65,7 @@ const provFr = [
     'Yukon'
 ];
 
-const fsaToProv: { [key: string]: string } = {
+const fsaToProv: { [key: string]: ProvCode } = {
     A: 'NL',
     B: 'NS',
     C: 'PE',
@@ -75,8 +97,10 @@ const fsaToProv: { [key: string]: string } = {
 // the current risk is that the new services will add new categories and we won't be aware of it, and thus
 // they will not appear in the filter combo. we'll deal with this as best we can. as far as I can tell,
 // the modern service does not expose a DOV-type list.
-// there is also the issue that some results from OpenStreetMap don't have a category set, despite being obvious (e.g. a lake with category "")
-const catAbbr = [
+// there is also the issue that some results from OpenStreetMap don't have a category set, despite being obvious (e.g. a lake with category ""),
+// or have different wordings (e.g. "Waterway"). May not be able to use them, or use with limitations
+
+const catCodes = [
     '..',
     'AIR',
     'BAY',
@@ -127,8 +151,25 @@ const catAbbr = [
     'UTM',
     'VALL',
     'VEGL',
-    'VILG'
-];
+    'VILG',
+    // the following codes are not from the concise list, they are our custom ones for special handcrafted results
+    'ADDRESS',
+    'FSA',
+    'NTS',
+    'COORD'
+] as const;
+
+export type CategoryCode = (typeof catCodes)[number];
+
+// new things from geonames
+// Dispersed Rural Community | Collectivité rurale dispersée
+// Compact Rural Community | Collectivité rurale concentrée
+// Railway Point | Point ferroviaire
+// Creek | Crique
+// Township Municipality | Municipalité de canton
+// Geographic Township | Canton géographique
+// Hill | Colline
+
 const catEn = [
     '...',
     'Air Navigation Feature',
@@ -180,7 +221,11 @@ const catEn = [
     'Upper Tier Municipality',
     'Valley',
     'Low Vegetation',
-    'Village'
+    'Village',
+    'Street Address',
+    'Forward Sortation Area',
+    'National Topographic System',
+    'Latitude/Longitude'
 ];
 const catFr = [
     '...',
@@ -233,24 +278,60 @@ const catFr = [
     'Municipalité de palier supérieure',
     'Vallée',
     'Végétation basse',
-    'Village'
+    'Village',
+    'Adresse Municipale',
+    "Région De Tri D'Acheminement",
+    'Système National De Référence Cartographique',
+    'Latitude/Longitude'
 ];
 
-function langPairMaker(abbrArray: Array<string>, nameArray: Array<string>): Array<AbbrNamePair> {
+export interface ProvinceInfo {
+    /**
+     * code string
+     */
+    code: ProvCode;
+
+    /**
+     * Full name
+     */
+    name: string;
+}
+
+export interface CategoryInfo {
+    /**
+     * code string
+     */
+    code: CategoryCode;
+
+    /**
+     * Full name
+     */
+    name: string;
+}
+
+/**
+ * A structure for storing two variants of the same thing, one for each language
+ */
+interface LangLookup<T> {
+    en: T;
+    fr: T;
+}
+
+function langPairMaker<T>(abbrArray: ReadonlyArray<T>, nameArray: Array<string>): Array<any> {
     return zip(abbrArray, nameArray).map(p => ({
-        abbr: p[0],
+        code: p[0],
         name: p[1]
     }));
 }
 
-export const provinceData: LangLookup<Array<AbbrNamePair>> = {
-    en: langPairMaker(provAbbr, provEn),
-    fr: langPairMaker(provAbbr, provFr)
+export const provinceData: LangLookup<Array<ProvinceInfo>> = {
+    en: langPairMaker(provCodes, provEn),
+    fr: langPairMaker(provCodes, provFr)
 };
 
-export const categoryData: LangLookup<Array<AbbrNamePair>> = {
-    en: langPairMaker(catAbbr, catEn),
-    fr: langPairMaker(catAbbr, catFr)
+export const categoryData: LangLookup<Array<CategoryInfo>> = {
+    en: langPairMaker(catCodes, catEn),
+    fr: langPairMaker(catCodes, catFr)
 };
 
 function currLang(): 'en' | 'fr' {
@@ -261,7 +342,7 @@ function currLang(): 'en' | 'fr' {
  * Get the province information for a province name
  * @param provName the name in the active language
  */
-export function nameToProvince(provName: string): AbbrNamePair {
+export function nameToProvince(provName: string): ProvinceInfo {
     // TODO find where we're actually using this.
     return provinceData[currLang()].find(pvi => pvi.name === provName)!;
 }
@@ -270,16 +351,16 @@ export function nameToProvince(provName: string): AbbrNamePair {
  * Get the province information for a province abbreviation
  * @param provAbbr the prov abbreviation
  */
-export function abbrToProvince(provAbbr: string): AbbrNamePair {
-    return provinceData[currLang()].find(pvi => pvi.abbr === provAbbr)!;
+export function abbrToProvince(provAbbr: ProvCode): ProvinceInfo {
+    return provinceData[currLang()].find(pvi => pvi.code === provAbbr)!;
 }
 
 /**
  * Get the province information belonging to an FSA
  * @param fsa three-char FSA
  */
-export function fsaToProvince(fsa: string): AbbrNamePair {
-    let provCode: string;
+export function fsaToProvince(fsa: string): ProvinceInfo {
+    let provCode: ProvCode;
 
     const fancyFSA = fsa.toUpperCase();
     const firstLetter = fancyFSA.substring(0, 1);

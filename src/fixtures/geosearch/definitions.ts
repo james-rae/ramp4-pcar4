@@ -1,16 +1,9 @@
 import type { Extent } from '@/geo/api';
+import type { CategoryCode, ProvCode, ProvinceInfo } from './dov-tools';
 
 export interface IGenericObjectType {
     [key: string]: string;
 }
-
-/**
- * A structure for storing two variants of the same thing, one for each language
- */
-export type LangLookup<T> = {
-    en: T;
-    fr: T;
-};
 
 /**
  * FSA / NTS / Address / Name / LatLon
@@ -60,6 +53,7 @@ export interface ITypes {
     filterValidTypes(exclude?: string | string[]): IGenericObjectType;
 }
 
+/*
 export interface IProvinces {
     provinceList: Array<IProvinceInfo>;
     listFetched: boolean;
@@ -68,6 +62,7 @@ export interface IProvinces {
     nameToProvince(provName: string): IProvinceInfo;
     abbrToProvince(provAbbr: string): IProvinceInfo;
 }
+*/
 
 /**
  * Custom geosearch search source structure
@@ -108,18 +103,6 @@ export type LocationResponseList = ILocationResponse[];
  */
 export const FSATOKEN = '~FSA~';
 
-export interface AbbrNamePair {
-    /**
-     * abbreviation / code
-     */
-    abbr: string;
-
-    /**
-     * Full name
-     */
-    name: string;
-}
-
 export interface ISearchResult {
     /**
      * Primary display name
@@ -150,7 +133,7 @@ export interface ISearchResult {
         /**
          * Province information object
          */
-        province?: IProvinceInfo;
+        province?: ProvinceInfo;
     };
 
     /**
@@ -165,8 +148,8 @@ export type SearchResultList = Array<ISearchResult>;
  * Additional filters for a query
  */
 export interface QueryFilters {
-    category: string; // TODO same, should this be code?
-    province: string; // TODO will it make sense for this to be province abbreviation??
+    category: CategoryCode;
+    province: ProvCode;
     extent: Extent | undefined;
 }
 

@@ -15,7 +15,7 @@
                 <option value="" disabled hidden v-truncate>
                     {{ t('geosearch.filters.province') }}
                 </option>
-                <option v-for="province in provinces" v-bind:key="province.abbr" v-truncate>
+                <option v-for="province in provinces" v-bind:key="province.code" v-truncate>
                     {{ province.name }}
                 </option>
             </select>
@@ -66,13 +66,14 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vu
 import type { GeosearchAPI } from '../api/geosearch';
 import { useGeosearchStore } from '../store';
 import { useI18n } from 'vue-i18n';
-import type { AbbrNamePair, QueryFilters } from '../definitions';
+import type { QueryFilters } from '../definitions';
+import type { ProvinceInfo } from '../dov-tools';
 
 const { t } = useI18n();
 const iApi = inject('iApi') as InstanceAPI;
 const geosearchStore = useGeosearchStore();
 
-const provinces = ref<Array<AbbrNamePair>>([]);
+const provinces = ref<Array<ProvinceInfo>>([]);
 const types = ref<Array<any>>([]);
 const watchers = ref<Array<() => void>>([]);
 
@@ -102,14 +103,14 @@ const updateProvincesAndTypes = () => {
 
     // convert current province and type selection to new lang
     // TODO revisit this. would it make more sense for the queryParam to be the abbr value?   Same with type
-    const queryProvCode = provinces.value.find(prov => queryParams.value.province === prov.name)?.abbr;
-    const queryTypeCode = types.value.find(type => queryParams.value.category === type.name)?.abbr;
+    const queryProvCode = provinces.value.find(prov => queryParams.value.province === prov.name)?.code;
+    const queryTypeCode = types.value.find(type => queryParams.value.category === type.name)?.code;
 
     // populate province and type selection lists in new lang
 
     provinces.value = geosearchStore.provinceList;
     setProvince({
-        province: geosearchStore.provinceList.find(prov => prov.abbr === queryProvCode)?.name,
+        province: geosearchStore.provinceList.find(prov => prov.code === queryProvCode)?.name,
         forceReRun: true
     });
 

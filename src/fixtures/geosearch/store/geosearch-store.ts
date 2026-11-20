@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { GeoSearchUI } from './geosearch.feature-old';
 import { computed, ref } from 'vue';
-import type { AbbrNamePair, ISearchResult, MapExtentFilter, QueryFilters } from '../definitions';
+import type { ISearchResult, MapExtentFilter, QueryFilters } from '../definitions';
+import type { CategoryInfo, ProvinceInfo } from '../dov-tools';
 import { categoryData, provinceData } from '../dov-tools';
 
 export const useGeosearchStore = defineStore('geosearch', () => {
@@ -10,8 +11,8 @@ export const useGeosearchStore = defineStore('geosearch', () => {
 
     // TODO rename to queryFilters
     const queryParams = ref<QueryFilters>({
-        type: '',
-        province: '',
+        category: '..',
+        province: '..',
         extent: undefined
     });
 
@@ -60,18 +61,18 @@ export const useGeosearchStore = defineStore('geosearch', () => {
      */
     const gsLang = ref<'en' | 'fr'>('en');
 
-    const sortyMcGhee = (itemA: AbbrNamePair, itemB: AbbrNamePair): number =>
+    const sortyMcGhee = (itemA: ProvinceInfo | CategoryInfo, itemB: ProvinceInfo | CategoryInfo): number =>
         itemA.name.localeCompare(itemB.name, undefined, { sensitivity: 'case' });
 
     /**
      * Returns the list of province abbr/name objects in the active language, sorted by name
      */
-    const provinceList = computed<Array<AbbrNamePair>>(() => provinceData[gsLang.value].toSorted(sortyMcGhee));
+    const provinceList = computed<Array<ProvinceInfo>>(() => provinceData[gsLang.value].toSorted(sortyMcGhee));
 
     /**
      * Returns the list of category abbr/name objects in the active language, sorted by name
      */
-    const categoryList = computed<Array<AbbrNamePair>>(() => categoryData[gsLang.value].toSorted(sortyMcGhee));
+    const categoryList = computed<Array<CategoryInfo>>(() => categoryData[gsLang.value].toSorted(sortyMcGhee));
 
     function initService(lang: string, config: any) {
         gsLang.value = lang as 'en' | 'fr';

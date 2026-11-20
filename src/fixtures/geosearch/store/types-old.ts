@@ -1,22 +1,10 @@
 import type { IGenericObjectType, ITypes } from '../definitions';
 import axios from 'redaxios';
 
-const types: any = {
-    en: {
-        ADDRESS: 'Street Address',
-        FSA: 'Forward Sortation Area',
-        NTS: 'National Topographic System',
-        COORD: 'Latitude/Longitude',
-        SCALE: 'Scale'
-    },
-    fr: {
-        ADDRESS: 'Adresse Municipale',
-        FSA: "Région De Tri D'Acheminement",
-        NTS: 'Système National De Référence Cartographique',
-        COORD: 'Latitude/Longitude',
-        SCALE: 'Échelle'
-    }
-};
+// TODO: I think these fill in "types" / categories for things that don't exist in the concise spectrum
+//       k, after the load, other the other concise types get injected.
+//       sO maybe insert these into the list in dov-utils
+// TODO is SCALE being used?? we don't search for scale. maybe test old versions of ramp?
 
 class Types {
     allTypes: IGenericObjectType = {};
